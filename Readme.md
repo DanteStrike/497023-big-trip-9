@@ -1,7 +1,7 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
 * Студент: [Геворк Геворкян](https://up.htmlacademy.ru/ecmascript/9/user/497023).
-* Наставник: `Неизвестно`.
+* Наставник: [Михаил Пушков](https://up.htmlacademy.ru/ecmascript/9/user/638545).
 
 ---
 
