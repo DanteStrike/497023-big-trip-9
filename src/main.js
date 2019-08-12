@@ -29,9 +29,9 @@ renderComponent(tripList, createTripBoardTemplate());
 const tripBoard = tripList.querySelector(`.trip-days`);
 renderComponent(tripBoard, createTripDayTemplate());
 
-const dayEventList = tripBoard.querySelector(`.trip-events__list`);
-renderComponent(dayEventList, createEditeEventTemplate());
+const dayEventsList = tripBoard.querySelector(`.trip-events__list`);
+renderComponent(dayEventsList, createEditeEventTemplate());
 
 for (let i = 0; i < 3; i++) {
-  renderComponent(dayEventList, createEventTemplate());
+  renderComponent(dayEventsList, createEventTemplate());
 }
