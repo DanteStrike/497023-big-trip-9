@@ -139,3 +139,27 @@ const getEventData = () => {
     }
   };
 };
+
+const getDayEvents = (date, dayEventsList) => ({
+  date,
+  dayEventsList
+});
+
+const sliceEventsByDays = (eventsList) => {
+  let daysList = [];
+
+  if (eventsList.length === 0) {
+    return daysList;
+  }
+
+  const startDay = new Date(eventsList[0].time.start).setHours(0, 0, 0, 0);
+  const lastDay = new Date(eventsList[eventsList.length - 1].time.start).setHours(0, 0, 0, 0);
+
+  for (let day = startDay; day <= lastDay; day += utils.MILLISECONDS_IN_DAY) {
+    let dayEvents = eventsList.filter((event) => new Date(event.time.start).setHours(0, 0, 0, 0) === day);
+    daysList.push(getDayEvents(day, dayEvents));
+  }
+
+  return daysList;
+};
+
