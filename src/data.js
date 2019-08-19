@@ -46,3 +46,8 @@ const eventsListConfig = {
   minAmount: 20,
   maxAmount: 40
 };
+
+const tripFiltersConfig = {
+  titles: new Set([`Everything`, `Future`, `Past`])
+};
+
