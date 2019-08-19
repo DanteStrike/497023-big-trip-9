@@ -6,7 +6,7 @@ import {createTripBoardTemplate} from './components/trip-board.js';
 import {createTripDayTemplate} from './components/trip-day.js';
 import {createEventTemplate} from './components/event.js';
 import {createEditEventTemplate} from './components/event-edit.js';
-import {eventsList, tripInfoData, tripFilterData, tripDaysData} from './data.js';
+import {tripInfoData, tripFilterData, tripDaysData} from './data.js';
 
 const renderComponent = (node, markup, position = `beforeend`) => {
   node.insertAdjacentHTML(position, markup);
@@ -28,9 +28,12 @@ renderComponent(tripList, createSortingTemplate(), `afterbegin`);
 renderComponent(tripList, createTripBoardTemplate());
 
 const tripBoard = tripList.querySelector(`.trip-days`);
+
+//  Сформировать разметку, потом вывести
 const tripDays = tripDaysData.map((tripDay, index) => {
   let list = ``;
 
+  //  Первый элемент на странице сделать event-edit
   if (index === 0) {
     list = tripDay.dayEventsList.map((event, ind) =>
       (ind === 0) ? createEditEventTemplate(event) : createEventTemplate(event)).join(``);

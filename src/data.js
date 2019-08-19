@@ -51,6 +51,7 @@ const tripFiltersConfig = {
   titles: new Set([`Everything`, `Future`, `Past`])
 };
 
+// Подобрать приблизительно правдоподобную точку назначения, согласно типу события.
 const getRandomDestination = (type) => {
   if (type === `Flight`) {
     return utils.getRandomElement(eventConfig.destination.citys);
@@ -78,6 +79,7 @@ const getRandomDestination = (type) => {
   return `Error`;
 };
 
+//  Срандомить начало и конец события
 const getRandomEventTime = (past, future) => {
   let start = Date.now()
   + utils.getRandomNumber(past, future - 1) * utils.MILLISECONDS_IN_DAY
@@ -119,6 +121,7 @@ const getEventData = () => {
       .map(() => eventConfig.photos.defaultURL + Math.random()),
     isFavorite: utils.getRandomFlag(),
 
+    //  Геттеры для удобного вывода в шаблон компонента event-edit и event
     get isTransportType() {
       return eventConfig.types.transport.has(this.type);
     },
@@ -140,11 +143,13 @@ const getEventData = () => {
   };
 };
 
+//  Все события необходимо разбить по дням, для корректного вывода данных.
 const getDayEvents = (date, dayEventsList) => ({
   date,
   dayEventsList
 });
 
+// Разбить точки маршрута по дням
 const sliceEventsByDays = (eventsList) => {
   let daysList = [];
 
@@ -186,25 +191,19 @@ const getFilterEvents = (title, eventsList) => {
   return daysList;
 };
 
-const getTripFilter = (title, eventsList) => {
-  const currentTitle = title;
-
-  return {
-    title: currentTitle,
-    filterEvents: getFilterEvents(currentTitle, eventsList)
-  };
-};
-
 const eventsList = new Array(utils.getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
   .fill(``)
   .map(() => getEventData())
   .sort((a, b) => a.time.start - b.time.start);
+
+const tripDaysData = sliceEventsByDays(eventsList);
 
 const tripInfoData = {
   citys: eventsList.reduce((accum, event) => {
     if (eventConfig.destination.citys.has(event.destination)) {
       accum.push(event.destination);
     }
+
     return accum;
   }, []),
   dates: {
@@ -217,10 +216,16 @@ const tripInfoData = {
   }
 };
 
+const getTripFilter = (title, list) => {
+  const currentTitle = title;
+
+  return {
+    title: currentTitle,
+    filterEvents: getFilterEvents(currentTitle, list)
+  };
+};
+
 const tripFilterData = Array.from(tripFiltersConfig.titles)
   .map((title) => getTripFilter(title, eventsList));
-
-
-const tripDaysData = sliceEventsByDays(eventsList);
 
 export {eventsList, tripInfoData, tripFilterData, tripDaysData};
