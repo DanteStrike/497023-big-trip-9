@@ -6,7 +6,7 @@ import {createTripBoardTemplate} from './components/trip-board.js';
 import {createTripDayTemplate} from './components/trip-day.js';
 import {createEventTemplate} from './components/event.js';
 import {createEditEventTemplate} from './components/event-edit.js';
-import {tripInfoData, tripFilterData, tripDaysData} from './data.js';
+import {eventsList, tripInfoData, tripFilterData, tripDaysData} from './data.js';
 
 const renderComponent = (node, markup, position = `beforeend`) => {
   node.insertAdjacentHTML(position, markup);
@@ -45,3 +45,6 @@ const tripDays = tripDaysData.map((tripDay, index) => {
 }).join(``);
 
 renderComponent(tripBoard, tripDays);
+
+const totalCost = eventsList.reduce((accum, event) => accum + event.price, 0);
+tripMain.querySelector(`.trip-info__cost-value`).innerHTML = totalCost.toString();
