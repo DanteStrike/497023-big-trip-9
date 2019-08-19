@@ -221,3 +221,5 @@ const tripFilterData = Array.from(tripFiltersConfig.titles)
   .map((title) => getTripFilter(title, eventsList));
 
 
+const tripDaysData = sliceEventsByDays(eventsList);
+
