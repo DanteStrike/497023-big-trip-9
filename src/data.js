@@ -163,3 +163,7 @@ const sliceEventsByDays = (eventsList) => {
   return daysList;
 };
 
+const eventsList = new Array(utils.getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
+  .fill(``)
+  .map(() => getEventData())
+  .sort((a, b) => a.time.start - b.time.start);
