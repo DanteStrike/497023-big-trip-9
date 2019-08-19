@@ -163,6 +163,38 @@ const sliceEventsByDays = (eventsList) => {
   return daysList;
 };
 
+const getFilterEvents = (title, eventsList) => {
+  let daysList = [];
+
+  switch (title) {
+    case `Everything`:
+      daysList = sliceEventsByDays(eventsList);
+      break;
+
+    case `Future`:
+      daysList = sliceEventsByDays(eventsList.filter((event) => (Date.now() - event.time.start) < utils.MILLISECONDS_IN_MINUTE));
+      break;
+
+    case `Past`:
+      daysList = sliceEventsByDays(eventsList.filter((event) => (Date.now() - event.time.end) > utils.MILLISECONDS_IN_MINUTE));
+      break;
+
+    default:
+      break;
+  }
+
+  return daysList;
+};
+
+const getTripFilter = (title, eventsList) => {
+  const currentTitle = title;
+
+  return {
+    title: currentTitle,
+    filterEvents: getFilterEvents(currentTitle, eventsList)
+  };
+};
+
 const eventsList = new Array(utils.getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
   .fill(``)
   .map(() => getEventData())
@@ -184,4 +216,8 @@ const tripInfoData = {
     return new Set(this.citys).size;
   }
 };
+
+const tripFilterData = Array.from(tripFiltersConfig.titles)
+  .map((title) => getTripFilter(title, eventsList));
+
 
