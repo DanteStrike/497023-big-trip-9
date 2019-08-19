@@ -223,3 +223,4 @@ const tripFilterData = Array.from(tripFiltersConfig.titles)
 
 const tripDaysData = sliceEventsByDays(eventsList);
 
+export {eventsList, tripInfoData, tripFilterData, tripDaysData};
