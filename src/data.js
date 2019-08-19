@@ -167,3 +167,21 @@ const eventsList = new Array(utils.getRandomNumber(eventsListConfig.minAmount, e
   .fill(``)
   .map(() => getEventData())
   .sort((a, b) => a.time.start - b.time.start);
+
+const tripInfoData = {
+  citys: eventsList.reduce((accum, event) => {
+    if (eventConfig.destination.citys.has(event.destination)) {
+      accum.push(event.destination);
+    }
+    return accum;
+  }, []),
+  dates: {
+    start: eventsList[0].time.start,
+    end: eventsList[eventsList.length - 1].time.end
+  },
+
+  get citysAmount() {
+    return new Set(this.citys).size;
+  }
+};
+
