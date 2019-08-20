@@ -1,6 +1,6 @@
 
 import * as utils from './utils.js';
-import {eventConfig, offerConfig, eventsListConfig, tripFiltersConfig} from './configs.js';
+import {eventConfig, offerConfig, eventsListConfig, tripFiltersConfig, menuConfig} from './configs.js';
 
 // Подобрать приблизительно правдоподобную точку назначения, согласно типу события.
 const getRandomDestination = (type) => {
@@ -94,60 +94,10 @@ const getEventData = () => {
   };
 };
 
-//  Все события необходимо разбить по дням, для корректного вывода данных.
-const getDayEvents = (date, dayEventsList) => ({
-  date,
-  dayEventsList
-});
-
-// Разбить точки маршрута по дням
-const sliceEventsByDays = (eventsList) => {
-  let daysList = [];
-
-  if (eventsList.length === 0) {
-    return daysList;
-  }
-
-  const startDay = new Date(eventsList[0].time.start).setHours(0, 0, 0, 0);
-  const lastDay = new Date(eventsList[eventsList.length - 1].time.start).setHours(0, 0, 0, 0);
-
-  for (let day = startDay; day <= lastDay; day += utils.MILLISECONDS_IN_DAY) {
-    let dayEvents = eventsList.filter((event) => new Date(event.time.start).setHours(0, 0, 0, 0) === day);
-    daysList.push(getDayEvents(day, dayEvents));
-  }
-
-  return daysList;
-};
-
-const getFilterEvents = (title, eventsList) => {
-  let daysList = [];
-
-  switch (title) {
-    case `Everything`:
-      daysList = sliceEventsByDays(eventsList);
-      break;
-
-    case `Future`:
-      daysList = sliceEventsByDays(eventsList.filter((event) => (Date.now() - event.time.start) < utils.MILLISECONDS_IN_MINUTE));
-      break;
-
-    case `Past`:
-      daysList = sliceEventsByDays(eventsList.filter((event) => (Date.now() - event.time.end) > utils.MILLISECONDS_IN_MINUTE));
-      break;
-
-    default:
-      break;
-  }
-
-  return daysList;
-};
-
 const eventsList = new Array(utils.getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
   .fill(``)
   .map(() => getEventData())
   .sort((a, b) => a.time.start - b.time.start);
-
-const tripDaysData = sliceEventsByDays(eventsList);
 
 const tripInfoData = {
   citys: eventsList.reduce((accum, event) => {
@@ -167,16 +117,8 @@ const tripInfoData = {
   }
 };
 
-const getTripFilter = (title, list) => {
-  const currentTitle = title;
+const tripFilterData = Array.from(tripFiltersConfig.titles);
 
-  return {
-    title: currentTitle,
-    filterEvents: getFilterEvents(currentTitle, list)
-  };
-};
+const menuData = Array.from(menuConfig.titles);
 
-const tripFilterData = Array.from(tripFiltersConfig.titles)
-  .map((title) => getTripFilter(title, eventsList));
-
-export {eventsList, tripInfoData, tripFilterData, tripDaysData};
+export {eventsList, tripInfoData, menuData, tripFilterData};

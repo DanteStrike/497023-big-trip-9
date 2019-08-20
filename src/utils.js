@@ -6,6 +6,11 @@ export const MILLISECONDS_IN_MINUTE = MILLISECONDS_IN_SECOND * SECONDS_IN_MINUTE
 export const MILLISECONDS_IN_HOUR = MILLISECONDS_IN_MINUTE * MINUTES_IN_HOUR;
 export const MILLISECONDS_IN_DAY = MILLISECONDS_IN_HOUR * HOURS_IN_DAY;
 
+export const Position = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
+};
+
 /**
  * Возвращает случайный число в заданном диапазоне.
  *
@@ -49,5 +54,46 @@ export const shuffle = (iterableObject) => {
     [arr[randomIndex], arr[index]] = [arr[index], arr[randomIndex]];
   });
   return newArray;
+};
+
+/**
+ * Возвращает DOM на основе разметки.
+ *
+ * @param {string} template - разметка.
+ * @return {node} DOM разметки.
+ */
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement.firstChild;
+};
+
+/**
+ * Вставляет элемент в определенную позицию контейнера.
+ *
+ * @param {node} container - контейнер.
+ * @param {node} element - элемент.
+ * @param {Position} place - позиция.
+ */
+export const render = (container, element, place) => {
+  switch (place) {
+    case Position.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case Position.BEFOREEND:
+      container.append(element);
+      break;
+  }
+};
+
+/**
+ * Удалить DOM-элемент.
+ *
+ * @param {node} element - элемент.
+ */
+export const unrender = (element) => {
+  if (element) {
+    element.remove();
+  }
 };
 

@@ -44,6 +44,10 @@ export const eventsListConfig = {
   maxAmount: 40
 };
 
+export const menuConfig = {
+  titles: [`Menu`, `Stats`]
+};
+
 export const tripFiltersConfig = {
-  titles: new Set([`Everything`, `Future`, `Past`])
+  titles: [`Everything`, `Future`, `Past`]
 };
