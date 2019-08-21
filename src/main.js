@@ -1,3 +1,4 @@
+import * as data from './data.js';
 import {createTripInfoTemplate} from './components/trip-info.js';
 import {createMenuTemplate} from './components/menu.js';
 import {createTripFiltersTemplate} from './components/trip-filters.js';
@@ -6,45 +7,39 @@ import {createTripBoardTemplate} from './components/trip-board.js';
 import {createTripDayTemplate} from './components/trip-day.js';
 import {createEventTemplate} from './components/event.js';
 import {createEditEventTemplate} from './components/event-edit.js';
-import {eventsList, tripInfoData, tripFilterData, tripDaysData} from './data.js';
+
 
 const renderComponent = (node, markup, position = `beforeend`) => {
   node.insertAdjacentHTML(position, markup);
 };
 
-const tripMain = document.querySelector(`.trip-main`);
+const tripMainNode = document.querySelector(`.trip-main`);
+const totalCost = data.eventsList.reduce((accum, event) => accum + event.price, 0);
+tripMainNode.querySelector(`.trip-info__cost-value`).innerHTML = totalCost.toString();
 
-const tripInfo = tripMain.querySelector(`.trip-info`);
-renderComponent(tripInfo, createTripInfoTemplate(tripInfoData), `afterbegin`);
+const tripInfoNode = tripMainNode.querySelector(`.trip-info`);
+renderComponent(tripInfoNode, createTripInfoTemplate(data.tripInfo), `afterbegin`);
 
-const menu = tripMain.querySelector(`.trip-controls h2:first-child`);
-renderComponent(menu, createMenuTemplate(), `afterend`);
+const menuNode = tripMainNode.querySelector(`.trip-controls h2:first-child`);
+renderComponent(menuNode, createMenuTemplate(data.tripMenu), `afterend`);
 
-const filters = tripMain.querySelector(`.trip-controls h2:last-child`);
-renderComponent(filters, createTripFiltersTemplate(tripFilterData), `afterend`);
+const filtersNode = tripMainNode.querySelector(`.trip-controls h2:last-child`);
+renderComponent(filtersNode, createTripFiltersTemplate(data.tripFilters), `afterend`);
 
-const tripList = document.querySelector(`.trip-events`);
-renderComponent(tripList, createSortingTemplate(), `afterbegin`);
-renderComponent(tripList, createTripBoardTemplate());
+const tripListNode = document.querySelector(`.trip-events`);
+renderComponent(tripListNode, createSortingTemplate(), `afterbegin`);
+renderComponent(tripListNode, createTripBoardTemplate());
 
-const tripBoard = tripList.querySelector(`.trip-days`);
+const tripBoardNode = tripListNode.querySelector(`.trip-days`);
+renderComponent(tripBoardNode, createTripDayTemplate());
 
-//  Сформировать разметку, потом вывести
-const tripDays = tripDaysData.map((tripDay, index) => {
-  let list = ``;
+const eventsListNode = tripBoardNode.querySelector(`.trip-events__list`);
 
-  //  Первый элемент на странице сделать event-edit
-  if (index === 0) {
-    list = tripDay.dayEventsList.map((event, ind) =>
-      (ind === 0) ? createEditEventTemplate(event) : createEventTemplate(event)).join(``);
-  } else {
-    list = tripDay.dayEventsList.map((event) => createEventTemplate(event)).join(``);
-  }
+let firstEvent;
+let overEvents;
+[firstEvent, ...overEvents] = data.eventsList;
+renderComponent(eventsListNode, createEditEventTemplate(firstEvent));
 
-  return createTripDayTemplate(tripDay, index, list);
-}).join(``);
-
-renderComponent(tripBoard, tripDays);
-
-const totalCost = eventsList.reduce((accum, event) => accum + event.price, 0);
-tripMain.querySelector(`.trip-info__cost-value`).innerHTML = totalCost.toString();
+const eventsList = overEvents.map((event) => createEventTemplate(event))
+  .join(``);
+renderComponent(eventsListNode, eventsList);
