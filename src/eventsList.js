@@ -42,7 +42,7 @@ const getEventData = (data, config) => {
     time: getRandomEventTime(config.periodOfTime.past, config.periodOfTime.future),
     price: getRandomNumber(config.price.min, config.price.max),
     offers: shuffle(data.offerDescriptions)
-      .slice(0, getRandomNumber(config.offer.minAmount, config.maxAmount))
+      .slice(0, getRandomNumber(config.offer.minAmount, config.offer.maxAmount))
       .map((offerDescription) => getOffer(offerDescription, config)),
     photos: new Array(getRandomNumber(config.photos.minAmount, eventConfig.photos.maxAmount))
       .fill(``)
