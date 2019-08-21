@@ -1,3 +1,9 @@
+import {getRandomNumber, getRandomFlag, getRandomElement, shuffle, Enum} from './utils/utils.js';
+import getRandomDestination from './utils/getRandomDestination.js';
+import getRandomEventTime from './utils/getRandomEventTime.js';
+import {eventConfig, eventsListConfig} from './configs.js';
+
+
 const eventsData = {
   types: {
     transport: new Set([`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`]),
@@ -17,3 +23,59 @@ const eventsData = {
 
   offerDescriptions: [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`]
 };
+
+const getOffer = (offerDescription, data) => ({
+  description: offerDescription,
+  price: getRandomNumber(data.offer.price.min, data.offer.price.max),
+  isActive: getRandomFlag()
+});
+
+const getEventData = (data, config) => {
+  const randomType = getRandomElement(new Set([...data.types.transport, ...data.types.arrival]));
+
+  return {
+    type: randomType,
+    destination: getRandomDestination(randomType, data),
+    description: shuffle(data.descriptions)
+      .slice(0, getRandomNumber(config.descriptions.minAmount, config.descriptions.maxAmount))
+      .join(`. `),
+    time: getRandomEventTime(config.periodOfTime.past, config.periodOfTime.future),
+    price: getRandomNumber(config.price.min, config.price.max),
+    offers: shuffle(data.offerDescriptions)
+      .slice(0, getRandomNumber(config.offer.minAmount, config.maxAmount))
+      .map((offerDescription) => getOffer(offerDescription, config)),
+    photos: new Array(getRandomNumber(config.photos.minAmount, eventConfig.photos.maxAmount))
+      .fill(``)
+      .map(() => config.photos.defaultURL + Math.random()),
+    isFavorite: getRandomFlag(),
+
+    //  Геттеры для удобного вывода в шаблон компонента event-edit и event
+    get isTransportType() {
+      return eventsData.types.transport.has(this.type);
+    },
+    get timeDuration() {
+      return {
+        duration: this.time.end - this.time.start,
+
+        get days() {
+          return Math.floor(this.duration / Enum.MILLISECONDS_IN_DAY);
+        },
+        get hours() {
+          return Math.floor((this.duration - this.days * Enum.MILLISECONDS_IN_DAY) / Enum.MILLISECONDS_IN_HOUR);
+        },
+        get minutes() {
+          return Math.floor((this.duration - this.days * Enum.MILLISECONDS_IN_DAY - this.hours * Enum.MILLISECONDS_IN_HOUR) / Enum.MILLISECONDS_IN_MINUTE);
+        }
+      };
+    }
+  };
+};
+
+
+const eventsList = new Array(getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
+  .fill(``)
+  .map(() => getEventData(eventsData, eventConfig))
+  .sort((a, b) => a.time.start - b.time.start);
+
+
+export {eventsData, eventsList};
