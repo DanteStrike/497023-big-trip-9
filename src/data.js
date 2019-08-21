@@ -2,51 +2,6 @@
 import * as utils from './utils.js';
 import {eventConfig, offerConfig, eventsListConfig, tripFiltersConfig} from './configs.js';
 
-// Подобрать приблизительно правдоподобную точку назначения, согласно типу события.
-const getRandomDestination = (type) => {
-  if (type === `Flight`) {
-    return utils.getRandomElement(eventConfig.destination.citys);
-  }
-
-  if (type === `Check-in`) {
-    return utils.getRandomElement(eventConfig.destination.checkinPoints);
-  }
-
-  if (type === `Sightseeing`) {
-    return utils.getRandomElement(eventConfig.destination.sights);
-  }
-
-  if (type === `Restaurant`) {
-    return utils.getRandomElement(eventConfig.destination.eatingPoints);
-  }
-
-  if (eventConfig.types.transport.has(type)) {
-    return utils.getRandomElement(new Set([...eventConfig.destination.citys,
-      ...eventConfig.destination.sights,
-      ...eventConfig.destination.eatingPoints,
-      ...eventConfig.destination.checkinPoints]));
-  }
-
-  return `Error`;
-};
-
-//  Срандомить начало и конец события
-const getRandomEventTime = (past, future) => {
-  let start = Date.now()
-  + utils.getRandomNumber(past, future - 1) * utils.MILLISECONDS_IN_DAY
-  + utils.getRandomNumber(0, utils.HOURS_IN_DAY - 1) * utils.MILLISECONDS_IN_HOUR
-  + utils.getRandomNumber(0, utils.MINUTES_IN_HOUR - 1) * utils.MILLISECONDS_IN_MINUTE;
-
-  let end = start
-  + utils.getRandomNumber(0, utils.HOURS_IN_DAY - 1) * utils.MILLISECONDS_IN_HOUR
-  + utils.getRandomNumber(0, utils.MINUTES_IN_HOUR - 1) * utils.MILLISECONDS_IN_MINUTE;
-
-  return {
-    start,
-    end
-  };
-};
-
 const getOffer = (offerDescription) => ({
   description: offerDescription,
   price: utils.getRandomNumber(offerConfig.price.min, offerConfig.price.max),
