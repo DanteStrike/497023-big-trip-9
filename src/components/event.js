@@ -71,10 +71,10 @@ class Event {
 
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${this._offers.map((offer) => `<li class="event__offer" ${offer.isCheck ? `` : `style="color: gray;"`}>
-          <span class="event__offer-title" ${offer.isCheck ? `` : `style="color: gray;"`}>${offer.description}</span>
+          ${this._offers.map((offer) => `<li class="event__offer" ${offer.isActive ? `` : `style="color: gray;"`}>
+          <span class="event__offer-title" ${offer.isActive ? `` : `style="color: gray;"`}>${offer.description}</span>
           +
-          €&nbsp;<span class="event__offer-price" ${offer.isCheck ? `` : `style="color: gray;"`}>${offer.price}</span>
+          €&nbsp;<span class="event__offer-price" ${offer.isActive ? `` : `style="color: gray;"`}>${offer.price}</span>
           </li>`).join(``)}
 
         </ul>
