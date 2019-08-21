@@ -1,4 +1,5 @@
 
+import {eventsData, eventsList} from './eventsList.js';
 
 
 const filterData = {
@@ -10,21 +11,22 @@ const menuData = {
 };
 
 
-const tripInfoData = {
-  citys: eventsList.reduce((accum, event) => {
-    if (eventConfig.destination.citys.has(event.destination)) {
+const tripInfo = {
+  cities: eventsList.reduce((accum, event) => {
+    if (eventsData.destination.cities.has(event.destination)) {
       accum.push(event.destination);
     }
 
     return accum;
   }, []),
+
   dates: {
     start: eventsList[0].time.start,
     end: eventsList[eventsList.length - 1].time.end
   },
 
-  get citysAmount() {
-    return new Set(this.citys).size;
+  get citiesAmount() {
+    return new Set(this.cities).size;
   }
 };
 
