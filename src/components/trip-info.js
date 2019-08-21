@@ -1,5 +1,5 @@
 import {createElement} from '../utils/utils.js';
-import {eventsData} from '../configs.js';
+import {eventsData} from '../eventsList.js';
 
 class TripInfo {
   constructor(eventsList) {
