@@ -37,7 +37,7 @@ class TripInfo {
 
   getTemplate() {
     return `<div class="trip-info__main">
-        <h1 class="trip-info__title">${this._cities[0]} ${(this.citiesAmount > 2) ? `&mdash; ... &mdash;` : `&mdash;`} ${this._cities[this._cities.length - 1]}</h1>
+        <h1 class="trip-info__title">${(this.citiesAmount !== 0) ? `${this._cities[0]} ${(this.citiesAmount > 2) ? `&mdash; ... &mdash;` : `&mdash;`} ${this._cities[this._cities.length - 1]}` : ``}</h1>
 
         <p class="trip-info__dates">${new Date(this._dates.start).toDateString()}&nbsp;&mdash;&nbsp;${new Date(this._dates.end).toDateString()}</p>
       </div>`;
