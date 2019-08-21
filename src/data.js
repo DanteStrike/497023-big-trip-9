@@ -47,4 +47,4 @@ const getMenuItem = (title, index) => {
 const tripMenu = menuData.titles.map((title, index) => getMenuItem(title, index));
 
 
-export {eventsList, tripInfoData, tripFilterData, tripDaysData};
+export {eventsList, tripInfo, tripFilters, tripMenu};
