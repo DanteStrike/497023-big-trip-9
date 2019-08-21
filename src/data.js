@@ -72,6 +72,8 @@ const sliceEventsByDays = (eventsList) => {
   }
 
   return daysList;
+const filterData = {
+  titles: [`Everything`, `Future`, `Past`]
 };
 
 const getFilterEvents = (title, eventsList) => {
@@ -95,6 +97,8 @@ const getFilterEvents = (title, eventsList) => {
   }
 
   return daysList;
+const menuData = {
+  titles: [`Table`, `Stats`]
 };
 
 const eventsList = new Array(utils.getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
