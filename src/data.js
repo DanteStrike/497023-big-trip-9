@@ -38,11 +38,13 @@ const getTripFilter = (title, index) => {
 };
 const tripFilters = filterData.titles.map((title, index) => getTripFilter(title, index));
 
+const getMenuItem = (title, index) => {
   return {
-    title: currentTitle,
-    filterEvents: getFilterEvents(currentTitle, list)
+    title,
+    isActive: (index === 0) ? true : false
   };
 };
+const tripMenu = menuData.titles.map((title, index) => getMenuItem(title, index));
 
 
 export {eventsList, tripInfoData, tripFilterData, tripDaysData};
