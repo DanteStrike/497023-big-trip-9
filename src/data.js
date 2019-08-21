@@ -30,8 +30,13 @@ const tripInfo = {
   }
 };
 
-const getTripFilter = (title, list) => {
-  const currentTitle = title;
+const getTripFilter = (title, index) => {
+  return {
+    title,
+    isActive: (index === 0) ? true : false
+  };
+};
+const tripFilters = filterData.titles.map((title, index) => getTripFilter(title, index));
 
   return {
     title: currentTitle,
