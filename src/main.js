@@ -3,11 +3,11 @@ import {render, Enum, createElement} from './utils/utils.js';
 import TripInfo from './components/trip-info.js';
 import Menu from './components/menu.js';
 import Filters from './components/trip-filters.js';
+import Event from './components/event.js';
+import EditEvent from './components/event-edit.js';
 import {createSortingTemplate} from './components/sorting.js';
 import {createTripBoardTemplate} from './components/trip-board.js';
 import {createTripDayTemplate} from './components/trip-day.js';
-import Event from './components/event.js';
-import EditEvent from './components/event-edit.js';
 
 const tripMainNode = document.querySelector(`.trip-main`);
 const totalCost = data.eventsList.reduce((accum, event) => accum + event.price, 0);
@@ -28,14 +28,24 @@ const tripBoardNode = tripListNode.querySelector(`.trip-days`);
 render(tripBoardNode, createElement(createTripDayTemplate()), Enum.Position.BEFOREEND);
 
 const eventsListNode = tripBoardNode.querySelector(`.trip-events__list`);
-render(eventsListNode, new EditEvent(data.eventsList[0]).getElement(), Enum.Position.BEFOREEND);
-render(eventsListNode, new Event(data.eventsList[1]).getElement(), Enum.Position.BEFOREEND);
+data.eventsList.map((event) => {
+  let newEvent = new Event(event);
+  let newEditEvent = new EditEvent(event);
 
-// let firstEvent;
-// let overEvents;
-// [firstEvent, ...overEvents] = data.eventsList;
-// renderComponent(eventsListNode, createEditEventTemplate(firstEvent));
+  const onEventRollupBtnClick = () => eventsListNode.replaceChild(newEditEvent.getElement(), newEvent.getElement());
+  newEvent.getElement().querySelector(`.event__rollup-btn`)
+    .addEventListener(`click`, onEventRollupBtnClick);
 
-// const eventsList = overEvents.map((event) => createEventTemplate(event))
-//   .join(``);
-// renderComponent(eventsListNode, eventsList);
+  const onEditEventRollupBtnClick = () => eventsListNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
+  newEditEvent.getElement().querySelector(`.event__rollup-btn`)
+    .addEventListener(`click`, onEditEventRollupBtnClick);
+
+  const onEditEventFormSubmit = (evt) => {
+    evt.preventDefault();
+    eventsListNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
+  };
+  newEditEvent.getElement().querySelector(`form`)
+    .addEventListener(`submit`, onEditEventFormSubmit);
+
+  render(eventsListNode, newEvent.getElement(), Enum.Position.BEFOREEND);
+});
