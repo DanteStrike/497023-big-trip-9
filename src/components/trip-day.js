@@ -1,10 +1,9 @@
-export const createTripDayTemplate = ({date}, index, dayEventsList = ``) =>
+export const createTripDayTemplate = () =>
   `<li class="trip-days__item  day">
     <div class="day__info">
-      <span class="day__counter">${index + 1}</span>
-      <time class="day__date" datetime="${new Date(date).getFullYear()}-${new Date(date).getMonth()}-${new Date(date).getDate()}T${new Date(date).getHours()}:${new Date(date).getMinutes()}">
-      ${new Date(date).toDateString()}</time>
+      <span class="day__counter">3</span>
+      <time class="day__date" datetime="2019-03-18">18 MAR</time>
     </div>
 
-    <ul class="trip-events__list">${dayEventsList}</ul>
+    <ul class="trip-events__list"></ul>
   </li>`;
