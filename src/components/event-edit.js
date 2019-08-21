@@ -125,7 +125,7 @@ export const createEditEventTemplate = ({type, isTransportType, description, des
 
           <div class="event__available-offers">
             ${offers.map((offer, index) => `<div class="event__offer-selector">
-            <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" ${offer.isCheck ? `checked` : ``}>
+            <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" ${offer.isActive ? `checked` : ``}>
               <label class="event__offer-label" for="event-offer-luggage-${index}">
                 <span class="event__offer-title">${offer.description}</span>
                 +
