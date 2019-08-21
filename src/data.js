@@ -10,7 +10,7 @@ const menuData = {
   titles: [`Table`, `Stats`]
 };
 
-
+//  Сборка информации о поездке на основе списка
 const tripInfo = {
   cities: eventsList.reduce((accum, event) => {
     if (eventsData.destination.cities.has(event.destination)) {

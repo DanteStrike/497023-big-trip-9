@@ -24,12 +24,26 @@ const eventsData = {
   offerDescriptions: [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`]
 };
 
-const getOffer = (offerDescription, data) => ({
-  description: offerDescription,
-  price: getRandomNumber(data.offer.price.min, data.offer.price.max),
+/**
+ * Возвращает новый экземпляр предложения.
+ *
+ * @param {string} description - описание предложения.
+ * @param {object} config - параметры сборки.
+ * @return {Offer} Экземпляр Offer.
+ */
+const getOffer = (description, config) => ({
+  description,
+  price: getRandomNumber(config.offer.price.min, config.offer.price.max),
   isActive: getRandomFlag()
 });
 
+/**
+ * Возвращает новый экземпляр события.
+ *
+ * @param {object} data - данные для сборки.
+ * @param {object} config - параметры сборки.
+ * @return {EventData} Экземпляр EventData.
+ */
 const getEventData = (data, config) => {
   const randomType = getRandomElement(new Set([...data.types.transport, ...data.types.arrival]));
 
@@ -71,7 +85,7 @@ const getEventData = (data, config) => {
   };
 };
 
-
+//  Сборка списка точек маршрута
 const eventsList = new Array(getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
   .fill(``)
   .map(() => getEventData(eventsData, eventConfig))
