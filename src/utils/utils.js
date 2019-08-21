@@ -5,7 +5,12 @@ export const Enum = {
   HOURS_IN_DAY: 24,
   MILLISECONDS_IN_MINUTE: 1000 * 60,
   MILLISECONDS_IN_HOUR: 1000 * 60 * 60,
-  MILLISECONDS_IN_DAY: 1000 * 60 * 60 * 24
+  MILLISECONDS_IN_DAY: 1000 * 60 * 60 * 24,
+
+  Position: {
+    AFTERBEGIN: `afterbegin`,
+    BEFOREEND: `beforeend`
+  }
 };
 
 /**
@@ -53,3 +58,43 @@ export const shuffle = (iterableObject) => {
   return newArray;
 };
 
+/**
+ * Возвращает DOM на основе разметки.
+ *
+ * @param {string} template - разметка.
+ * @return {node} DOM разметки.
+ */
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement.firstChild;
+};
+
+/**
+ * Вставляет элемент в определенную позицию контейнера.
+ *
+ * @param {node} container - контейнер.
+ * @param {node} element - элемент.
+ * @param {Position} place - позиция.
+ */
+export const render = (container, element, place) => {
+  switch (place) {
+    case Enum.Position.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case Enum.Position.BEFOREEND:
+      container.append(element);
+      break;
+  }
+};
+
+/**
+ * Удалить DOM-элемент.
+ *
+ * @param {node} element - элемент.
+ */
+export const unrender = (element) => {
+  if (element) {
+    element.remove();
+  }
+};
