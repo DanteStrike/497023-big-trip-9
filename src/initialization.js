@@ -5,7 +5,7 @@ import {createSortingTemplate} from './components/sorting.js';
 import {createTripBoardTemplate} from './components/trip-board.js';
 import {createTripDayTemplate} from './components/trip-day.js';
 import {createNoEventsTemplate} from './components/no-events.js';
-import {createElement, render, Position} from './utils/utils.js';
+import {createElement, render, Position, Key} from './utils/utils.js';
 
 const tripMainNode = document.querySelector(`.trip-main`);
 const tripListNode = document.querySelector(`.trip-events`);
@@ -34,7 +34,7 @@ export const init = (data) => {
     const newEditEvent = new EditEvent(event);
 
     const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
+      if (Key.ESCAPE.has(evt.key)) {
         eventsListNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
