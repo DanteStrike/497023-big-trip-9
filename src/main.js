@@ -71,6 +71,11 @@ const renderEvents = (container) => {
   };
 
   data.eventsList.map(renderEvent);
+const data = {
+  eventsList,
+  tripInfo,
+  tripFilters,
+  tripMenu
 };
 
 

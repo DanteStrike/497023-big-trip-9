@@ -1,4 +1,4 @@
-import {createElement, Enum} from '../utils/utils.js';
+import {createElement, TimeValue} from '../utils/utils.js';
 import {eventsData} from '../eventsList.js';
 
 
@@ -21,13 +21,13 @@ class Event {
       duration: this._time.end - this._time.start,
 
       get days() {
-        return Math.floor(this.duration / Enum.MILLISECONDS_IN_DAY);
+        return Math.floor(this.duration / TimeValue.MILLISECONDS_IN_DAY);
       },
       get hours() {
-        return Math.floor((this.duration - this.days * Enum.MILLISECONDS_IN_DAY) / Enum.MILLISECONDS_IN_HOUR);
+        return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY) / TimeValue.MILLISECONDS_IN_HOUR);
       },
       get minutes() {
-        return Math.floor((this.duration - this.days * Enum.MILLISECONDS_IN_DAY - this.hours * Enum.MILLISECONDS_IN_HOUR) / Enum.MILLISECONDS_IN_MINUTE);
+        return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY - this.hours * TimeValue.MILLISECONDS_IN_HOUR) / TimeValue.MILLISECONDS_IN_MINUTE);
       }
     };
   }
