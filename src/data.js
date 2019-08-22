@@ -21,8 +21,8 @@ const tripInfo = {
   }, []),
 
   dates: {
-    start: eventsList[0].time.start,
-    end: eventsList[eventsList.length - 1].time.end
+    start: (eventsList.length !== 0) ? eventsList[0].time.start : 0,
+    end: (eventsList.length !== 0) ? eventsList[eventsList.length - 1].time.end : 0
   },
 
   get citiesAmount() {

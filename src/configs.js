@@ -28,6 +28,6 @@ export const eventConfig = {
 };
 
 export const eventsListConfig = {
-  minAmount: 20,
-  maxAmount: 40
+  minAmount: 0,
+  maxAmount: 3
 };
