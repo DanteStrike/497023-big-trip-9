@@ -1,4 +1,4 @@
-export const Enum = {
+export const TimeValue = {
   MILLISECONDS_IN_SECOND: 1000,
   SECONDS_IN_MINUTE: 60,
   MINUTES_IN_HOUR: 60,
@@ -6,11 +6,15 @@ export const Enum = {
   MILLISECONDS_IN_MINUTE: 1000 * 60,
   MILLISECONDS_IN_HOUR: 1000 * 60 * 60,
   MILLISECONDS_IN_DAY: 1000 * 60 * 60 * 24,
+};
 
-  Position: {
-    AFTERBEGIN: `afterbegin`,
-    BEFOREEND: `beforeend`
-  }
+export const Position = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
+};
+
+export const Key = {
+  ESCAPE: new Set([`Escape`, `Esc`]),
 };
 
 /**
@@ -79,10 +83,10 @@ export const createElement = (template) => {
  */
 export const render = (container, element, place) => {
   switch (place) {
-    case Enum.Position.AFTERBEGIN:
+    case Position.AFTERBEGIN:
       container.prepend(element);
       break;
-    case Enum.Position.BEFOREEND:
+    case Position.BEFOREEND:
       container.append(element);
       break;
   }
