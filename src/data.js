@@ -10,7 +10,6 @@ const menuData = {
   titles: [`Table`, `Stats`]
 };
 
-
 const tripInfo = {
   cities: eventsList.reduce((accum, event) => {
     if (eventsData.destination.cities.has(event.destination)) {
