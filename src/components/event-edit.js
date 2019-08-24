@@ -1,9 +1,10 @@
-import {createElement} from '../utils/utils.js';
 import {eventsData} from '../eventsList.js';
+import AbstractComponent from './abstract.js';
 
 
-class EventEdit {
+class EventEdit extends AbstractComponent {
   constructor({type, description, destination, time, price, offers, isFavorite, photos}) {
+    super();
     this._type = type;
     this._destination = destination;
     this._description = description;
@@ -12,26 +13,13 @@ class EventEdit {
     this._price = price;
     this._photos = photos;
     this._isFavorite = isFavorite;
-    this._element = null;
   }
 
-  get isTransportType() {
+  get _isTransportType() {
     return eventsData.types.transport.has(this._type);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
-
-  getTemplate() {
+  _getTemplate() {
     return `<li class="trip-events__item">
       <form class="event  event--edit" action="#" method="post">
         <header class="event__header">
@@ -105,7 +93,7 @@ class EventEdit {
 
           <div class="event__field-group  event__field-group--destination">
             <label class="event__label  event__type-output" for="event-destination-1">
-              ${this._type} ${this._isTransportType ? `to` : `into`}
+              ${this._type} ${this.__isTransportType ? `to` : `into`}
             </label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination}" list="destination-list-1">
             <datalist id="destination-list-1">
@@ -184,5 +172,6 @@ class EventEdit {
     </li>`.trim();
   }
 }
+
 
 export default EventEdit;
