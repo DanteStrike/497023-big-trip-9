@@ -1,5 +1,6 @@
 import Event from './event.js';
 import EditEvent from './event-edit.js';
+import {createSortingTemplate} from './sorting.js';
 import {createTripDayTemplate} from './trip-day.js';
 import {render, createElement, Position, Key} from '../utils/utils.js';
 
@@ -19,6 +20,7 @@ class TripController {
       return;
     }
 
+    render(this._container, createElement(createSortingTemplate()), Position.BEFOREEND);
     render(this._container, createElement(this._getTripBoardTemplate()), Position.BEFOREEND);
 
 

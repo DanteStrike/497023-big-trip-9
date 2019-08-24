@@ -14,4 +14,5 @@ class Menu extends AbstractComponent {
   }
 }
 
+
 export default Menu;
