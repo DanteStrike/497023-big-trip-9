@@ -39,32 +39,40 @@ class TripController {
 
   _renderEvent(event, listNode) {
     const newEvent = new Event(event);
-    const newEditEvent = new EditEvent(event);
-
-    const onEscKeyDown = (evt) => {
-      if (evt.key === `Esc` || event.key === `Escape`) {
-        listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
-        document.removeEventListener(`keydown`, onEscKeyDown);
-      }
-    };
 
     const onEventRollupBtnClick = () => {
+      const newEditEvent = new EditEvent(event);
       listNode.replaceChild(newEditEvent.getElement(), newEvent.getElement());
+
+      const onEditEventRollupBtnClick = () => {
+        listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
+        newEditEvent.removeElement();
+      };
+
+      newEditEvent.getElement().querySelector(`.event__rollup-btn`)
+        .addEventListener(`click`, onEditEventRollupBtnClick);
+
+      const onEditEventFormSubmit = (evt) => {
+        evt.preventDefault();
+        listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
+        newEditEvent.removeElement();
+      };
+
+      const onEscKeyDown = (evt) => {
+        if (evt.key === `Esc` || evt.key === `Escape`) {
+          listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
+          document.removeEventListener(`keydown`, onEscKeyDown);
+          newEditEvent.removeElement();
+        }
+      };
+
+      newEditEvent.getElement().querySelector(`form`)
+        .addEventListener(`submit`, onEditEventFormSubmit);
       document.addEventListener(`keydown`, onEscKeyDown);
     };
+
     newEvent.getElement().querySelector(`.event__rollup-btn`)
       .addEventListener(`click`, onEventRollupBtnClick);
-
-    const onEditEventRollupBtnClick = () => listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
-    newEditEvent.getElement().querySelector(`.event__rollup-btn`)
-      .addEventListener(`click`, onEditEventRollupBtnClick);
-
-    const onEditEventFormSubmit = (evt) => {
-      evt.preventDefault();
-      listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
-    };
-    newEditEvent.getElement().querySelector(`form`)
-      .addEventListener(`submit`, onEditEventFormSubmit);
 
     render(listNode, newEvent.getElement(), Position.BEFOREEND);
   }
