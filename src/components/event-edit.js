@@ -13,10 +13,7 @@ class EventEdit extends AbstractComponent {
     this._price = price;
     this._photos = photos;
     this._isFavorite = isFavorite;
-  }
-
-  get _isTransportType() {
-    return eventsData.types.transport.has(this._type);
+    this._isTransportType = eventsData.types.transport.has(this._type);
   }
 
   _getTemplate() {

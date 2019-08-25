@@ -9,28 +9,21 @@ class Event extends AbstractComponent {
     this._type = type;
     this._destination = destination;
     this._time = time;
-    this._offers = offers;
-    this._price = price;
-  }
-
-  get _isTransportType() {
-    return eventsData.types.transport.has(this._type);
-  }
-
-  get _timeDuration() {
-    return {
-      duration: this._time.end - this._time.start,
+    this._timeDuration = {
+      milliseconds: this._time.end - this._time.start,
 
       get days() {
-        return Math.floor(this.duration / TimeValue.MILLISECONDS_IN_DAY);
+        return Math.floor(this.milliseconds / TimeValue.MILLISECONDS_IN_DAY);
       },
       get hours() {
-        return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY) / TimeValue.MILLISECONDS_IN_HOUR);
+        return Math.floor((this.milliseconds - this.days * TimeValue.MILLISECONDS_IN_DAY) / TimeValue.MILLISECONDS_IN_HOUR);
       },
       get minutes() {
-        return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY - this.hours * TimeValue.MILLISECONDS_IN_HOUR) / TimeValue.MILLISECONDS_IN_MINUTE);
-      }
-    };
+        return Math.floor((this.milliseconds - this.days * TimeValue.MILLISECONDS_IN_DAY - this.hours * TimeValue.MILLISECONDS_IN_HOUR) / TimeValue.MILLISECONDS_IN_MINUTE);
+      }};
+    this._offers = offers;
+    this._price = price;
+    this._isTransportType = eventsData.types.transport.has(this._type);
   }
 
   _getTemplate() {
