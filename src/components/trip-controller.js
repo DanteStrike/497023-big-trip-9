@@ -2,7 +2,7 @@ import Event from './event.js';
 import EditEvent from './event-edit.js';
 import {createSortingTemplate} from './sorting.js';
 import {createTripDayTemplate} from './trip-day.js';
-import {render, createElement, Position, Key} from '../utils/utils.js';
+import {render, createElement, Position} from '../utils/utils.js';
 
 class TripController {
   constructor(node, data) {
@@ -42,7 +42,7 @@ class TripController {
     const newEditEvent = new EditEvent(event);
 
     const onEscKeyDown = (evt) => {
-      if (Key.ESCAPE.has(evt.key)) {
+      if (evt.key === `Esc` || event.key === `Escape`) {
         listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
         document.removeEventListener(`keydown`, onEscKeyDown);
       }
