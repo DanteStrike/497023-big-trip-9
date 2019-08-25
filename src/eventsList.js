@@ -49,10 +49,6 @@ const getEventData = (data, config) => {
       .map(() => config.photos.defaultURL + Math.random()),
     isFavorite: getRandomFlag(),
 
-    //  Геттеры для удобного вывода в шаблон компонента event-edit и event
-    get isTransportType() {
-      return eventsData.types.transport.has(this.type);
-    },
     get timeDuration() {
       return {
         duration: this.time.end - this.time.start,
