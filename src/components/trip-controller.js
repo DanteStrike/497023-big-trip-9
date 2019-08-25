@@ -4,7 +4,7 @@ import NoEvents from './no-events.js';
 import Sort from './sorting.js';
 import TripBoard from './trip-board.js';
 import {createTripDayTemplate} from './trip-day.js';
-import {render, createElement, Position} from '../utils/utils.js';
+import {render, createElement, Position, TimeValue} from '../utils/utils.js';
 
 class TripController {
   constructor(node, data) {
@@ -26,16 +26,18 @@ class TripController {
     }
 
     render(this._container, this._sort.getElement(), Position.BEFOREEND);
+    this._sort.getElement().addEventListener(`click`, (evt) => this._onSortBtnClick(evt));
     render(this._container, this._board.getElement(), Position.BEFOREEND);
+    this._renderEventsByDays();
 
+    //   const tripBoardNode = this._container.querySelector(`.trip-days`);
+    //   render(tripBoardNode, createElement(createTripDayTemplate()), Position.BEFOREEND);
 
-    const tripBoardNode = this._container.querySelector(`.trip-days`);
-    render(tripBoardNode, createElement(createTripDayTemplate()), Position.BEFOREEND);
+    //   const eventsListNode = this._container.querySelector(`.trip-events__list`);
+    //   for (const event of this._eventsList) {
+    //     this._renderEvent(event, eventsListNode);
+    //   }
 
-    const eventsListNode = this._container.querySelector(`.trip-events__list`);
-    for (const event of this._eventsList) {
-      this._renderEvent(event, eventsListNode);
-    }
   }
 
   _firstInit() {
@@ -81,6 +83,56 @@ class TripController {
       .addEventListener(`click`, onEventRollupBtnClick);
 
     render(listNode, newEvent.getElement(), Position.BEFOREEND);
+  }
+
+  _onSortBtnClick(evt) {
+    const target = evt.target;
+    if (target.tagName !== `INPUT` || this._eventsList.length === 0) {
+      return;
+    }
+    this._board.getElement().innerHTML = ``;
+    let eventsListNode;
+
+    switch (target.dataset.sortType) {
+      case `time`:
+        const sortedByEventDuration = this._eventsList.sort((a, b) => (b.time.end - b.time.start) - (a.time.end - a.time.start));
+        render(this._board.getElement(), createElement(createTripDayTemplate()), Position.BEFOREEND);
+        eventsListNode = this._board.getElement().querySelector(`.trip-events__list`);
+        for (const event of sortedByEventDuration) {
+          this._renderEvent(event, eventsListNode);
+        }
+        return;
+
+      case `price`:
+        const sortedByPrice = this._eventsList.sort((a, b) => b.price - a.price);
+        render(this._board.getElement(), createElement(createTripDayTemplate()), Position.BEFOREEND);
+        eventsListNode = this._board.getElement().querySelector(`.trip-events__list`);
+        for (const event of sortedByPrice) {
+          this._renderEvent(event, eventsListNode);
+        }
+        return;
+
+      case `default`:
+        this._renderEventsByDays();
+        return;
+    }
+  }
+
+  _renderEventsByDays() {
+    const sortedByEvent = this._eventsList.sort((a, b) => a.time.start - b.time.start);
+    const startDay = new Date(this._eventsList[0].time.start).setHours(0, 0, 0, 0);
+    const lastDay = new Date(this._eventsList[this._eventsList.length - 1].time.start).setHours(0, 0, 0, 0);
+    let counter = 0;
+
+    for (let day = startDay; day <= lastDay; day += TimeValue.MILLISECONDS_IN_DAY) {
+      const dayEvents = sortedByEvent.filter((event) => new Date(event.time.start).setHours(0, 0, 0, 0) === day);
+      counter++;
+      render(this._board.getElement(), createElement(createTripDayTemplate(counter, day)), Position.BEFOREEND);
+      const dayEventsListNode = this._board.getElement().querySelectorAll(`.trip-events__list`);
+      for (const event of dayEvents) {
+        this._renderEvent(event, dayEventsListNode[dayEventsListNode.length - 1]);
+      }
+    }
   }
 }
 
