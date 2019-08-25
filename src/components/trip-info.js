@@ -2,7 +2,7 @@ import AbstractComponent from './abstract.js';
 
 
 class TripInfo extends AbstractComponent {
-  constructor(cities, dates) {
+  constructor({cities, dates}) {
     super();
     this._cities = cities;
     this._dates = dates;
