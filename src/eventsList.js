@@ -1,4 +1,4 @@
-import {getRandomNumber, getRandomFlag, getRandomElement, shuffle, TimeValue} from './utils/utils.js';
+import {getRandomNumber, getRandomFlag, getRandomElement, shuffle} from './utils/utils.js';
 import getRandomDestination from './utils/getRandomDestination.js';
 import getRandomEventTime from './utils/getRandomEventTime.js';
 import {eventConfig, eventsListConfig} from './configs.js';
@@ -21,7 +21,9 @@ const eventsData = {
     `Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui`, `Sed sed nisi sed augue convallis suscipit in sed felis`,
     `Aliquam erat volutpat`, `Nunc fermentum tortor ac porta dapibus`, `In rutrum ac purus sit amet tempus`],
 
-  offerDescriptions: [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`]
+  offerDescriptions: [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`],
+
+  photosDefaultURL: `http://picsum.photos/300/150?r=`
 };
 
 const getOffer = (offerDescription, config) => ({
@@ -46,24 +48,8 @@ const getEventData = (data, config) => {
       .map((offerDescription) => getOffer(offerDescription, config)),
     photos: new Array(getRandomNumber(config.photos.minAmount, eventConfig.photos.maxAmount))
       .fill(``)
-      .map(() => config.photos.defaultURL + Math.random()),
+      .map(() => data.photosDefaultURL + Math.random()),
     isFavorite: getRandomFlag(),
-
-    get timeDuration() {
-      return {
-        duration: this.time.end - this.time.start,
-
-        get days() {
-          return Math.floor(this.duration / TimeValue.MILLISECONDS_IN_DAY);
-        },
-        get hours() {
-          return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY) / TimeValue.MILLISECONDS_IN_HOUR);
-        },
-        get minutes() {
-          return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY - this.hours * TimeValue.MILLISECONDS_IN_HOUR) / TimeValue.MILLISECONDS_IN_MINUTE);
-        }
-      };
-    }
   };
 };
 
