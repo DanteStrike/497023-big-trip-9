@@ -3,20 +3,10 @@ import AbstractComponent from './abstract.js';
 
 
 class TripInfo extends AbstractComponent {
-  constructor(eventsList) {
+  constructor(cities, dates) {
     super();
-    this._cities = eventsList.reduce((accum, event) => {
-      if (eventsData.destination.cities.has(event.destination)) {
-        accum.push(event.destination);
-      }
-
-      return accum;
-    }, []);
-
-    this._dates = {
-      start: eventsList[0].time.start,
-      end: eventsList[eventsList.length - 1].time.end
-    };
+    this._cities = cities;
+    this._dates = dates;
   }
 
   get _citiesAmount() {

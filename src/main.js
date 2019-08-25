@@ -24,7 +24,7 @@ if (data.eventsList.length === 0) {
   tripMainNode.querySelector(`.trip-main__event-add-btn`).disabled = true;
 } else {
   const tripInfoNode = tripMainNode.querySelector(`.trip-info`);
-  render(tripInfoNode, new TripInfo(data.eventsList).getElement(), Position.AFTERBEGIN);
+  render(tripInfoNode, new TripInfo(data.tripInfo).getElement(), Position.AFTERBEGIN);
 }
 
 tripMainNode.querySelector(`.trip-info__cost-value`).innerHTML = tripController.getTripCost();
