@@ -24,9 +24,9 @@ const eventsData = {
   offerDescriptions: [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`]
 };
 
-const getOffer = (offerDescription, data) => ({
+const getOffer = (offerDescription, config) => ({
   description: offerDescription,
-  price: getRandomNumber(data.offer.price.min, data.offer.price.max),
+  price: getRandomNumber(config.offer.price.min, config.offer.price.max),
   isActive: getRandomFlag()
 });
 
