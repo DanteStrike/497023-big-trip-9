@@ -1,6 +1,8 @@
 import Event from './event.js';
 import EditEvent from './event-edit.js';
-import {createSortingTemplate} from './sorting.js';
+import NoEvents from './no-events.js';
+import Sort from './sorting.js';
+import TripBoard from './trip-board.js';
 import {createTripDayTemplate} from './trip-day.js';
 import {render, createElement, Position} from '../utils/utils.js';
 
@@ -8,6 +10,9 @@ class TripController {
   constructor(node, data) {
     this._container = node;
     this._eventsList = data;
+    this._board = new TripBoard();
+    this._sort = new Sort();
+    this._noEvents = null;
   }
 
   getTripCost() {
@@ -20,8 +25,8 @@ class TripController {
       return;
     }
 
-    render(this._container, createElement(createSortingTemplate()), Position.BEFOREEND);
-    render(this._container, createElement(this._getTripBoardTemplate()), Position.BEFOREEND);
+    render(this._container, this._sort.getElement(), Position.BEFOREEND);
+    render(this._container, this._board.getElement(), Position.BEFOREEND);
 
 
     const tripBoardNode = this._container.querySelector(`.trip-days`);
@@ -34,7 +39,8 @@ class TripController {
   }
 
   _firstInit() {
-    render(this._container, createElement(this._getNoEventsTemplate()), Position.BEFOREEND);
+    this._noEvents = new NoEvents();
+    render(this._container, this._noEvents.getElement(), Position.BEFOREEND);
   }
 
   _renderEvent(event, listNode) {
@@ -75,14 +81,6 @@ class TripController {
       .addEventListener(`click`, onEventRollupBtnClick);
 
     render(listNode, newEvent.getElement(), Position.BEFOREEND);
-  }
-
-  _getNoEventsTemplate() {
-    return `<p class="trip-events__msg">Click New Event to create your first point</p>`;
-  }
-
-  _getTripBoardTemplate() {
-    return `<ul class="trip-days"></ul>`;
   }
 }
 

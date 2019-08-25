@@ -1,5 +1,13 @@
-export const createSortingTemplate = () =>
-  `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
+import AbstractComponent from './abstract.js';
+
+
+class Sort extends AbstractComponent {
+  constructor() {
+    super();
+  }
+
+  _getTemplate() {
+    return `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
     <span class="trip-sort__item  trip-sort__item--day">Day</span>
 
     <div class="trip-sort__item  trip-sort__item--event">
@@ -29,3 +37,8 @@ export const createSortingTemplate = () =>
 
     <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
   </form>`;
+  }
+}
+
+
+export default Sort;
