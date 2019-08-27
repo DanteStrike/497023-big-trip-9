@@ -1,4 +1,4 @@
-import {tripInfo, tripFilters, tripMenu} from './data.js';
+import {tripFilters, tripMenu} from './data.js';
 import {eventsList} from './eventsList.js';
 import {render, Position} from './utils/utils.js';
 import TripController from './components/trip-controller.js';
@@ -9,7 +9,6 @@ import Filters from './components/trip-filters.js';
 
 const data = {
   eventsList,
-  tripInfo,
   tripFilters,
   tripMenu
 };
@@ -24,7 +23,7 @@ if (data.eventsList.length === 0) {
   tripMainNode.querySelector(`.trip-main__event-add-btn`).disabled = true;
 } else {
   const tripInfoNode = tripMainNode.querySelector(`.trip-info`);
-  render(tripInfoNode, new TripInfo(data.tripInfo).getElement(), Position.AFTERBEGIN);
+  render(tripInfoNode, new TripInfo(eventsList).getElement(), Position.AFTERBEGIN);
 }
 
 tripMainNode.querySelector(`.trip-info__cost-value`).innerHTML = tripController.getTripCost();

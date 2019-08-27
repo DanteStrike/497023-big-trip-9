@@ -1,4 +1,5 @@
 import {eventsData} from '../eventsList.js';
+import {eventsData} from '../data.js';
 import AbstractComponent from './abstract.js';
 
 
