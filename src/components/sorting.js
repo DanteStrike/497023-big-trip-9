@@ -1,14 +1,22 @@
-export const createSortingTemplate = () =>
-  `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
+import AbstractComponent from './abstract.js';
+
+
+class Sort extends AbstractComponent {
+  constructor() {
+    super();
+  }
+
+  _getTemplate() {
+    return `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
     <span class="trip-sort__item  trip-sort__item--day">Day</span>
 
     <div class="trip-sort__item  trip-sort__item--event">
-      <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" checked="">
+      <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" checked="" data-sort-type="default">
       <label class="trip-sort__btn" for="sort-event">Event</label>
     </div>
 
     <div class="trip-sort__item  trip-sort__item--time">
-      <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
+      <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time" data-sort-type="time">
       <label class="trip-sort__btn" for="sort-time">
         Time
         <svg class="trip-sort__direction-icon" width="8" height="10" viewBox="0 0 8 10">
@@ -18,7 +26,7 @@ export const createSortingTemplate = () =>
     </div>
 
     <div class="trip-sort__item  trip-sort__item--price">
-      <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
+      <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price" data-sort-type="price">
       <label class="trip-sort__btn" for="sort-price">
         Price
         <svg class="trip-sort__direction-icon" width="8" height="10" viewBox="0 0 8 10">
@@ -29,3 +37,8 @@ export const createSortingTemplate = () =>
 
     <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
   </form>`;
+  }
+}
+
+
+export default Sort;

@@ -13,9 +13,9 @@ export const Position = {
   BEFOREEND: `beforeend`
 };
 
-export const Key = {
-  ESCAPE: new Set([`Escape`, `Esc`]),
-};
+// export const Keys = {
+//   ESCAPE: new Set([`Escape`, `Esc`]),
+// };
 
 /**
  * Возвращает случайный число в заданном диапазоне.

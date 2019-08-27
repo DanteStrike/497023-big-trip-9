@@ -8,7 +8,6 @@ export const eventConfig = {
     future: 2
   },
   photos: {
-    defaultURL: `http://picsum.photos/300/150?r=`,
     minAmount: 2,
     maxAmount: 5
   },
@@ -28,6 +27,6 @@ export const eventConfig = {
 };
 
 export const eventsListConfig = {
-  minAmount: 0,
-  maxAmount: 3
+  minAmount: 20,
+  maxAmount: 30
 };

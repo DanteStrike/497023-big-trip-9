@@ -1,56 +1,38 @@
-import {createElement, TimeValue} from '../utils/utils.js';
+import {TimeValue} from '../utils/utils.js';
 import {eventsData} from '../eventsList.js';
+import AbstractComponent from './abstract.js';
 
 
-class Event {
+class Event extends AbstractComponent {
   constructor({type, destination, time, price, offers}) {
+    super();
     this._type = type;
     this._destination = destination;
     this._time = time;
-    this._offers = offers;
-    this._price = price;
-    this._element = null;
-  }
-
-  get isTransportType() {
-    return eventsData.types.transport.has(this._type);
-  }
-
-  get timeDuration() {
-    return {
-      duration: this._time.end - this._time.start,
+    this._timeDuration = {
+      milliseconds: this._time.end - this._time.start,
 
       get days() {
-        return Math.floor(this.duration / TimeValue.MILLISECONDS_IN_DAY);
+        return Math.floor(this.milliseconds / TimeValue.MILLISECONDS_IN_DAY);
       },
       get hours() {
-        return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY) / TimeValue.MILLISECONDS_IN_HOUR);
+        return Math.floor((this.milliseconds - this.days * TimeValue.MILLISECONDS_IN_DAY) / TimeValue.MILLISECONDS_IN_HOUR);
       },
       get minutes() {
-        return Math.floor((this.duration - this.days * TimeValue.MILLISECONDS_IN_DAY - this.hours * TimeValue.MILLISECONDS_IN_HOUR) / TimeValue.MILLISECONDS_IN_MINUTE);
-      }
-    };
+        return Math.floor((this.milliseconds - this.days * TimeValue.MILLISECONDS_IN_DAY - this.hours * TimeValue.MILLISECONDS_IN_HOUR) / TimeValue.MILLISECONDS_IN_MINUTE);
+      }};
+    this._offers = offers;
+    this._price = price;
+    this._isTransportType = eventsData.types.transport.has(this._type);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
-
-  getTemplate() {
+  _getTemplate() {
     return `<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${this._type} ${this.isTransportType ? `to` : `into`} ${this._destination}</h3>
+        <h3 class="event__title">${this._type} ${this._isTransportType ? `to` : `into`} ${this._destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
@@ -62,7 +44,7 @@ class Event {
             ${new Date(this._time.end).getHours()}:${new Date(this._time.end).getMinutes()}</time>
           </p>
           <p class="event__duration">
-            ${this.timeDuration.days !== 0 ? `${this.timeDuration.days}D` : ``} ${this.timeDuration.hours !== 0 ? `${this.timeDuration.hours}H` : ``} ${this.timeDuration.minutes !== 0 ? `${this.timeDuration.minutes}M` : ``}</p>
+            ${this._timeDuration.days !== 0 ? `${this._timeDuration.days}D` : ``} ${this._timeDuration.hours !== 0 ? `${this._timeDuration.hours}H` : ``} ${this._timeDuration.minutes !== 0 ? `${this._timeDuration.minutes}M` : ``}</p>
         </div>
 
         <p class="event__price">
@@ -86,5 +68,6 @@ class Event {
     </li>`.trim();
   }
 }
+
 
 export default Event;

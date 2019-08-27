@@ -1,24 +1,13 @@
-import {createElement} from '../utils/utils.js';
+import AbstractComponent from './abstract.js';
 
-class Filters {
+
+class Filters extends AbstractComponent {
   constructor(filters) {
+    super();
     this._filters = filters;
-    this._element = null;
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
-  }
-
-  getTemplate() {
+  _getTemplate() {
     return `<form class="trip-filters" action="#" method="get">
         <div class="trip-filters__filter">
           <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value=" ${this._filters[0].title.toLowerCase()}" ${this._filters[0].isActive ? `checked` : ``}>
@@ -39,5 +28,6 @@ class Filters {
       </form>`;
   }
 }
+
 
 export default Filters;
