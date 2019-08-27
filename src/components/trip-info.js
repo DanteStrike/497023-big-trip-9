@@ -1,11 +1,36 @@
+import {eventsData} from '../data.js';
+// import {createElement} from '../utils/utils.js';
 import AbstractComponent from './abstract.js';
 
 
 class TripInfo extends AbstractComponent {
-  constructor({cities, dates}) {
+  constructor(eventsList) {
     super();
-    this._cities = cities;
-    this._dates = dates;
+    this._cities = this._getCities(eventsList);
+    this._dates = this._getDates(eventsList);
+  }
+
+  // update(eventsList) {
+  //   this._cities = this._getCities(eventsList);
+  //   this._dates = this._getDates(eventsList);
+  //   this._element = createElement(this._getTemplate());
+  // }
+
+  _getCities(eventsList) {
+    return eventsList.reduce((accum, event) => {
+      if (eventsData.destination.cities.has(event.destination)) {
+        accum.push(event.destination);
+      }
+
+      return accum;
+    }, []);
+  }
+
+  _getDates(eventsList) {
+    return {
+      start: (eventsList.length !== 0) ? eventsList[0].time.start : 0,
+      end: (eventsList.length !== 0) ? eventsList[eventsList.length - 1].time.end : 0
+    };
   }
 
   _citiesAmount() {

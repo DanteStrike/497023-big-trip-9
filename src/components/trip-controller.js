@@ -54,7 +54,6 @@ class TripController {
 
       const onEditEventRollupBtnClick = () => {
         listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
-        newEditEvent.removeElement();
       };
 
       newEditEvent.getElement().querySelector(`.event__rollup-btn`)
@@ -63,14 +62,12 @@ class TripController {
       const onEditEventFormSubmit = (evt) => {
         evt.preventDefault();
         listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
-        newEditEvent.removeElement();
       };
 
       const onEscKeyDown = (evt) => {
         if (evt.key === `Esc` || evt.key === `Escape`) {
           listNode.replaceChild(newEvent.getElement(), newEditEvent.getElement());
           document.removeEventListener(`keydown`, onEscKeyDown);
-          newEditEvent.removeElement();
         }
       };
 
