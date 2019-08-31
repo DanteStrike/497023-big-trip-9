@@ -1,7 +1,7 @@
 import {tripFilters, tripMenu} from './data.js';
 import {eventsList} from './eventsList.js';
 import {render, Position} from './utils/utils.js';
-import TripController from './components/trip-controller.js';
+import TripController from './controllers/trip-controller.js';
 import TripInfo from './components/trip-info.js';
 import Menu from './components/menu.js';
 import Filters from './components/trip-filters.js';
