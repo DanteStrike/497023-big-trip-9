@@ -102,3 +102,13 @@ export const unrender = (element) => {
     element.remove();
   }
 };
+
+/**
+ * Сделать заглавной первую букву слова.
+ *
+ * @param {string} word - слово.
+ * @return {string} - слово с заглавной первой буквой
+ */
+export const capitalizeFirstLetter = (word) => {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+};

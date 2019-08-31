@@ -11,6 +11,15 @@ module.exports = {
 
   devtool: `source-map`,
 
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [`style-loader`, `css-loader`],
+      }
+    ]
+  },
+
   devServer: {
     contentBase: path.join(__dirname, `public`),
     publicPath: `http://localhost:8080`,
