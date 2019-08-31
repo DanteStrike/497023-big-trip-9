@@ -12,14 +12,14 @@ export const eventConfig = {
     maxAmount: 5
   },
   price: {
-    min: 0,
+    min: 400,
     max: 1000
   },
 
   offer: {
     price: {
-      min: 0,
-      max: 600
+      min: 20,
+      max: 100
     },
     minAmount: 0,
     maxAmount: 3

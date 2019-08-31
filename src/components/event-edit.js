@@ -1,6 +1,7 @@
-import {eventsData} from '../data.js';
+import {eventsData, getOffer} from '../data.js';
+import {eventConfig} from '../configs';
 import AbstractComponent from './abstract.js';
-import {capitalizeFirstLetter, createElement} from '../utils/utils.js';
+import {capitalizeFirstLetter, createElement, getRandomNumber, shuffle} from '../utils/utils.js';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -28,22 +29,32 @@ class EventEdit extends AbstractComponent {
   }
 
   _initFlatpickr() {
-    flatpickr(this.getElement().querySelector(`#event-start-time-1`), {
+    const startFlatpickr = flatpickr(this.getElement().querySelector(`#event-start-time-1`), {
       altInput: true,
       allowInput: true,
       altFormat: `d/m/Y H:i`,
       dateFormat: `Y-m-d H:i:S`,
       enableTime: true,
-      defaultDate: this._time.start ? this._time.start : Date.now()
+      defaultDate: this._time.start ? this._time.start : Date.now(),
+      onClose(selectedDates) {
+        if (endFlatpickr.selectedDates[0] < selectedDates[0]) {
+          endFlatpickr.setDate(selectedDates[0]);
+        }
+      }
     });
 
-    flatpickr(this.getElement().querySelector(`#event-end-time-1`), {
+    const endFlatpickr = flatpickr(this.getElement().querySelector(`#event-end-time-1`), {
       altInput: true,
       allowInput: true,
       altFormat: `d/m/Y H:i`,
       dateFormat: `Y-m-d H:i:S`,
       enableTime: true,
-      defaultDate: this._time.end ? this._time.end : Date.now()
+      defaultDate: this._time.end ? this._time.end : Date.now(),
+      onClose(selectedDates) {
+        if (startFlatpickr.selectedDates[0] > selectedDates[0]) {
+          startFlatpickr.setDate(selectedDates[0]);
+        }
+      }
     });
 
     this.getElement().querySelectorAll(`.event__input--time`).forEach((node) => {
@@ -55,7 +66,7 @@ class EventEdit extends AbstractComponent {
     this.getElement().querySelector(`.event__type-list`)
       .addEventListener(`click`, (evt) => this._onEventTypeListClick(evt));
     this.getElement().querySelector(`input.event__input--destination`)
-      .addEventListener(`keydown`, (evt) => this._onInputDestinationKeysDown(evt));
+      .addEventListener(`input`, (evt) => this._onDestinationInput(evt));
   }
 
   _onEventTypeListClick(evt) {
@@ -76,16 +87,87 @@ class EventEdit extends AbstractComponent {
     const eventInputDestination = this.getElement().querySelector(`input.event__input--destination`);
     eventInputDestination.value = ``;
 
-    const oldDatalist = this.getElement().querySelector(`datalist#destination-list-1`);
+    const oldDataList = this.getElement().querySelector(`datalist#destination-list-1`);
     const newDataList = createElement(this._getDataListTemplate());
 
-    oldDatalist.parentNode.replaceChild(newDataList, oldDatalist);
+    oldDataList.parentNode.replaceChild(newDataList, oldDataList);
     eventInputDestination.placeholder = newDataList.options[0].value;
   }
 
-  //  Запретить ввод точки назначения согласно ТЗ
-  _onInputDestinationKeysDown(evt) {
+  _onDestinationInput(evt) {
     evt.preventDefault();
+
+    const target = evt.currentTarget;
+    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
+
+    if (!new Set([...eventsData.destination.cities,
+      ...eventsData.destination.sights,
+      ...eventsData.destination.eatingPoints,
+      ...eventsData.destination.checkinPoints]).has(target.value)) {
+
+      detailsSectionNode.style.display = `none`;
+      return;
+    } else {
+      detailsSectionNode.style.display = ``;
+    }
+
+
+    this._destination = target.value;
+
+
+    const destinationDescriptionNode = detailsSectionNode.querySelector(`.event__destination-description`);
+    this._description = shuffle(eventsData.descriptions)
+      .slice(0, getRandomNumber(eventConfig.descriptions.minAmount, eventConfig.descriptions.maxAmount))
+      .join(`. `);
+    destinationDescriptionNode.textContent = this._description;
+
+
+    const eventPriceNode = this.getElement().querySelector(`.event__input--price`);
+    this._price = getRandomNumber(eventConfig.price.min, eventConfig.price.max);
+    eventPriceNode.value = this._price;
+
+
+    this._offers = shuffle(eventsData.offerDescriptions)
+      .slice(0, getRandomNumber(eventConfig.offer.minAmount, eventConfig.offer.maxAmount))
+      .map((offerDescription) => getOffer(offerDescription, eventConfig));
+    const offersSectionNode = detailsSectionNode.querySelector(`.event__section--offers`);
+    const oldOffersNode = offersSectionNode.querySelector(`.event__available-offers`);
+    const newOffersNode = createElement(this._getOffersTemplate());
+    if (this._offers.length === 0) {
+      offersSectionNode.style.display = `none`;
+    } else {
+      offersSectionNode.style.display = ``;
+    }
+    offersSectionNode.replaceChild(newOffersNode, oldOffersNode);
+
+
+    this._photos = new Array(getRandomNumber(eventConfig.photos.minAmount, eventConfig.photos.maxAmount))
+      .fill(``)
+      .map(() => eventsData.photosDefaultURL + Math.random());
+    const photosContainerNode = this.getElement().querySelector(`.event__photos-container`);
+    const oldPhotosNode = photosContainerNode.querySelector(`.event__photos-tape`);
+    const newPhotosNode = createElement(this._getPhotosTemplate());
+    photosContainerNode.replaceChild(newPhotosNode, oldPhotosNode);
+  }
+
+  _getPhotosTemplate() {
+    return `<div class="event__photos-tape">
+              ${this._photos.map((photoURL) => `<img class="event__photo" src="${photoURL}" alt="Event photo">`)
+                .join(``)}
+            </div>`;
+  }
+
+  _getOffersTemplate() {
+    return `<div class="event__available-offers">
+      ${this._offers.map((offer, index) => `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" ${offer.isActive ? `checked` : ``}>
+          <label class="event__offer-label" for="event-offer-luggage-${index}">
+            <span class="event__offer-title">${offer.description}</span>
+            +
+            €&nbsp;<span class="event__offer-price">${offer.price}</span>
+          </label>
+        </div>`).join(``)}
+      </div>`;
   }
 
   _getDataListTemplate() {
@@ -196,7 +278,7 @@ class EventEdit extends AbstractComponent {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${capitalizeFirstLetter(this._type)} ${this._isTransportType() ? `to` : `into`}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination}" list="destination-list-1" required>
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination}" list="destination-list-1" required autocomplete="off">
             ${this._getDataListTemplate()}
           </div>
 
@@ -238,19 +320,10 @@ class EventEdit extends AbstractComponent {
 
         <section class="event__details">
 
-          <section class="event__section  event__section--offers">
+          <section class="event__section  event__section--offers" ${(this._offers.length === 0) ? `style="display: none"` : ``}>
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-            <div class="event__available-offers">
-              ${this._offers.map((offer, index) => `<div class="event__offer-selector">
-              <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" ${offer.isActive ? `checked` : ``}>
-                <label class="event__offer-label" for="event-offer-luggage-${index}">
-                  <span class="event__offer-title">${offer.description}</span>
-                  +
-                  €&nbsp;<span class="event__offer-price">${offer.price}</span>
-                </label>
-              </div>`).join(``)}
-            </div>
+            ${this._getOffersTemplate()}
           </section>
 
           <section class="event__section  event__section--destination">
@@ -258,10 +331,7 @@ class EventEdit extends AbstractComponent {
             <p class="event__destination-description">${this._description}</p>
 
             <div class="event__photos-container">
-              <div class="event__photos-tape">
-                ${this._photos.map((photoURL) => `<img class="event__photo" src="${photoURL}" alt="Event photo">`)
-                  .join(``)}
-              </div>
+              ${this._getPhotosTemplate()}
             </div>
           </section>
         </section>

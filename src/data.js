@@ -2,7 +2,6 @@
 import {getRandomNumber, getRandomFlag, getRandomElement, shuffle} from './utils/utils.js';
 import getRandomDestination from './utils/getRandomDestination.js';
 import getRandomEventTime from './utils/getRandomEventTime.js';
-import {eventConfig} from './configs.js';
 
 const eventsData = {
   types: {
@@ -45,7 +44,7 @@ const getEventData = (data, config) => {
     offers: shuffle(data.offerDescriptions)
       .slice(0, getRandomNumber(config.offer.minAmount, config.offer.maxAmount))
       .map((offerDescription) => getOffer(offerDescription, config)),
-    photos: new Array(getRandomNumber(config.photos.minAmount, eventConfig.photos.maxAmount))
+    photos: new Array(getRandomNumber(config.photos.minAmount, config.photos.maxAmount))
       .fill(``)
       .map(() => data.photosDefaultURL + Math.random()),
     isFavorite: getRandomFlag(),
@@ -77,4 +76,4 @@ const getMenuItem = (title, index) => {
 const tripMenu = menuData.titles.map((title, index) => getMenuItem(title, index));
 
 
-export {eventsData, getEventData, tripFilters, tripMenu};
+export {eventsData, getEventData, tripFilters, tripMenu, getOffer};
