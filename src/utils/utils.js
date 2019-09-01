@@ -14,8 +14,10 @@ export const Position = {
 };
 
 // export const Keys = {
-//   ESCAPE: new Set([`Escape`, `Esc`]),
+//   ESCAPE: `Escape`,
+//   ieESC: `Esc`
 // };
+
 
 /**
  * Возвращает случайный число в заданном диапазоне.
@@ -101,4 +103,22 @@ export const unrender = (element) => {
   if (element) {
     element.remove();
   }
+};
+
+/**
+ * Сделать заглавной первую букву слова.
+ *
+ * @param {string} word - слово.
+ * @return {string} - слово с заглавной первой буквой
+ */
+export const capitalizeFirstLetter = (word) => {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+};
+
+export const hideNode = (node) => {
+  node.style.display = `none`;
+};
+
+export const showNode = (node) => {
+  node.style.display = ``;
 };
