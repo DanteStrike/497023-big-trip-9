@@ -10,33 +10,14 @@ class PointController {
     this._data = eventData;
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
-
-    this.init();
   }
 
   init() {
-    this._createNewPointView();
-    render(this._listNode, this._pointView.getElement(), Position.BEFOREEND);
-  }
-
-  _createNewPointView() {
     this._pointView = new Event(this._data);
     this._pointView.getElement().querySelector(`.event__rollup-btn`)
       .addEventListener(`click`, () => this._onPointViewRollupBtnClick());
+    render(this._listNode, this._pointView.getElement(), Position.BEFOREEND);
   }
-
-  // _updatePointData(data) {
-  //   let newData = Object.assign({}, this._data);
-  //   for (const key in data) {
-  //     if (newData.hasOwnProperty(key)) {
-  //       newData[key] = data[key];
-  //     }
-  //   }
-
-  //   //  Обновить данные в коллекции карточек "листа"
-  //   this._onDataChange(this._data, newData);
-  //   //  this._data = newData;
-  // }
 
   _onPointViewRollupBtnClick() {
     this._pointEdit = new EditEvent(this._data);
@@ -46,7 +27,6 @@ class PointController {
     const onPointEditRollupBtnClick = () => {
       this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
       document.removeEventListener(`keydown`, this._onEscKeyDown);
-      // this._pointEdit = null;
     };
 
     this._pointEdit.getElement().querySelector(`.event__rollup-btn`)
@@ -76,12 +56,6 @@ class PointController {
       };
 
       this._onDataChange(this._data, entry);
-
-      // this._updatePointData(entry);
-      // this._createNewPointView();
-
-      // this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
-      // this._pointEdit = null;
     };
 
     this._onEscKeyDown = (evt) => {

@@ -37,6 +37,7 @@ class TripController {
 
   _renderEvent(event, listNode) {
     const newPointController = new PointController(listNode, event, this._onChangeView, this._onDataChange);
+    newPointController.init();
 
     this._subscriptions.push(newPointController.setDefaultView.bind(newPointController));
   }
@@ -47,6 +48,8 @@ class TripController {
 
   _onDataChange(oldData, newData) {
     this._events[this._events.findIndex((task) => task === oldData)] = newData;
+
+    //  Согласно ТЗ обновленные данные должны соответствовать текущей сортировке
     this._sortEvents();
   }
 
@@ -60,6 +63,7 @@ class TripController {
     this._sortEvents();
   }
 
+  //  Отсортировать точки, согласно текущей сортировке (this._sortStatus)
   _sortEvents() {
     // Закрыть все карточки и убрать обработчики нажатия кнопки ESC
     this._onChangeView();

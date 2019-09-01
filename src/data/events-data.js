@@ -52,7 +52,7 @@ const getEventData = () => {
     isFavorite: getRandomFlag(),
 
     //  Каждому пункту назначения соответствует свое описание, цена, предложения, фотографии
-    //  Все данные по точкам назначения сгенерырованы в destinationsData
+    //  данные сгенерырованы в destinationsData
     description: destinationsData[randomDestination].description,
     price: destinationsData[randomDestination].price,
     offers: shallowCopyObjsArray(destinationsData[randomDestination].offers),

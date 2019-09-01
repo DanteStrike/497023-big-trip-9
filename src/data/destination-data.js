@@ -11,7 +11,7 @@ const sentences = [`Lorem ipsum dolor sit amet, consectetur adipiscing elit`, `C
 const offerDescriptions = [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`];
 const photosDefaultURL = `http://picsum.photos/300/150?r=`;
 
-//  Предложение генерируется отдельно для удобства
+//  Сгенерировать 1-но предложение
 const getOffer = (offerDescription, config) => ({
   description: offerDescription,
   price: getRandomNumber(config.offer.price.min, config.offer.price.max),
