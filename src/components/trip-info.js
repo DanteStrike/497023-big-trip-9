@@ -1,7 +1,5 @@
-import {eventsData} from '../data.js';
-// import {createElement} from '../utils/utils.js';
 import AbstractComponent from './abstract.js';
-
+import {destinationTypes} from '../data/events-data.js';
 
 class TripInfo extends AbstractComponent {
   constructor(eventsList) {
@@ -18,7 +16,7 @@ class TripInfo extends AbstractComponent {
 
   _getCities(eventsList) {
     return eventsList.reduce((accum, event) => {
-      if (eventsData.destination.cities.has(event.destination)) {
+      if (destinationTypes.cities.has(event.destination)) {
         accum.push(event.destination);
       }
 
