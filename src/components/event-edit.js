@@ -67,6 +67,8 @@ class EventEdit extends AbstractComponent {
       .addEventListener(`click`, (evt) => this._onEventTypeListClick(evt));
     this.getElement().querySelector(`input.event__input--destination`)
       .addEventListener(`input`, (evt) => this._onDestinationInput(evt));
+    this.getElement().querySelector(`.event__section--offers`)
+      .addEventListener(`click`, (evt) => this._onOffersClick(evt));
   }
 
   _onEventTypeListClick(evt) {
@@ -88,8 +90,8 @@ class EventEdit extends AbstractComponent {
     eventInputDestination.value = ``;
     const detailsSectionNode = this.getElement().querySelector(`.event__details`);
     hideNode(detailsSectionNode);
-    const eventPriceNode = this.getElement().querySelector(`.event__input--price`);
-    eventPriceNode.value = ``;
+    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
+    eventPriceInput.value = ``;
     const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
     eventFavoriteInput.checked = false;
 
@@ -106,12 +108,12 @@ class EventEdit extends AbstractComponent {
     const target = evt.currentTarget;
     const newDestination = target.value;
     const detailsSectionNode = this.getElement().querySelector(`.event__details`);
-    const eventPriceNode = this.getElement().querySelector(`.event__input--price`);
+    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
     const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
 
     if (!(newDestination in destinationsData)) {
       hideNode(detailsSectionNode);
-      eventPriceNode.value = ``;
+      eventPriceInput.value = ``;
       eventFavoriteInput.checked = false;
       return;
     } else {
@@ -121,7 +123,7 @@ class EventEdit extends AbstractComponent {
     const destinationDescriptionNode = detailsSectionNode.querySelector(`.event__destination-description`);
     destinationDescriptionNode.textContent = destinationsData[newDestination].description;
 
-    eventPriceNode.value = destinationsData[newDestination].price;
+    eventPriceInput.value = destinationsData[newDestination].price;
 
     const offersSectionNode = detailsSectionNode.querySelector(`.event__section--offers`);
     const oldOffersNode = offersSectionNode.querySelector(`.event__available-offers`);
@@ -139,6 +141,18 @@ class EventEdit extends AbstractComponent {
     photosContainerNode.replaceChild(newPhotosNode, oldPhotosNode);
   }
 
+  _onOffersClick(evt) {
+    const target = evt.target;
+
+    if (target.tagName !== `INPUT`) {
+      return;
+    }
+
+    const offer = target;
+    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
+    eventPriceInput.value = (offer.checked) ? Number(eventPriceInput.value) + Number(offer.value) : Number(eventPriceInput.value) - Number(offer.value);
+  }
+
   _getPhotosTemplate(photos) {
     return `<div class="event__photos-tape">
               ${photos.map((photoURL) => `<img class="event__photo" src="${photoURL}" alt="Event photo">`)
@@ -149,7 +163,7 @@ class EventEdit extends AbstractComponent {
   _getOffersTemplate(offers) {
     return `<div class="event__available-offers">
       ${offers.map((offer, index) => `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" ${offer.isActive ? `checked` : ``}>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" value="${offer.price}" ${offer.isActive ? `checked` : ``}>
           <label class="event__offer-label" for="event-offer-luggage-${index}">
             <span class="event__offer-title">${offer.description}</span>
             +
