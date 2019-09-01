@@ -1,30 +1,26 @@
 import {getRandomElement} from './utils.js';
 
 // Подобрать приблизительно правдоподобную точку назначения, согласно типу события.
-const getRandomDestination = (type, data) => {
-  switch (type) {
-    case `Flight`:
-      return getRandomElement(data.destination.cities);
+const getRandomDestination = (eventType, destinationsTypes) => {
+  switch (eventType) {
+    case `flight`:
+      return getRandomElement(destinationsTypes.cities);
 
-    case `Check-in`:
-      return getRandomElement(data.destination.checkinPoints);
+    case `check-in`:
+      return getRandomElement(destinationsTypes.checkinPoints);
 
-    case `Sightseeing`:
-      return getRandomElement(data.destination.sights);
+    case `sightseeing`:
+      return getRandomElement(destinationsTypes.sights);
 
-    case `Restaurant`:
-      return getRandomElement(data.destination.eatingPoints);
+    case `restaurant`:
+      return getRandomElement(destinationsTypes.eatingPoints);
 
     default:
-      if (data.types.transport.has(type)) {
-        return getRandomElement(new Set([...data.destination.cities,
-          ...data.destination.sights,
-          ...data.destination.eatingPoints,
-          ...data.destination.checkinPoints]));
-      }
+      return getRandomElement(new Set([...destinationsTypes.cities,
+        ...destinationsTypes.sights,
+        ...destinationsTypes.eatingPoints,
+        ...destinationsTypes.checkinPoints]));
   }
-
-  return null;
 };
 
 
