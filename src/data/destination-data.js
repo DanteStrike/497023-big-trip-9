@@ -1,4 +1,4 @@
-import {shuffle, getRandomNumber, getRandomFlag} from '../utils/utils.js';
+import {shuffle, getRandomNumber} from '../utils/utils.js';
 import {destinationConfig} from '../configs.js';
 
 //  Дано согласно заданию
@@ -15,7 +15,7 @@ const photosDefaultURL = `http://picsum.photos/300/150?r=`;
 const getOffer = (offerDescription, config) => ({
   description: offerDescription,
   price: getRandomNumber(config.offer.price.min, config.offer.price.max),
-  isActive: getRandomFlag()
+  isActive: false
 });
 
 //  Сгенерировать мок-данные для каждого пункта назначения.

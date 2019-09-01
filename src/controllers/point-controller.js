@@ -1,6 +1,7 @@
 import Event from '../components/event.js';
 import EditEvent from '../components/event-edit.js';
 import {render, Position} from '../utils/utils.js';
+import {destinationsData} from '../data/destination-data.js';
 
 
 class PointController {
@@ -53,20 +54,24 @@ class PointController {
 
     const onPointEditFormSubmit = (evt) => {
       evt.preventDefault();
-      const formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
 
+      const formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
+      const newDestination = formData.get(`event-destination`);
       const entry = {
         type: formData.get(`event-type`),
-        destination: formData.get(`event-destination`),
+        destination: newDestination,
+        description: destinationsData[newDestination].description,
         time: {
           start: new Date(formData.get(`event-start-time`)).valueOf(),
           end: new Date(formData.get(`event-end-time`)).valueOf()
         },
-        offers: this._data.offers.map((offer, index) => {
-          offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
-          return offer;
-        }),
+        offers: destinationsData[newDestination].offers.slice()
+          .map((offer, index) => {
+            offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
+            return offer;
+          }),
         price: formData.get(`event-price`),
+        photos: destinationsData[newDestination].photos,
         isFavorite: formData.get(`event-favorite`) ? true : false
       };
 

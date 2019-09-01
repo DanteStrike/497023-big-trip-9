@@ -1,5 +1,5 @@
 import {TimeValue, capitalizeFirstLetter} from '../utils/utils.js';
-import {eventsData} from '../data.js';
+import {eventTypes} from '../data/events-data';
 import AbstractComponent from './abstract.js';
 
 
@@ -23,7 +23,10 @@ class Event extends AbstractComponent {
       }};
     this._offers = offers;
     this._price = price;
-    this._isTransportType = eventsData.types.transport.has(this._type);
+  }
+
+  _isTransferType() {
+    return eventTypes.transfer.has(this._type);
   }
 
   _getTemplate() {
@@ -32,7 +35,7 @@ class Event extends AbstractComponent {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${capitalizeFirstLetter(this._type)} ${this._isTransportType ? `to` : `into`} ${this._destination}</h3>
+        <h3 class="event__title">${capitalizeFirstLetter(this._type)} ${this._isTransferType() ? `to` : `into`} ${this._destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">

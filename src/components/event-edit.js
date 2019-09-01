@@ -1,7 +1,7 @@
-import {eventsData, getOffer} from '../data.js';
-import {eventConfig} from '../configs';
 import AbstractComponent from './abstract.js';
-import {capitalizeFirstLetter, createElement, getRandomNumber, shuffle} from '../utils/utils.js';
+import {capitalizeFirstLetter, createElement, hideNode, showNode} from '../utils/utils.js';
+import {destinationsData} from '../data/destination-data.js';
+import {eventTypes, destinationTypes} from '../data/events-data';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -24,8 +24,8 @@ class EventEdit extends AbstractComponent {
     this._hangHandlers();
   }
 
-  _isTransportType() {
-    return eventsData.types.transport.has(this._type);
+  _isTransferType() {
+    return eventTypes.transfer.has(this._type);
   }
 
   _initFlatpickr() {
@@ -76,90 +76,79 @@ class EventEdit extends AbstractComponent {
       return;
     }
 
-    this._type = target.value;
+    const newType = target.value;
 
     const eventIconImg = this.getElement().querySelector(`img.event__type-icon`);
-    eventIconImg.src = `${eventIconImg.baseURI}img/icons/${this._type.toLowerCase()}.png`;
+    eventIconImg.src = `${eventIconImg.baseURI}img/icons/${newType.toLowerCase()}.png`;
 
     const eventTypeOutput = this.getElement().querySelector(`label.event__type-output`);
-    eventTypeOutput.textContent = `${capitalizeFirstLetter(this._type)} ${this._isTransportType() ? `to` : `into`}`;
+    eventTypeOutput.textContent = `${capitalizeFirstLetter(newType)} ${eventTypes.transfer.has(newType) ? `to` : `in`}`;
 
     const eventInputDestination = this.getElement().querySelector(`input.event__input--destination`);
     eventInputDestination.value = ``;
+    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
+    hideNode(detailsSectionNode);
+    const eventPriceNode = this.getElement().querySelector(`.event__input--price`);
+    eventPriceNode.value = ``;
+    const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
+    eventFavoriteInput.checked = false;
 
-    const oldDataList = this.getElement().querySelector(`datalist#destination-list-1`);
-    const newDataList = createElement(this._getDataListTemplate());
+    const dataListContainer = this.getElement().querySelector(`.event__field-group--destination`);
+    const oldDataList = dataListContainer.querySelector(`datalist#destination-list-1`);
+    const newDataList = createElement(this._getDataListTemplate(newType));
 
-    oldDataList.parentNode.replaceChild(newDataList, oldDataList);
-    eventInputDestination.placeholder = newDataList.options[0].value;
+    dataListContainer.replaceChild(newDataList, oldDataList);
   }
 
   _onDestinationInput(evt) {
     evt.preventDefault();
 
     const target = evt.currentTarget;
+    const newDestination = target.value;
     const detailsSectionNode = this.getElement().querySelector(`.event__details`);
+    const eventPriceNode = this.getElement().querySelector(`.event__input--price`);
+    const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
 
-    if (!new Set([...eventsData.destination.cities,
-      ...eventsData.destination.sights,
-      ...eventsData.destination.eatingPoints,
-      ...eventsData.destination.checkinPoints]).has(target.value)) {
-
-      detailsSectionNode.style.display = `none`;
+    if (!(newDestination in destinationsData)) {
+      hideNode(detailsSectionNode);
+      eventPriceNode.value = ``;
+      eventFavoriteInput.checked = false;
       return;
     } else {
-      detailsSectionNode.style.display = ``;
+      showNode(detailsSectionNode);
     }
 
-
-    this._destination = target.value;
-
-
     const destinationDescriptionNode = detailsSectionNode.querySelector(`.event__destination-description`);
-    this._description = shuffle(eventsData.descriptions)
-      .slice(0, getRandomNumber(eventConfig.descriptions.minAmount, eventConfig.descriptions.maxAmount))
-      .join(`. `);
-    destinationDescriptionNode.textContent = this._description;
+    destinationDescriptionNode.textContent = destinationsData[newDestination].description;
 
+    eventPriceNode.value = destinationsData[newDestination].price;
 
-    const eventPriceNode = this.getElement().querySelector(`.event__input--price`);
-    this._price = getRandomNumber(eventConfig.price.min, eventConfig.price.max);
-    eventPriceNode.value = this._price;
-
-
-    this._offers = shuffle(eventsData.offerDescriptions)
-      .slice(0, getRandomNumber(eventConfig.offer.minAmount, eventConfig.offer.maxAmount))
-      .map((offerDescription) => getOffer(offerDescription, eventConfig));
     const offersSectionNode = detailsSectionNode.querySelector(`.event__section--offers`);
     const oldOffersNode = offersSectionNode.querySelector(`.event__available-offers`);
-    const newOffersNode = createElement(this._getOffersTemplate());
-    if (this._offers.length === 0) {
-      offersSectionNode.style.display = `none`;
+    const newOffersNode = createElement(this._getOffersTemplate(destinationsData[newDestination].offers));
+    if (destinationsData[newDestination].offers.length === 0) {
+      hideNode(offersSectionNode);
     } else {
-      offersSectionNode.style.display = ``;
+      showNode(offersSectionNode);
     }
     offersSectionNode.replaceChild(newOffersNode, oldOffersNode);
 
-
-    this._photos = new Array(getRandomNumber(eventConfig.photos.minAmount, eventConfig.photos.maxAmount))
-      .fill(``)
-      .map(() => eventsData.photosDefaultURL + Math.random());
     const photosContainerNode = this.getElement().querySelector(`.event__photos-container`);
     const oldPhotosNode = photosContainerNode.querySelector(`.event__photos-tape`);
-    const newPhotosNode = createElement(this._getPhotosTemplate());
+    const newPhotosNode = createElement(this._getPhotosTemplate(destinationsData[newDestination].photos));
     photosContainerNode.replaceChild(newPhotosNode, oldPhotosNode);
   }
 
-  _getPhotosTemplate() {
+  _getPhotosTemplate(photos) {
     return `<div class="event__photos-tape">
-              ${this._photos.map((photoURL) => `<img class="event__photo" src="${photoURL}" alt="Event photo">`)
+              ${photos.map((photoURL) => `<img class="event__photo" src="${photoURL}" alt="Event photo">`)
                 .join(``)}
             </div>`;
   }
 
-  _getOffersTemplate() {
+  _getOffersTemplate(offers) {
     return `<div class="event__available-offers">
-      ${this._offers.map((offer, index) => `<div class="event__offer-selector">
+      ${offers.map((offer, index) => `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" ${offer.isActive ? `checked` : ``}>
           <label class="event__offer-label" for="event-offer-luggage-${index}">
             <span class="event__offer-title">${offer.description}</span>
@@ -170,31 +159,31 @@ class EventEdit extends AbstractComponent {
       </div>`;
   }
 
-  _getDataListTemplate() {
-    let options = ``;
+  _getDataListTemplate(type) {
+    let options = [];
 
-    switch (this._type) {
+    switch (type) {
       case `flight`:
-        options = Array.from(eventsData.destination.cities);
+        options = Array.from(destinationTypes.cities);
         break;
 
       case `check-in`:
-        options = Array.from(eventsData.destination.checkinPoints);
+        options = Array.from(destinationTypes.checkinPoints);
         break;
 
       case `sightseeing`:
-        options = Array.from(eventsData.destination.sights);
+        options = Array.from(destinationTypes.sights);
         break;
 
       case `restaurant`:
-        options = Array.from(eventsData.destination.eatingPoints);
+        options = Array.from(destinationTypes.eatingPoints);
         break;
 
       default:
-        options = Array.from(new Set([...eventsData.destination.cities,
-          ...eventsData.destination.sights,
-          ...eventsData.destination.eatingPoints,
-          ...eventsData.destination.checkinPoints]));
+        options = Array.from(new Set([...destinationTypes.cities,
+          ...destinationTypes.sights,
+          ...destinationTypes.eatingPoints,
+          ...destinationTypes.checkinPoints]));
     }
 
     return `<datalist id="destination-list-1">
@@ -276,10 +265,10 @@ class EventEdit extends AbstractComponent {
 
           <div class="event__field-group  event__field-group--destination">
             <label class="event__label  event__type-output" for="event-destination-1">
-              ${capitalizeFirstLetter(this._type)} ${this._isTransportType() ? `to` : `into`}
+              ${capitalizeFirstLetter(this._type)} ${this._isTransferType() ? `to` : `into`}
             </label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination}" list="destination-list-1" required autocomplete="off">
-            ${this._getDataListTemplate()}
+            ${this._getDataListTemplate(this._type)}
           </div>
 
           <div class="event__field-group  event__field-group--time">
@@ -323,7 +312,7 @@ class EventEdit extends AbstractComponent {
           <section class="event__section  event__section--offers" ${(this._offers.length === 0) ? `style="display: none"` : ``}>
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-            ${this._getOffersTemplate()}
+            ${this._getOffersTemplate(this._offers)}
           </section>
 
           <section class="event__section  event__section--destination">
@@ -331,7 +320,7 @@ class EventEdit extends AbstractComponent {
             <p class="event__destination-description">${this._description}</p>
 
             <div class="event__photos-container">
-              ${this._getPhotosTemplate()}
+              ${this._getPhotosTemplate(this._photos)}
             </div>
           </section>
         </section>

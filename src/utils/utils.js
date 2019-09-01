@@ -114,3 +114,11 @@ export const unrender = (element) => {
 export const capitalizeFirstLetter = (word) => {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 };
+
+export const hideNode = (node) => {
+  node.style.display = `none`;
+};
+
+export const showNode = (node) => {
+  node.style.display = ``;
+};

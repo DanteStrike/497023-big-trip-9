@@ -18,31 +18,31 @@ const destinationTypes = {
 };
 
 // Подобрать приблизительно правдоподобную точку назначения согласно типу события.
-const getRandomDestination = (eventType, destinationsTypes) => {
+const getRandomDestination = (eventType) => {
   switch (eventType) {
     case `flight`:
-      return getRandomElement(destinationsTypes.cities);
+      return getRandomElement(destinationTypes.cities);
 
     case `check-in`:
-      return getRandomElement(destinationsTypes.checkinPoints);
+      return getRandomElement(destinationTypes.checkinPoints);
 
     case `sightseeing`:
-      return getRandomElement(destinationsTypes.sights);
+      return getRandomElement(destinationTypes.sights);
 
     case `restaurant`:
-      return getRandomElement(destinationsTypes.eatingPoints);
+      return getRandomElement(destinationTypes.eatingPoints);
 
     default:
-      return getRandomElement(new Set([...destinationsTypes.cities,
-        ...destinationsTypes.sights,
-        ...destinationsTypes.eatingPoints,
-        ...destinationsTypes.checkinPoints]));
+      return getRandomElement(new Set([...destinationTypes.cities,
+        ...destinationTypes.sights,
+        ...destinationTypes.eatingPoints,
+        ...destinationTypes.checkinPoints]));
   }
 };
 
 //  Сгенерировать мок для 1-ой точки
 const getEventData = () => {
-  const randomType = getRandomElement(new Set([...eventTypes.transport, ...eventTypes.arrival]));
+  const randomType = getRandomElement(new Set([...eventTypes.transfer, ...eventTypes.activity]));
   const randomDestination = getRandomDestination(randomType, destinationTypes);
 
   return {
@@ -61,4 +61,4 @@ const getEventData = () => {
 };
 
 
-export {getEventData, eventTypes};
+export {getEventData, eventTypes, destinationTypes};
