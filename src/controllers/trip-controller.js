@@ -11,6 +11,7 @@ class TripController {
     this._events = data;
     this._board = new TripBoard();
     this._sort = new Sort();
+    this._sortStatus = `default`;
     this._noEvents = new NoEvents();
 
     this._subscriptions = [];
@@ -46,6 +47,7 @@ class TripController {
 
   _onDataChange(oldData, newData) {
     this._events[this._events.findIndex((task) => task === oldData)] = newData;
+    this._sortEvents();
   }
 
   _onSortBtnClick(evt) {
@@ -54,6 +56,11 @@ class TripController {
       return;
     }
 
+    this._sortStatus = target.dataset ? target.dataset.sortType : `default`;
+    this._sortEvents();
+  }
+
+  _sortEvents() {
     // Закрыть все карточки и убрать обработчики нажатия кнопки ESC
     this._onChangeView();
     // Обнулить всех "подписчиков", не допускать утечку памяти
@@ -61,7 +68,7 @@ class TripController {
     this._board.getElement().innerHTML = ``;
     const newTripDay = new TripDay();
 
-    switch (target.dataset.sortType) {
+    switch (this._sortStatus) {
       case `time`:
         const sortedByEventDuration = this._events.sort((a, b) => (b.time.end - b.time.start) - (a.time.end - a.time.start));
         render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);

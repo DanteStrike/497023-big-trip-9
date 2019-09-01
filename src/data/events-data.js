@@ -1,6 +1,6 @@
 import {destinationsData} from './destination-data.js';
 import {eventConfig} from '../configs.js';
-import {getRandomFlag, getRandomElement} from '../utils/utils.js';
+import {getRandomFlag, getRandomElement, shallowCopyObjsArray} from '../utils/utils.js';
 import getRandomEventTime from '../utils/getRandomEventTime.js';
 
 //  Согласно ТЗ существует две группы типов точек (transfer и activity)
@@ -55,7 +55,7 @@ const getEventData = () => {
     //  Все данные по точкам назначения сгенерырованы в destinationsData
     description: destinationsData[randomDestination].description,
     price: destinationsData[randomDestination].price,
-    offers: destinationsData[randomDestination].offers,
+    offers: shallowCopyObjsArray(destinationsData[randomDestination].offers),
     photos: destinationsData[randomDestination].photos
   };
 };

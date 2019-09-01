@@ -115,10 +115,28 @@ export const capitalizeFirstLetter = (word) => {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 };
 
+/**
+ * Скрыть node.
+ *
+ * @param {Node} node - необходимый node.
+ */
 export const hideNode = (node) => {
   node.style.display = `none`;
 };
 
+/**
+ * Показать node.
+ *
+ * @param {Node} node - необходимый node.
+ */
 export const showNode = (node) => {
   node.style.display = ``;
 };
+
+/**
+ * Сделать полную копию массива с объектами, вложенность которых не превышает 1.
+ *
+ * @param {array} source - исходный массив с объектами.
+ * @return {array} - копия исходного массива.
+ */
+export const shallowCopyObjsArray = (source) => source.map((obj) => Object.assign({}, obj));

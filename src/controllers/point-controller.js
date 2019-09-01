@@ -1,6 +1,6 @@
 import Event from '../components/event.js';
 import EditEvent from '../components/event-edit.js';
-import {render, Position} from '../utils/utils.js';
+import {render, Position, shallowCopyObjsArray} from '../utils/utils.js';
 import {destinationsData} from '../data/destination-data.js';
 
 
@@ -25,18 +25,18 @@ class PointController {
       .addEventListener(`click`, () => this._onPointViewRollupBtnClick());
   }
 
-  _updatePointData(data) {
-    let newData = Object.assign({}, this._data);
-    for (const key in data) {
-      if (newData.hasOwnProperty(key)) {
-        newData[key] = data[key];
-      }
-    }
+  // _updatePointData(data) {
+  //   let newData = Object.assign({}, this._data);
+  //   for (const key in data) {
+  //     if (newData.hasOwnProperty(key)) {
+  //       newData[key] = data[key];
+  //     }
+  //   }
 
-    //  Обновить данные в коллекции карточек "листа"
-    this._onDataChange(this._data, newData);
-    this._data = newData;
-  }
+  //   //  Обновить данные в коллекции карточек "листа"
+  //   this._onDataChange(this._data, newData);
+  //   //  this._data = newData;
+  // }
 
   _onPointViewRollupBtnClick() {
     this._pointEdit = new EditEvent(this._data);
@@ -46,7 +46,7 @@ class PointController {
     const onPointEditRollupBtnClick = () => {
       this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
       document.removeEventListener(`keydown`, this._onEscKeyDown);
-      this._pointEdit = null;
+      // this._pointEdit = null;
     };
 
     this._pointEdit.getElement().querySelector(`.event__rollup-btn`)
@@ -65,7 +65,7 @@ class PointController {
           start: new Date(formData.get(`event-start-time`)).valueOf(),
           end: new Date(formData.get(`event-end-time`)).valueOf()
         },
-        offers: destinationsData[newDestination].offers.slice()
+        offers: shallowCopyObjsArray(destinationsData[newDestination].offers)
           .map((offer, index) => {
             offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
             return offer;
@@ -75,12 +75,13 @@ class PointController {
         isFavorite: formData.get(`event-favorite`) ? true : false
       };
 
-      // Перерисовать только текущую карточку путем создания нового PointView и подмены replaceChild. Не требуется перерисовывать всю "доску".
-      this._updatePointData(entry);
-      this._createNewPointView();
+      this._onDataChange(this._data, entry);
 
-      this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
-      this._pointEdit = null;
+      // this._updatePointData(entry);
+      // this._createNewPointView();
+
+      // this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
+      // this._pointEdit = null;
     };
 
     this._onEscKeyDown = (evt) => {
