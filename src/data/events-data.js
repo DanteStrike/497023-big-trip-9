@@ -5,7 +5,7 @@ import {eventConfig} from '../configs.js';
 
 const eventsData = {
   types: {
-    transfer: new Set([`Taxi`, `Bus`, `Train`, `Ship`, `transfer`, `Drive`, `Flight`]),
+    transfer: new Set([`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`]),
     activity: new Set([`Check-in`, `Sightseeing`, `Restaurant`])
   },
   destination: {

@@ -10,9 +10,11 @@ class TripController {
     this._container = container;
     this._events = data;
     this._board = new TripBoard();
-    this._sort = new Sort();
-    this._sortStatus = `default`;
     this._noEvents = new NoEvents();
+    this._sort = new Sort();
+
+    //  Тип текущей сортировки. Сортировка при изменении данных должна сохроняться.
+    this._sortStatus = `default`;
 
     this._subscriptions = [];
     this._onChangeView = this._onChangeView.bind(this);
@@ -63,7 +65,7 @@ class TripController {
     this._sortEvents();
   }
 
-  //  Отсортировать точки, согласно текущей сортировке (this._sortStatus)
+  //  Отсортировать точки согласно текущей сортировке (this._sortStatus)
   _sortEvents() {
     // Закрыть все карточки и убрать обработчики нажатия кнопки ESC
     this._onChangeView();

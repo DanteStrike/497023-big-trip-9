@@ -1,5 +1,6 @@
 import {eventsData} from './events-data.js';
 
+// Получит с сервера варианты пунктов назначения (для Datalist формы редактирования)
 const getNewDatalistOptions = (type) => {
   let options = [];
 

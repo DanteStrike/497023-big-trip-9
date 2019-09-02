@@ -10,6 +10,7 @@ class PointController {
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
 
+    //  Обратная связь с формой редактирования при изменении пункта назначения
     this._tempDestinationData = null;
     this._onDestinationDataFromServerReceive = this._onDestinationDataFromServerReceive.bind(this);
   }
@@ -42,7 +43,11 @@ class PointController {
       evt.preventDefault();
 
       const formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
+
+      //  Если пользователь выбрал и получил данные новой точки назначения с сервера,
+      //  изменить описание, предложение и фотографии текущей точки.
       const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
+
       const entry = {
         type: formData.get(`event-type`),
         destination: formData.get(`event-destination`),

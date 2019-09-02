@@ -22,6 +22,7 @@ class EventEdit extends AbstractComponent {
     this._photos = photos;
     this._isFavorite = isFavorite;
 
+    //  Передать контроллеру информацию, что было обращение к серверу за данными
     this._onDestinationDataFromServerReceive = onDestinationDataFromServerReceive;
 
     this._initFlatpickr();
@@ -77,12 +78,14 @@ class EventEdit extends AbstractComponent {
       .addEventListener(`click`, (evt) => this._onOffersClick(evt));
   }
 
+
   _getDestinationDataFromServer(destination) {
     const newData = getNewDestinationData(destination);
-    this._onDataFromServerReceive(newData);
+    this._onDestinationDataFromServerReceive(newData);
     return newData;
   }
 
+  //  Сбросить информацию о точке
   _resetEventInfo() {
     const detailsSectionNode = this.getElement().querySelector(`.event__details`);
     const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
@@ -95,6 +98,7 @@ class EventEdit extends AbstractComponent {
     eventFavoriteInput.checked = false;
   }
 
+  //  При изменении типа точки, изменить доступные варианты выбора пункта назначения
   _onEventTypeListClick(evt) {
     const target = evt.target;
 
@@ -117,17 +121,23 @@ class EventEdit extends AbstractComponent {
     const newDataList = createElement(this._getDataListTemplate(newType, eventsData));
 
     dataListContainer.replaceChild(newDataList, oldDataList);
+
+    const eventTypeToggle = this.getElement().querySelector(`input.event__type-toggle`);
+    eventTypeToggle.checked = false;
   }
 
+  //  При изменении пункта назначения изменить отображение согласно новым данным, поступившим с сервера.
   _onDestinationInput(evt) {
     evt.preventDefault();
 
     const target = evt.currentTarget;
     const newDestination = target.value;
-    const newDataFromServer = this._getDestinationDataFromServer(newDestination);
+
+    //  При смене пункта назначения получить данные с сервера
+    const newDestinationDataFromServer = this._getDestinationDataFromServer(newDestination);
     const detailsSectionNode = this.getElement().querySelector(`.event__details`);
 
-    if (!newDataFromServer) {
+    if (!newDestinationDataFromServer) {
       this._resetEventInfo();
       return;
     } else {
@@ -135,15 +145,15 @@ class EventEdit extends AbstractComponent {
     }
 
     const destinationDescriptionNode = detailsSectionNode.querySelector(`.event__destination-description`);
-    destinationDescriptionNode.textContent = newDataFromServer.description;
+    destinationDescriptionNode.textContent = newDestinationDataFromServer.description;
 
     const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
-    eventPriceInput.value = newDataFromServer.price;
+    eventPriceInput.value = newDestinationDataFromServer.price;
 
     const offersSectionNode = detailsSectionNode.querySelector(`.event__section--offers`);
     const oldOffersNode = offersSectionNode.querySelector(`.event__available-offers`);
-    const newOffersNode = createElement(this._getOffersTemplate(newDataFromServer.offers));
-    if (newDataFromServer.offers.length === 0) {
+    const newOffersNode = createElement(this._getOffersTemplate(newDestinationDataFromServer.offers));
+    if (newDestinationDataFromServer.offers.length === 0) {
       hideNode(offersSectionNode);
     } else {
       showNode(offersSectionNode);
@@ -152,10 +162,11 @@ class EventEdit extends AbstractComponent {
 
     const photosContainerNode = this.getElement().querySelector(`.event__photos-container`);
     const oldPhotosNode = photosContainerNode.querySelector(`.event__photos-tape`);
-    const newPhotosNode = createElement(this._getPhotosTemplate(newDataFromServer.photos));
+    const newPhotosNode = createElement(this._getPhotosTemplate(newDestinationDataFromServer.photos));
     photosContainerNode.replaceChild(newPhotosNode, oldPhotosNode);
   }
 
+  //  Согласно ТЗ пользователь не может вводить сам пункт назначения
   _onDestinationKeyDown(evt) {
     evt.preventDefault();
 
@@ -164,6 +175,7 @@ class EventEdit extends AbstractComponent {
     }
   }
 
+  //  Включение/Отключение предложения должно влиять на цену
   _onOffersClick(evt) {
     const target = evt.target;
 
