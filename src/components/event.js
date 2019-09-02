@@ -1,6 +1,6 @@
-import {TimeValue, capitalizeFirstLetter} from '../utils/utils.js';
-import {eventTypes} from '../data/events-data';
 import AbstractComponent from './abstract.js';
+import {TimeValue, capitalizeFirstLetter} from '../utils/utils.js';
+import {eventsData} from '../data/events-data';
 
 
 class Event extends AbstractComponent {
@@ -26,7 +26,7 @@ class Event extends AbstractComponent {
   }
 
   _isTransferType() {
-    return eventTypes.transfer.has(this._type);
+    return eventsData.types.transfer.has(this._type);
   }
 
   _getTemplate() {

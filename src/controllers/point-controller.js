@@ -1,7 +1,6 @@
 import Event from '../components/event.js';
 import EditEvent from '../components/event-edit.js';
-import {render, Position, shallowCopyObjsArray} from '../utils/utils.js';
-import {destinationsData} from '../data/destination-data.js';
+import {render, Position} from '../utils/utils.js';
 
 
 class PointController {
@@ -10,6 +9,9 @@ class PointController {
     this._data = eventData;
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
+
+    this._tempDestinationData = null;
+    this._onDestinationDataFromServerReceive = this._onDestinationDataFromServerReceive.bind(this);
   }
 
   init() {
@@ -19,8 +21,12 @@ class PointController {
     render(this._listNode, this._pointView.getElement(), Position.BEFOREEND);
   }
 
+  _onDestinationDataFromServerReceive(newDestinationData) {
+    this._tempDestinationData = newDestinationData;
+  }
+
   _onPointViewRollupBtnClick() {
-    this._pointEdit = new EditEvent(this._data);
+    this._pointEdit = new EditEvent(this._data, this._onDestinationDataFromServerReceive);
     this._onChangeView();
     this._listNode.replaceChild(this._pointEdit.getElement(), this._pointView.getElement());
 
@@ -36,22 +42,22 @@ class PointController {
       evt.preventDefault();
 
       const formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
-      const newDestination = formData.get(`event-destination`);
+      const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
       const entry = {
         type: formData.get(`event-type`),
-        destination: newDestination,
-        description: destinationsData[newDestination].description,
+        destination: formData.get(`event-destination`),
+        description: newDestinationData.description,
         time: {
           start: new Date(formData.get(`event-start-time`)).valueOf(),
           end: new Date(formData.get(`event-end-time`)).valueOf()
         },
-        offers: shallowCopyObjsArray(destinationsData[newDestination].offers)
+        offers: newDestinationData.offers
           .map((offer, index) => {
             offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
             return offer;
           }),
         price: formData.get(`event-price`),
-        photos: destinationsData[newDestination].photos,
+        photos: newDestinationData.photos,
         isFavorite: formData.get(`event-favorite`) ? true : false
       };
 

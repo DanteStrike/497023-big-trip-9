@@ -1,7 +1,9 @@
 import AbstractComponent from './abstract.js';
 import {capitalizeFirstLetter, createElement, hideNode, showNode} from '../utils/utils.js';
-import {destinationsData} from '../data/destination-data.js';
-import {eventTypes, destinationTypes} from '../data/events-data';
+import {eventsData} from '../data/events-data';
+import {getNewDestinationData} from '../data/getNewDestinationData.js';
+import {getNewDatalistOptions} from '../data/getNewDatalistOptions.js';
+
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -9,7 +11,7 @@ import 'flatpickr/dist/themes/light.css';
 
 
 class EventEdit extends AbstractComponent {
-  constructor({type, description, destination, time, price, offers, isFavorite, photos}) {
+  constructor({type, description, destination, time, price, offers, isFavorite, photos}, onDestinationDataFromServerReceive) {
     super();
     this._type = type;
     this._destination = destination;
@@ -20,12 +22,14 @@ class EventEdit extends AbstractComponent {
     this._photos = photos;
     this._isFavorite = isFavorite;
 
+    this._onDestinationDataFromServerReceive = onDestinationDataFromServerReceive;
+
     this._initFlatpickr();
     this._hangHandlers();
   }
 
   _isTransferType() {
-    return eventTypes.transfer.has(this._type);
+    return eventsData.types.transfer.has(this._type);
   }
 
   _initFlatpickr() {
@@ -67,8 +71,28 @@ class EventEdit extends AbstractComponent {
       .addEventListener(`click`, (evt) => this._onEventTypeListClick(evt));
     this.getElement().querySelector(`input.event__input--destination`)
       .addEventListener(`input`, (evt) => this._onDestinationInput(evt));
+    this.getElement().querySelector(`input.event__input--destination`)
+      .addEventListener(`keydown`, (evt) => this._onDestinationKeyDown(evt));
     this.getElement().querySelector(`.event__section--offers`)
       .addEventListener(`click`, (evt) => this._onOffersClick(evt));
+  }
+
+  _getDestinationDataFromServer(destination) {
+    const newData = getNewDestinationData(destination);
+    this._onDataFromServerReceive(newData);
+    return newData;
+  }
+
+  _resetEventInfo() {
+    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
+    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
+    const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
+    const eventInputDestination = this.getElement().querySelector(`input.event__input--destination`);
+
+    hideNode(detailsSectionNode);
+    eventInputDestination.value = ``;
+    eventPriceInput.value = ``;
+    eventFavoriteInput.checked = false;
   }
 
   _onEventTypeListClick(evt) {
@@ -84,20 +108,13 @@ class EventEdit extends AbstractComponent {
     eventIconImg.src = `${eventIconImg.baseURI}img/icons/${newType.toLowerCase()}.png`;
 
     const eventTypeOutput = this.getElement().querySelector(`label.event__type-output`);
-    eventTypeOutput.textContent = `${capitalizeFirstLetter(newType)} ${eventTypes.transfer.has(newType) ? `to` : `in`}`;
+    eventTypeOutput.textContent = `${capitalizeFirstLetter(newType)} ${eventsData.types.transfer.has(newType) ? `to` : `in`}`;
 
-    const eventInputDestination = this.getElement().querySelector(`input.event__input--destination`);
-    eventInputDestination.value = ``;
-    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
-    hideNode(detailsSectionNode);
-    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
-    eventPriceInput.value = ``;
-    const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
-    eventFavoriteInput.checked = false;
+    this._resetEventInfo();
 
     const dataListContainer = this.getElement().querySelector(`.event__field-group--destination`);
     const oldDataList = dataListContainer.querySelector(`datalist#destination-list-1`);
-    const newDataList = createElement(this._getDataListTemplate(newType));
+    const newDataList = createElement(this._getDataListTemplate(newType, eventsData));
 
     dataListContainer.replaceChild(newDataList, oldDataList);
   }
@@ -107,28 +124,26 @@ class EventEdit extends AbstractComponent {
 
     const target = evt.currentTarget;
     const newDestination = target.value;
+    const newDataFromServer = this._getDestinationDataFromServer(newDestination);
     const detailsSectionNode = this.getElement().querySelector(`.event__details`);
-    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
-    const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
 
-    if (!(newDestination in destinationsData)) {
-      hideNode(detailsSectionNode);
-      eventPriceInput.value = ``;
-      eventFavoriteInput.checked = false;
+    if (!newDataFromServer) {
+      this._resetEventInfo();
       return;
     } else {
       showNode(detailsSectionNode);
     }
 
     const destinationDescriptionNode = detailsSectionNode.querySelector(`.event__destination-description`);
-    destinationDescriptionNode.textContent = destinationsData[newDestination].description;
+    destinationDescriptionNode.textContent = newDataFromServer.description;
 
-    eventPriceInput.value = destinationsData[newDestination].price;
+    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
+    eventPriceInput.value = newDataFromServer.price;
 
     const offersSectionNode = detailsSectionNode.querySelector(`.event__section--offers`);
     const oldOffersNode = offersSectionNode.querySelector(`.event__available-offers`);
-    const newOffersNode = createElement(this._getOffersTemplate(destinationsData[newDestination].offers));
-    if (destinationsData[newDestination].offers.length === 0) {
+    const newOffersNode = createElement(this._getOffersTemplate(newDataFromServer.offers));
+    if (newDataFromServer.offers.length === 0) {
       hideNode(offersSectionNode);
     } else {
       showNode(offersSectionNode);
@@ -137,8 +152,16 @@ class EventEdit extends AbstractComponent {
 
     const photosContainerNode = this.getElement().querySelector(`.event__photos-container`);
     const oldPhotosNode = photosContainerNode.querySelector(`.event__photos-tape`);
-    const newPhotosNode = createElement(this._getPhotosTemplate(destinationsData[newDestination].photos));
+    const newPhotosNode = createElement(this._getPhotosTemplate(newDataFromServer.photos));
     photosContainerNode.replaceChild(newPhotosNode, oldPhotosNode);
+  }
+
+  _onDestinationKeyDown(evt) {
+    evt.preventDefault();
+
+    if (evt.key === `Backspace` || evt.key === `Delete`) {
+      this._resetEventInfo();
+    }
   }
 
   _onOffersClick(evt) {
@@ -174,32 +197,7 @@ class EventEdit extends AbstractComponent {
   }
 
   _getDataListTemplate(type) {
-    let options = [];
-
-    switch (type) {
-      case `flight`:
-        options = Array.from(destinationTypes.cities);
-        break;
-
-      case `check-in`:
-        options = Array.from(destinationTypes.checkinPoints);
-        break;
-
-      case `sightseeing`:
-        options = Array.from(destinationTypes.sights);
-        break;
-
-      case `restaurant`:
-        options = Array.from(destinationTypes.eatingPoints);
-        break;
-
-      default:
-        options = Array.from(new Set([...destinationTypes.cities,
-          ...destinationTypes.sights,
-          ...destinationTypes.eatingPoints,
-          ...destinationTypes.checkinPoints]));
-    }
-
+    const options = getNewDatalistOptions(type);
     return `<datalist id="destination-list-1">
               ${options.map((option) => `<option value="${option}"></option>`).join(``)}
             </datalist>`.trim();
