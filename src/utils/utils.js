@@ -133,10 +133,10 @@ export const showNode = (node) => {
   node.style.display = ``;
 };
 
-/**
- * Сделать полную копию массива с объектами, вложенность которых не превышает 1.
- *
- * @param {array} source - исходный массив с объектами.
- * @return {array} - копия исходного массива.
- */
-export const shallowCopyObjsArray = (source) => source.map((obj) => Object.assign({}, obj));
+// /**
+//  * Сделать полную копию массива с объектами, вложенность которых не превышает 1.
+//  *
+//  * @param {array} source - исходный массив с объектами.
+//  * @return {array} - копия исходного массива.
+//  */
+// export const shallowCopyObjsArray = (source) => source.map((obj) => Object.assign({}, obj));
