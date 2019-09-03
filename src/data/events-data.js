@@ -1,4 +1,4 @@
-import {getRandomFlag, getRandomElement, getRandomNumber, shuffle} from '../utils/utils.js';
+import {getRandomFlag, getRandomElement, getRandomNumber, shuffle, capitalizeFirstLetter} from '../utils/utils.js';
 import getRandomEventTime from '../utils/getRandomEventTime.js';
 import {eventConfig} from '../configs.js';
 
@@ -57,7 +57,11 @@ const getEventData = (data, config) => {
   const randomType = getRandomElement(new Set([...data.types.transfer, ...data.types.activity]));
 
   return {
-    type: randomType,
+    type: {
+      name: randomType,
+      icon: randomType.toLowerCase(),
+      title: data.types.transfer.has(randomType) ? `${capitalizeFirstLetter(randomType)} to` : `${capitalizeFirstLetter(randomType)} in`
+    },
     destination: getRandomDestination(randomType, data),
     description: shuffle(data.sentences)
       .slice(0, getRandomNumber(config.sentences.minAmount, config.sentences.maxAmount))
