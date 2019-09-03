@@ -1,13 +1,12 @@
+import {getRandomFlag, getRandomElement, getRandomNumber, shuffle} from '../utils/utils.js';
+import getRandomEventTime from '../utils/getRandomEventTime.js';
+import {eventConfig} from '../configs.js';
 
-import {getRandomNumber, getRandomFlag, getRandomElement, shuffle} from './utils/utils.js';
-import getRandomDestination from './utils/getRandomDestination.js';
-import getRandomEventTime from './utils/getRandomEventTime.js';
-import {eventConfig} from './configs.js';
 
 const eventsData = {
   types: {
-    transport: new Set([`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`]),
-    arrival: new Set([`Check-in`, `Sightseeing`, `Restaurant`])
+    transfer: new Set([`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`]),
+    activity: new Set([`Check-in`, `Sightseeing`, `Restaurant`])
   },
   destination: {
     cities: new Set([`Amsterdam`, `Geneva`, `Chamonix`, `France`]),
@@ -15,7 +14,7 @@ const eventsData = {
     eatingPoints: new Set([`Cafe`, `Hotel`, `Motel`]),
     checkinPoints: new Set([`Hotel`, `Motel`])
   },
-  descriptions: [`Lorem ipsum dolor sit amet, consectetur adipiscing elit`, `Cras aliquet varius magna, non porta ligula feugiat eget`,
+  sentences: [`Lorem ipsum dolor sit amet, consectetur adipiscing elit`, `Cras aliquet varius magna, non porta ligula feugiat eget`,
     `Fusce tristique felis at fermentum pharetra`, `Aliquam id orci ut lectus varius viverra`,
     `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante`, `Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum`,
     `Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui`, `Sed sed nisi sed augue convallis suscipit in sed felis`,
@@ -26,19 +25,42 @@ const eventsData = {
   photosDefaultURL: `http://picsum.photos/300/150?r=`
 };
 
+// Подобрать приблизительно правдоподобную точку назначения согласно типу события.
+const getRandomDestination = (type, data) => {
+  switch (type) {
+    case `Flight`:
+      return getRandomElement(data.destination.cities);
+
+    case `Check-in`:
+      return getRandomElement(data.destination.checkinPoints);
+
+    case `Sightseeing`:
+      return getRandomElement(data.destination.sights);
+
+    case `Restaurant`:
+      return getRandomElement(data.destination.eatingPoints);
+
+    default:
+      return getRandomElement(new Set([...data.destination.cities,
+        ...data.destination.sights,
+        ...data.destination.eatingPoints,
+        ...data.destination.checkinPoints]));
+  }
+};
+
 const getOffer = (offerDescription, config) => ({
   description: offerDescription,
   price: getRandomNumber(config.offer.price.min, config.offer.price.max),
   isActive: getRandomFlag()
 });
 const getEventData = (data, config) => {
-  const randomType = getRandomElement(new Set([...data.types.transport, ...data.types.arrival]));
+  const randomType = getRandomElement(new Set([...data.types.transfer, ...data.types.activity]));
 
   return {
     type: randomType,
     destination: getRandomDestination(randomType, data),
-    description: shuffle(data.descriptions)
-      .slice(0, getRandomNumber(config.descriptions.minAmount, config.descriptions.maxAmount))
+    description: shuffle(data.sentences)
+      .slice(0, getRandomNumber(config.sentences.minAmount, config.sentences.maxAmount))
       .join(`. `),
     time: getRandomEventTime(config.periodOfTime.past, config.periodOfTime.future),
     price: getRandomNumber(config.price.min, config.price.max),
@@ -53,28 +75,4 @@ const getEventData = (data, config) => {
 };
 
 
-const filterData = {
-  titles: [`Everything`, `Future`, `Past`]
-};
-const getTripFilter = (title, index) => {
-  return {
-    title,
-    isActive: (index === 0) ? true : false
-  };
-};
-const tripFilters = filterData.titles.map((title, index) => getTripFilter(title, index));
-
-
-const menuData = {
-  titles: [`Table`, `Stats`]
-};
-const getMenuItem = (title, index) => {
-  return {
-    title,
-    isActive: (index === 0) ? true : false
-  };
-};
-const tripMenu = menuData.titles.map((title, index) => getMenuItem(title, index));
-
-
-export {eventsData, getEventData, tripFilters, tripMenu};
+export {getEventData, eventsData};

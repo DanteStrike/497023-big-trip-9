@@ -1,7 +1,5 @@
-import {eventsData} from '../data.js';
-// import {createElement} from '../utils/utils.js';
 import AbstractComponent from './abstract.js';
-
+import {eventsData} from '../data/events-data.js';
 
 class TripInfo extends AbstractComponent {
   constructor(eventsList) {
