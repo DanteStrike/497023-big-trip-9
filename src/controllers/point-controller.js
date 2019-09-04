@@ -1,7 +1,9 @@
 import Event from '../components/event.js';
 import EditEvent from '../components/event-edit.js';
 import {render, Position} from '../utils/utils.js';
-
+import {getNewDestinationData} from '../data/destination-data.js';
+import {getNewDatalistOptions} from '../data/datalist-data.js';
+import {getTypeData} from '../data/events-data.js';
 
 class PointController {
   constructor(container, eventData, onChangeView, onDataChange) {
@@ -12,7 +14,8 @@ class PointController {
 
     //  Обратная связь с формой редактирования при изменении пункта назначения
     this._tempDestinationData = null;
-    this._onDestinationDataFromServerReceive = this._onDestinationDataFromServerReceive.bind(this);
+    this._onDestinationChange = this._onDestinationChange.bind(this);
+    this._onTypeChange = this._onTypeChange.bind(this);
   }
 
   init() {
@@ -22,12 +25,26 @@ class PointController {
     render(this._listNode, this._pointView.getElement(), Position.BEFOREEND);
   }
 
-  _onDestinationDataFromServerReceive(newDestinationData) {
-    this._tempDestinationData = newDestinationData;
+  _onDestinationChange(newDestination) {
+    this._tempDestinationData = getNewDestinationData(newDestination);
+    this._setNewDestinationDetails(this._tempDestinationData);
+  }
+
+  _onTypeChange(newType) {
+    const newTypeData = getTypeData(newType);
+    const newDatalistOptions = getNewDatalistOptions(newType);
+    return {
+      newTypeData,
+      newDatalistOptions
+    };
   }
 
   _onPointViewRollupBtnClick() {
-    this._pointEdit = new EditEvent(this._data, this._onDestinationDataFromServerReceive);
+    const datalistOptions = getNewDatalistOptions(this._data.type.name);
+    this._pointEdit = new EditEvent(this._data, datalistOptions, this._onDestinationChange, this._onTypeChange);
+
+    this._setNewDestinationDetails = this._pointEdit.setNewDestinationDetails.bind(this._pointEdit);
+
     this._onChangeView();
     this._listNode.replaceChild(this._pointEdit.getElement(), this._pointView.getElement());
 
