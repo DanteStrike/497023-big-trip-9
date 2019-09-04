@@ -1,5 +1,5 @@
 import {getRandomFlag, getRandomElement, getRandomNumber, shuffle, capitalizeFirstLetter} from '../utils/utils.js';
-import getRandomOptimalDestination from '../utils/random-optimal-destination';
+import getRandomOptimalDestination from '../utils/random-optimal-destination.js';
 import getRandomEventTime from '../utils/random-event-time.js';
 
 

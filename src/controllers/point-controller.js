@@ -3,7 +3,8 @@ import EditEvent from '../components/event-edit.js';
 import {render, Position} from '../utils/utils.js';
 import {getNewDestinationData} from '../data/destination-data.js';
 import {getNewDatalistOptions} from '../data/datalist-data.js';
-import {getTypeData} from '../data/events-data.js';
+import {getTypeData} from '../data/type-data.js';
+
 
 class PointController {
   constructor(container, eventData, onChangeView, onDataChange) {
