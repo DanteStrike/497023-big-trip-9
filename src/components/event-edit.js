@@ -1,8 +1,5 @@
 import AbstractComponent from './abstract.js';
-import {capitalizeFirstLetter, createElement, hideNode, showNode} from '../utils/utils.js';
-import {eventsData} from '../data/events-data';
-import {getNewDestinationData} from '../data/getNewDestinationData.js';
-import {getNewDatalistOptions} from '../data/getNewDatalistOptions.js';
+import {createElement, hideElement, showElement, formatDateTimeValue} from '../utils/utils.js';
 
 
 import flatpickr from 'flatpickr';
@@ -11,7 +8,7 @@ import 'flatpickr/dist/themes/light.css';
 
 
 class EventEdit extends AbstractComponent {
-  constructor({type, description, destination, time, price, offers, isFavorite, photos}, onDestinationDataFromServerReceive) {
+  constructor({type, description, destination, time, price, offers, isFavorite, photos}, datalistOptions, onDestinationChange, onTypeChange) {
     super();
     this._type = type;
     this._destination = destination;
@@ -21,16 +18,14 @@ class EventEdit extends AbstractComponent {
     this._price = price;
     this._photos = photos;
     this._isFavorite = isFavorite;
+    this._datalistOptions = datalistOptions;
 
     //  Передать контроллеру информацию, что было обращение к серверу за данными
-    this._onDestinationDataFromServerReceive = onDestinationDataFromServerReceive;
+    this._onDestinationChange = onDestinationChange;
+    this._onTypeChange = onTypeChange;
 
     this._initFlatpickr();
     this._hangHandlers();
-  }
-
-  _isTransferType() {
-    return eventsData.types.transfer.has(this._type);
   }
 
   _initFlatpickr() {
@@ -63,7 +58,7 @@ class EventEdit extends AbstractComponent {
     });
 
     this.getElement().querySelectorAll(`.event__input--time`).forEach((node) => {
-      node.style.width = `140px`;
+      node.style.width = `150px`;
     });
   }
 
@@ -78,23 +73,14 @@ class EventEdit extends AbstractComponent {
       .addEventListener(`click`, (evt) => this._onOffersClick(evt));
   }
 
-
-  _getDestinationDataFromServer(destination) {
-    const newData = getNewDestinationData(destination);
-    this._onDestinationDataFromServerReceive(newData);
-    return newData;
-  }
-
   //  Сбросить информацию о точке
   _resetEventInfo() {
-    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
-    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
+    const detailsSectionElement = this.getElement().querySelector(`.event__details`);
     const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
     const eventInputDestination = this.getElement().querySelector(`input.event__input--destination`);
 
-    hideNode(detailsSectionNode);
+    hideElement(detailsSectionElement);
     eventInputDestination.value = ``;
-    eventPriceInput.value = ``;
     eventFavoriteInput.checked = false;
   }
 
@@ -107,22 +93,22 @@ class EventEdit extends AbstractComponent {
     }
 
     const newType = target.value;
+    const {newTypeData, newDatalistOptions} = this._onTypeChange(newType);
 
     const eventIconImg = this.getElement().querySelector(`img.event__type-icon`);
-    eventIconImg.src = `${eventIconImg.baseURI}img/icons/${newType.toLowerCase()}.png`;
-
     const eventTypeOutput = this.getElement().querySelector(`label.event__type-output`);
-    eventTypeOutput.textContent = `${capitalizeFirstLetter(newType)} ${eventsData.types.transfer.has(newType) ? `to` : `in`}`;
-
-    this._resetEventInfo();
+    const eventTypeToggle = this.getElement().querySelector(`input.event__type-toggle`);
 
     const dataListContainer = this.getElement().querySelector(`.event__field-group--destination`);
     const oldDataList = dataListContainer.querySelector(`datalist#destination-list-1`);
-    const newDataList = createElement(this._getDataListTemplate(newType, eventsData));
+    const newDataList = createElement(this._getDataListTemplate(newDatalistOptions));
+
+    eventIconImg.src = `${eventIconImg.baseURI}img/icons/${newTypeData.icon}.png`;
+    eventTypeOutput.textContent = `${newTypeData.title}`;
+
+    this._resetEventInfo();
 
     dataListContainer.replaceChild(newDataList, oldDataList);
-
-    const eventTypeToggle = this.getElement().querySelector(`input.event__type-toggle`);
     eventTypeToggle.checked = false;
   }
 
@@ -132,38 +118,32 @@ class EventEdit extends AbstractComponent {
 
     const target = evt.currentTarget;
     const newDestination = target.value;
+    const newDestinationData = this._onDestinationChange(newDestination);
 
-    //  При смене пункта назначения получить данные с сервера
-    const newDestinationDataFromServer = this._getDestinationDataFromServer(newDestination);
-    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
-
-    if (!newDestinationDataFromServer) {
-      this._resetEventInfo();
-      return;
-    } else {
-      showNode(detailsSectionNode);
-    }
-
-    const destinationDescriptionNode = detailsSectionNode.querySelector(`.event__destination-description`);
-    destinationDescriptionNode.textContent = newDestinationDataFromServer.description;
-
+    const detailsSectionElement = this.getElement().querySelector(`.event__details`);
+    const destinationDescriptionElement = detailsSectionElement.querySelector(`.event__destination-description`);
     const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
-    eventPriceInput.value = newDestinationDataFromServer.price;
 
-    const offersSectionNode = detailsSectionNode.querySelector(`.event__section--offers`);
-    const oldOffersNode = offersSectionNode.querySelector(`.event__available-offers`);
-    const newOffersNode = createElement(this._getOffersTemplate(newDestinationDataFromServer.offers));
-    if (newDestinationDataFromServer.offers.length === 0) {
-      hideNode(offersSectionNode);
+    const offersSectionElement = detailsSectionElement.querySelector(`.event__section--offers`);
+    const oldOffersElement = offersSectionElement.querySelector(`.event__available-offers`);
+    const newOffersElement = createElement(this._getOffersTemplate(newDestinationData.offers));
+
+    const photosContainerElement = this.getElement().querySelector(`.event__photos-container`);
+    const oldPhotosElement = photosContainerElement.querySelector(`.event__photos-tape`);
+    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.photos));
+
+    showElement(detailsSectionElement);
+    destinationDescriptionElement.textContent = newDestinationData.description;
+    eventPriceInput.value = newDestinationData.price;
+
+    if (newDestinationData.offers.length === 0) {
+      hideElement(offersSectionElement);
     } else {
-      showNode(offersSectionNode);
+      showElement(offersSectionElement);
     }
-    offersSectionNode.replaceChild(newOffersNode, oldOffersNode);
+    offersSectionElement.replaceChild(newOffersElement, oldOffersElement);
 
-    const photosContainerNode = this.getElement().querySelector(`.event__photos-container`);
-    const oldPhotosNode = photosContainerNode.querySelector(`.event__photos-tape`);
-    const newPhotosNode = createElement(this._getPhotosTemplate(newDestinationDataFromServer.photos));
-    photosContainerNode.replaceChild(newPhotosNode, oldPhotosNode);
+    photosContainerElement.replaceChild(newPhotosElement, oldPhotosElement);
   }
 
   //  Согласно ТЗ пользователь не может вводить сам пункт назначения
@@ -208,8 +188,7 @@ class EventEdit extends AbstractComponent {
       </div>`;
   }
 
-  _getDataListTemplate(type) {
-    const options = getNewDatalistOptions(type);
+  _getDataListTemplate(options) {
     return `<datalist id="destination-list-1">
               ${options.map((option) => `<option value="${option}"></option>`).join(``)}
             </datalist>`.trim();
@@ -222,7 +201,7 @@ class EventEdit extends AbstractComponent {
           <div class="event__type-wrapper">
             <label class="event__type  event__type-btn" for="event-type-toggle-1">
               <span class="visually-hidden">Choose event type</span>
-              <img class="event__type-icon" width="17" height="17" src="img/icons/${this._type.toLowerCase()}.png" alt="Event type icon">
+              <img class="event__type-icon" width="17" height="17" src="img/icons/${this._type.icon}.png" alt="Event type icon">
             </label>
             <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -231,37 +210,37 @@ class EventEdit extends AbstractComponent {
                 <legend class="visually-hidden">Transfer</legend>
 
                 <div class="event__type-item">
-                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${(this._type.toLowerCase() === `taxi`) ? `checked` : ``}>
+                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${(this._type.name.toLowerCase() === `taxi`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${(this._type.toLowerCase() === `bus`) ? `checked` : ``}>
+                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${(this._type.name.toLowerCase() === `bus`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${(this._type.toLowerCase() === `train`) ? `checked` : ``}>
+                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${(this._type.name.toLowerCase() === `train`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${(this._type.toLowerCase() === `ship`) ? `checked` : ``}>
+                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${(this._type.name.toLowerCase() === `ship`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport" ${(this._type.toLowerCase() === `transport`) ? `checked` : ``}>
+                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport" ${(this._type.name.toLowerCase() === `transport`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${(this._type.toLowerCase() === `drive`) ? `checked` : ``}>
+                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${(this._type.name.toLowerCase() === `drive`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${(this._type.toLowerCase() === `flight`) ? `checked` : ``}>
+                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${(this._type.name.toLowerCase() === `flight`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
                 </div>
               </fieldset>
@@ -270,17 +249,17 @@ class EventEdit extends AbstractComponent {
                 <legend class="visually-hidden">Activity</legend>
 
                 <div class="event__type-item">
-                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${(this._type.toLowerCase() === `check-in`) ? `checked` : ``}>
+                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${(this._type.name.toLowerCase() === `check-in`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${(this._type.toLowerCase() === `sightseeing`) ? `checked` : ``}>
+                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${(this._type.name.toLowerCase() === `sightseeing`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${(this._type.toLowerCase() === `restaurant`) ? `checked` : ``}>
+                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${(this._type.name.toLowerCase() === `restaurant`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
                 </div>
               </fieldset>
@@ -289,22 +268,22 @@ class EventEdit extends AbstractComponent {
 
           <div class="event__field-group  event__field-group--destination">
             <label class="event__label  event__type-output" for="event-destination-1">
-              ${capitalizeFirstLetter(this._type)} ${this._isTransferType() ? `to` : `into`}
+              ${this._type.title}
             </label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination}" list="destination-list-1" required autocomplete="off">
-            ${this._getDataListTemplate(this._type)}
+            ${this._getDataListTemplate(this._datalistOptions)}
           </div>
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${new Date(this._time.start).getDate()}/${new Date(this._time.start).getMonth()}/${new Date(this._time.start).getFullYear()} ${new Date(this._time.start).getHours()}:${new Date(this._time.start).getMinutes()}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTimeValue(this._time.start)}">
             —
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${new Date(this._time.end).getDate()}/${new Date(this._time.end).getMonth()}/${new Date(this._time.end).getFullYear()} ${new Date(this._time.end).getHours()}:${new Date(this._time.end).getMinutes()}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTimeValue(this._time.end)}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -333,7 +312,7 @@ class EventEdit extends AbstractComponent {
 
         <section class="event__details">
 
-          <section class="event__section  event__section--offers" ${(this._offers.length === 0) ? `style="display: none"` : ``}>
+          <section class="event__section  event__section--offers ${(this._offers.length === 0) ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
             ${this._getOffersTemplate(this._offers)}
