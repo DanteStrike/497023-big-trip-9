@@ -133,10 +133,21 @@ export const showElement = (node) => {
   node.classList.remove(`visually-hidden`);
 };
 
-// /**
-//  * Сделать полную копию массива с объектами, вложенность которых не превышает 1.
-//  *
-//  * @param {array} source - исходный массив с объектами.
-//  * @return {array} - копия исходного массива.
-//  */
-// export const shallowCopyObjsArray = (source) => source.map((obj) => Object.assign({}, obj));
+export const formatDateTimeValue = (time) => {
+  return `${new Date(time).getDate()}/${new Date(time).getMonth()}/${new Date(time).getFullYear()} ${new Date(time).getHours()}:${new Date(time).getMinutes()}`;
+};
+
+export const formatDateTime = (time) => {
+  return `${new Date(time).getFullYear()}-${new Date(time).getMonth()}-${new Date(time).getDate()}T${new Date(time).getHours()}:${new Date(time).getMinutes()}`;
+};
+
+export const formatDateTimeView = (time) => {
+  return `${new Date(time).getHours() < 10 ? `0${new Date(time).getHours()}` : `${new Date(time).getHours()}`}:${new Date(time).getMinutes() < 10 ? `0${new Date(time).getMinutes()}` : `${new Date(time).getMinutes()}`}`;
+};
+
+export const formatDateToMonthDay = (date) => {
+  return new Date(date).toDateString()
+    .split(` `)
+    .slice(1, 3)
+    .join(` `);
+};
