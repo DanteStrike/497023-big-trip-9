@@ -15,19 +15,19 @@ const mock = {
 };
 
 
-const menuNode = document.querySelector(`.trip-controls`);
-const tripMainNode = document.querySelector(`.trip-main`);
-const tripListNode = document.querySelector(`.trip-events`);
-const tripController = new TripController(tripListNode, mock.eventsList);
+const menuElement = document.querySelector(`.trip-controls`);
+const tripMainElement = document.querySelector(`.trip-main`);
+const tripListElement = document.querySelector(`.trip-events`);
+const tripController = new TripController(tripListElement, mock.eventsList);
 
 if (mock.eventsList.length === 0) {
-  tripMainNode.querySelector(`.trip-main__event-add-btn`).disabled = true;
+  tripMainElement.querySelector(`.trip-main__event-add-btn`).disabled = true;
 } else {
-  const tripInfoNode = tripMainNode.querySelector(`.trip-info`);
-  render(tripInfoNode, new TripInfo(eventsList).getElement(), Position.AFTERBEGIN);
+  const tripInfoElement = tripMainElement.querySelector(`.trip-info`);
+  render(tripInfoElement, new TripInfo(eventsList).getElement(), Position.AFTERBEGIN);
 }
 
-tripMainNode.querySelector(`.trip-info__cost-value`).innerHTML = tripController.getTripCost();
-render(menuNode, new Menu(mock.tripMenu).getElement(), Position.AFTERBEGIN);
-render(menuNode, new Filters(mock.tripFilters).getElement(), Position.BEFOREEND);
+tripMainElement.querySelector(`.trip-info__cost-value`).innerHTML = tripController.getTripCost();
+render(menuElement, new Menu(mock.tripMenu).getElement(), Position.AFTERBEGIN);
+render(menuElement, new Filters(mock.tripFilters).getElement(), Position.BEFOREEND);
 tripController.init();
