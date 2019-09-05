@@ -120,8 +120,8 @@ export const capitalizeFirstLetter = (word) => {
  *
  * @param {Node} node - необходимый node.
  */
-export const hideNode = (node) => {
-  node.style.display = `none`;
+export const hideElement = (node) => {
+  node.classList.add(`visually-hidden`);
 };
 
 /**
@@ -129,8 +129,8 @@ export const hideNode = (node) => {
  *
  * @param {Node} node - необходимый node.
  */
-export const showNode = (node) => {
-  node.style.display = ``;
+export const showElement = (node) => {
+  node.classList.remove(`visually-hidden`);
 };
 
 // /**
