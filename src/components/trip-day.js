@@ -1,4 +1,5 @@
 import AbstractComponent from './abstract.js';
+import {formatDateTime, formatDateToMonthDay} from '../utils/utils.js';
 
 
 class TripDay extends AbstractComponent {
@@ -8,7 +9,7 @@ class TripDay extends AbstractComponent {
     this._date = date;
   }
 
-  getEventsListNode() {
+  getEventsListElement() {
     return this.getElement().querySelector(`.trip-events__list`);
   }
 
@@ -16,8 +17,8 @@ class TripDay extends AbstractComponent {
     return `<li class="trip-days__item  day">
               <div class="day__info">
                 <span class="day__counter">${(this._dayIndex) ? this._dayIndex : ``}</span>
-                <time class="day__date" datetime="${(this._date) ? `${new Date(this._date).getFullYear()}-${new Date(this._date).getMonth()}-${new Date(this._date).getDate()}T${new Date(this._date).getHours()}:${new Date(this._date).getMinutes()}` : ``}">
-                ${(this._date) ? new Date(this._date).toDateString() : ``}</time>
+                <time class="day__date" datetime="${(this._date) ? formatDateTime(this._date) : ``}">
+                ${(this._date) ? formatDateToMonthDay(this._date) : ``}</time>
               </div>
 
               <ul class="trip-events__list"></ul>
