@@ -1,5 +1,6 @@
 import AbstractComponent from './abstract.js';
 import {eventsData} from '../data/events-data.js';
+import {formatDateToMonthDay} from '../utils/utils.js';
 
 class TripInfo extends AbstractComponent {
   constructor(eventsList) {
@@ -39,7 +40,7 @@ class TripInfo extends AbstractComponent {
     return `<div class="trip-info__main">
         <h1 class="trip-info__title">${(this._citiesAmount() !== 0) ? `${this._cities[0]} ${(this._citiesAmount() > 2) ? `&mdash; ... &mdash;` : `&mdash;`} ${this._cities[this._cities.length - 1]}` : ``}</h1>
 
-        <p class="trip-info__dates">${new Date(this._dates.start).toDateString()}&nbsp;&mdash;&nbsp;${new Date(this._dates.end).toDateString()}</p>
+        <p class="trip-info__dates">${formatDateToMonthDay(this._dates.start)}&nbsp;&mdash;&nbsp;${formatDateToMonthDay(this._dates.end)}</p>
       </div>`;
   }
 }

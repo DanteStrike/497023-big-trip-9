@@ -37,8 +37,8 @@ class TripController {
     this._renderEventsByDays();
   }
 
-  _renderEvent(event, listNode) {
-    const newPointController = new PointController(listNode, event, this._onChangeView, this._onDataChange);
+  _renderEvent(event, listElement) {
+    const newPointController = new PointController(listElement, event, this._onChangeView, this._onDataChange);
     newPointController.init();
 
     this._subscriptions.push(newPointController.setDefaultView.bind(newPointController));
@@ -80,7 +80,7 @@ class TripController {
         render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
 
         for (const event of sortedByEventDuration) {
-          this._renderEvent(event, newTripDay.getEventsListNode());
+          this._renderEvent(event, newTripDay.getEventsListElement());
         }
         return;
 
@@ -89,7 +89,7 @@ class TripController {
         render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
 
         for (const event of sortedByPrice) {
-          this._renderEvent(event, newTripDay.getEventsListNode());
+          this._renderEvent(event, newTripDay.getEventsListElement());
         }
         return;
 
@@ -113,7 +113,7 @@ class TripController {
       render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
 
       for (const event of dayEvents) {
-        this._renderEvent(event, newTripDay.getEventsListNode());
+        this._renderEvent(event, newTripDay.getEventsListElement());
       }
     }
   }

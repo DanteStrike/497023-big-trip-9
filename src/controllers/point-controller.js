@@ -1,113 +1,51 @@
-import Event from '../components/event.js';
-import EditEvent from '../components/event-edit.js';
 import {render, Position} from '../utils/utils.js';
-import {getNewDestinationData} from '../data/destination-data.js';
-import {getNewDatalistOptions} from '../data/datalist-data.js';
-import {getTypeData} from '../data/type-data.js';
+import Event from '../components/event.js';
+import PointEditController from './point-edit-controller.js';
 
 
 class PointController {
   constructor(container, eventData, onChangeView, onDataChange) {
-    this._listNode = container;
+    this._container = container;
     this._data = eventData;
+
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
 
-    //  Обратная связь с формой редактирования при изменении пункта назначения
-    this._tempDestinationData = null;
-    this._onDestinationChange = this._onDestinationChange.bind(this);
-    this._onTypeChange = this._onTypeChange.bind(this);
+    //  Обратная связь с контроллером редактирования (закрытие формы редактирования без изменений и с сохранением).
+    this._onEditClose = this._onEditClose.bind(this);
+    this._onEditSave = this._onEditSave.bind(this);
   }
 
   init() {
     this._pointView = new Event(this._data);
     this._pointView.getElement().querySelector(`.event__rollup-btn`)
-      .addEventListener(`click`, () => this._onPointViewRollupBtnClick());
-    render(this._listNode, this._pointView.getElement(), Position.BEFOREEND);
+      .addEventListener(`click`, () => this._onRollupBtnClick());
+    render(this._container, this._pointView.getElement(), Position.BEFOREEND);
   }
 
-  _onDestinationChange(newDestination) {
-    this._tempDestinationData = getNewDestinationData(newDestination);
-    this._setNewDestinationDetails(this._tempDestinationData);
+  _onEditClose() {
+    this._container.replaceChild(this._pointView.getElement(), this._newPointEditController.getPointEditElement());
+    this._newPointEditController.removeOnEscKeyDown();
+    this._newPointEditController = null;
   }
 
-  _onTypeChange(newType) {
-    const newTypeData = getTypeData(newType);
-    const newDatalistOptions = getNewDatalistOptions(newType);
-    return {
-      newTypeData,
-      newDatalistOptions
-    };
+  _onEditSave(oldData, newData) {
+    this._onDataChange(oldData, newData);
   }
 
-  _onPointViewRollupBtnClick() {
-    const datalistOptions = getNewDatalistOptions(this._data.type.name);
-    this._pointEdit = new EditEvent(this._data, datalistOptions, this._onDestinationChange, this._onTypeChange);
-
-    this._setNewDestinationDetails = this._pointEdit.setNewDestinationDetails.bind(this._pointEdit);
-
+  _onRollupBtnClick() {
     this._onChangeView();
-    this._listNode.replaceChild(this._pointEdit.getElement(), this._pointView.getElement());
-
-    const onPointEditRollupBtnClick = () => {
-      this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
-      document.removeEventListener(`keydown`, this._onEscKeyDown);
-    };
-
-    this._pointEdit.getElement().querySelector(`.event__rollup-btn`)
-      .addEventListener(`click`, onPointEditRollupBtnClick);
-
-    const onPointEditFormSubmit = (evt) => {
-      evt.preventDefault();
-
-      const formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
-
-      //  Если пользователь выбрал и получил данные новой точки назначения с сервера,
-      //  изменить описание, предложение и фотографии текущей точки.
-      const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
-
-      const entry = {
-        type: formData.get(`event-type`),
-        destination: formData.get(`event-destination`),
-        description: newDestinationData.description,
-        time: {
-          start: new Date(formData.get(`event-start-time`)).valueOf(),
-          end: new Date(formData.get(`event-end-time`)).valueOf()
-        },
-        offers: newDestinationData.offers
-          .map((offer, index) => {
-            offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
-            return offer;
-          }),
-        price: formData.get(`event-price`),
-        photos: newDestinationData.photos,
-        isFavorite: formData.get(`event-favorite`) ? true : false
-      };
-
-      this._onDataChange(this._data, entry);
-    };
-
-    this._onEscKeyDown = (evt) => {
-      if (evt.key === `Esc` || evt.key === `Escape`) {
-        this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
-        document.removeEventListener(`keydown`, this._onEscKeyDown);
-      }
-    };
-
-    this._pointEdit.getElement().querySelector(`form`)
-      .addEventListener(`submit`, onPointEditFormSubmit);
-    document.addEventListener(`keydown`, this._onEscKeyDown);
+    this._newPointEditController = new PointEditController(this._data, this._onEditClose, this._onEditSave);
+    this._newPointEditController.init();
+    this._container.replaceChild(this._newPointEditController.getPointEditElement(), this._pointView.getElement());
   }
 
   setDefaultView() {
-    if (!this._pointEdit) {
+    if (!this._newPointEditController) {
       return;
     }
 
-    if (this._listNode.contains(this._pointEdit.getElement())) {
-      this._listNode.replaceChild(this._pointView.getElement(), this._pointEdit.getElement());
-      document.removeEventListener(`keydown`, this._onEscKeyDown);
-    }
+    this._onEditClose();
   }
 }
 

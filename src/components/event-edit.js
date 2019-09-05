@@ -1,8 +1,5 @@
 import AbstractComponent from './abstract.js';
-import {createElement, hideNode, showNode} from '../utils/utils.js';
-// import {eventsData} from '../data/events-data';
-// import {getNewDestinationData} from '../data/getNewDestinationData.js';
-// import {getNewDatalistOptions} from '../data/getNewDatalistOptions.js';
+import {createElement, hideElement, showElement, formatDateTimeValue} from '../utils/utils.js';
 
 
 import flatpickr from 'flatpickr';
@@ -29,38 +26,6 @@ class EventEdit extends AbstractComponent {
 
     this._initFlatpickr();
     this._hangHandlers();
-  }
-
-  setNewDestinationDetails(newDestination) {
-    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
-
-    if (!newDestination) {
-      this._resetEventInfo();
-      return;
-    } else {
-      showNode(detailsSectionNode);
-    }
-
-    const destinationDescriptionNode = detailsSectionNode.querySelector(`.event__destination-description`);
-    destinationDescriptionNode.textContent = newDestination.description;
-
-    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
-    eventPriceInput.value = newDestination.price;
-
-    const offersSectionNode = detailsSectionNode.querySelector(`.event__section--offers`);
-    const oldOffersNode = offersSectionNode.querySelector(`.event__available-offers`);
-    const newOffersNode = createElement(this._getOffersTemplate(newDestination.offers));
-    if (newDestination.offers.length === 0) {
-      hideNode(offersSectionNode);
-    } else {
-      showNode(offersSectionNode);
-    }
-    offersSectionNode.replaceChild(newOffersNode, oldOffersNode);
-
-    const photosContainerNode = this.getElement().querySelector(`.event__photos-container`);
-    const oldPhotosNode = photosContainerNode.querySelector(`.event__photos-tape`);
-    const newPhotosNode = createElement(this._getPhotosTemplate(newDestination.photos));
-    photosContainerNode.replaceChild(newPhotosNode, oldPhotosNode);
   }
 
   _initFlatpickr() {
@@ -93,7 +58,7 @@ class EventEdit extends AbstractComponent {
     });
 
     this.getElement().querySelectorAll(`.event__input--time`).forEach((node) => {
-      node.style.width = `140px`;
+      node.style.width = `150px`;
     });
   }
 
@@ -110,14 +75,12 @@ class EventEdit extends AbstractComponent {
 
   //  Сбросить информацию о точке
   _resetEventInfo() {
-    const detailsSectionNode = this.getElement().querySelector(`.event__details`);
-    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
+    const detailsSectionElement = this.getElement().querySelector(`.event__details`);
     const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
     const eventInputDestination = this.getElement().querySelector(`input.event__input--destination`);
 
-    hideNode(detailsSectionNode);
+    hideElement(detailsSectionElement);
     eventInputDestination.value = ``;
-    eventPriceInput.value = ``;
     eventFavoriteInput.checked = false;
   }
 
@@ -130,23 +93,22 @@ class EventEdit extends AbstractComponent {
     }
 
     const newType = target.value;
-    const data = this._onTypeChange(newType);
+    const {newTypeData, newDatalistOptions} = this._onTypeChange(newType);
 
     const eventIconImg = this.getElement().querySelector(`img.event__type-icon`);
-    eventIconImg.src = `${eventIconImg.baseURI}img/icons/${data.newTypeData.icon}.png`;
-
     const eventTypeOutput = this.getElement().querySelector(`label.event__type-output`);
-    eventTypeOutput.textContent = `${data.newTypeData.title}`;
-
-    this._resetEventInfo();
+    const eventTypeToggle = this.getElement().querySelector(`input.event__type-toggle`);
 
     const dataListContainer = this.getElement().querySelector(`.event__field-group--destination`);
     const oldDataList = dataListContainer.querySelector(`datalist#destination-list-1`);
-    const newDataList = createElement(this._getDataListTemplate(data.newDatalistOptions));
+    const newDataList = createElement(this._getDataListTemplate(newDatalistOptions));
+
+    eventIconImg.src = `${eventIconImg.baseURI}img/icons/${newTypeData.icon}.png`;
+    eventTypeOutput.textContent = `${newTypeData.title}`;
+
+    this._resetEventInfo();
 
     dataListContainer.replaceChild(newDataList, oldDataList);
-
-    const eventTypeToggle = this.getElement().querySelector(`input.event__type-toggle`);
     eventTypeToggle.checked = false;
   }
 
@@ -156,8 +118,32 @@ class EventEdit extends AbstractComponent {
 
     const target = evt.currentTarget;
     const newDestination = target.value;
+    const newDestinationData = this._onDestinationChange(newDestination);
 
-    this._onDestinationChange(newDestination);
+    const detailsSectionElement = this.getElement().querySelector(`.event__details`);
+    const destinationDescriptionElement = detailsSectionElement.querySelector(`.event__destination-description`);
+    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
+
+    const offersSectionElement = detailsSectionElement.querySelector(`.event__section--offers`);
+    const oldOffersElement = offersSectionElement.querySelector(`.event__available-offers`);
+    const newOffersElement = createElement(this._getOffersTemplate(newDestinationData.offers));
+
+    const photosContainerElement = this.getElement().querySelector(`.event__photos-container`);
+    const oldPhotosElement = photosContainerElement.querySelector(`.event__photos-tape`);
+    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.photos));
+
+    showElement(detailsSectionElement);
+    destinationDescriptionElement.textContent = newDestinationData.description;
+    eventPriceInput.value = newDestinationData.price;
+
+    if (newDestinationData.offers.length === 0) {
+      hideElement(offersSectionElement);
+    } else {
+      showElement(offersSectionElement);
+    }
+    offersSectionElement.replaceChild(newOffersElement, oldOffersElement);
+
+    photosContainerElement.replaceChild(newPhotosElement, oldPhotosElement);
   }
 
   //  Согласно ТЗ пользователь не может вводить сам пункт назначения
@@ -292,12 +278,12 @@ class EventEdit extends AbstractComponent {
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${new Date(this._time.start).getDate()}/${new Date(this._time.start).getMonth()}/${new Date(this._time.start).getFullYear()} ${new Date(this._time.start).getHours()}:${new Date(this._time.start).getMinutes()}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTimeValue(this._time.start)}">
             —
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${new Date(this._time.end).getDate()}/${new Date(this._time.end).getMonth()}/${new Date(this._time.end).getFullYear()} ${new Date(this._time.end).getHours()}:${new Date(this._time.end).getMinutes()}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTimeValue(this._time.end)}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -326,7 +312,7 @@ class EventEdit extends AbstractComponent {
 
         <section class="event__details">
 
-          <section class="event__section  event__section--offers" ${(this._offers.length === 0) ? `style="display: none"` : ``}>
+          <section class="event__section  event__section--offers ${(this._offers.length === 0) ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
             ${this._getOffersTemplate(this._offers)}

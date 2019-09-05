@@ -5,7 +5,7 @@ import {eventsListConfig, eventConfig} from '../configs.js';
 //  Сгенерировать список мок-данных точек
 const eventsList = new Array(getRandomNumber(eventsListConfig.minAmount, eventsListConfig.maxAmount))
   .fill(``)
-  .map(() => getEventData(eventsData, eventConfig))
+  .map((el, index) => getEventData(eventsData, eventConfig, index))
   .sort((a, b) => a.time.start - b.time.start);
 
 export {eventsList};
