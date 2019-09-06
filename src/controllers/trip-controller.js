@@ -13,8 +13,8 @@ class TripController {
     this._noEvents = new NoEvents();
     this._sort = new Sort();
 
-    //  Тип текущей сортировки. Сортировка при изменении данных должна сохроняться.
-    this._sortStatus = `default`;
+    //  Тип текущей сортировки. Сортировка при изменении данных должна сохраняться.
+    this._sortType = `default`;
 
     this._subscriptions = [];
     this._onChangeView = this._onChangeView.bind(this);
@@ -37,8 +37,8 @@ class TripController {
     this._renderEventsByDays();
   }
 
-  _renderEvent(event, listNode) {
-    const newPointController = new PointController(listNode, event, this._onChangeView, this._onDataChange);
+  _renderEvent(event, listElement) {
+    const newPointController = new PointController(listElement, event, this._onChangeView, this._onDataChange);
     newPointController.init();
 
     this._subscriptions.push(newPointController.setDefaultView.bind(newPointController));
@@ -61,11 +61,11 @@ class TripController {
       return;
     }
 
-    this._sortStatus = target.dataset ? target.dataset.sortType : `default`;
+    this._sortType = target.dataset ? target.dataset.sortType : `default`;
     this._sortEvents();
   }
 
-  //  Отсортировать точки согласно текущей сортировке (this._sortStatus)
+  //  Отсортировать точки согласно текущей сортировке (this._sortType)
   _sortEvents() {
     // Закрыть все карточки и убрать обработчики нажатия кнопки ESC
     this._onChangeView();
@@ -74,13 +74,13 @@ class TripController {
     this._board.getElement().innerHTML = ``;
     const newTripDay = new TripDay();
 
-    switch (this._sortStatus) {
+    switch (this._sortType) {
       case `time`:
         const sortedByEventDuration = this._events.sort((a, b) => (b.time.end - b.time.start) - (a.time.end - a.time.start));
         render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
 
         for (const event of sortedByEventDuration) {
-          this._renderEvent(event, newTripDay.getEventsListNode());
+          this._renderEvent(event, newTripDay.getEventsListElement());
         }
         return;
 
@@ -89,7 +89,7 @@ class TripController {
         render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
 
         for (const event of sortedByPrice) {
-          this._renderEvent(event, newTripDay.getEventsListNode());
+          this._renderEvent(event, newTripDay.getEventsListElement());
         }
         return;
 
@@ -113,7 +113,7 @@ class TripController {
       render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
 
       for (const event of dayEvents) {
-        this._renderEvent(event, newTripDay.getEventsListNode());
+        this._renderEvent(event, newTripDay.getEventsListElement());
       }
     }
   }

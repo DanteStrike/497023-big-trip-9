@@ -1,6 +1,6 @@
-import {getRandomFlag, getRandomElement, getRandomNumber, shuffle} from '../utils/utils.js';
-import getRandomEventTime from '../utils/getRandomEventTime.js';
-import {eventConfig} from '../configs.js';
+import {getRandomFlag, getRandomElement, getRandomNumber, shuffle, capitalizeFirstLetter} from '../utils/utils.js';
+import getRandomOptimalDestination from '../utils/random-optimal-destination.js';
+import getRandomEventTime from '../utils/random-event-time.js';
 
 
 const eventsData = {
@@ -25,54 +25,53 @@ const eventsData = {
   photosDefaultURL: `http://picsum.photos/300/150?r=`
 };
 
-// Подобрать приблизительно правдоподобную точку назначения согласно типу события.
-const getRandomDestination = (type, data) => {
-  switch (type) {
-    case `Flight`:
-      return getRandomElement(data.destination.cities);
+//  Сформировать доп. данные типа. {наименование типа, иконка типа, отображаемый заголовок}
+const generateTypeData = (type, data) => ({
+  name: type,
+  icon: type.toLowerCase(),
+  title: data.types.transfer.has(type) ? `${capitalizeFirstLetter(type)} to` : `${capitalizeFirstLetter(type)} in`
+});
 
-    case `Check-in`:
-      return getRandomElement(data.destination.checkinPoints);
-
-    case `Sightseeing`:
-      return getRandomElement(data.destination.sights);
-
-    case `Restaurant`:
-      return getRandomElement(data.destination.eatingPoints);
-
-    default:
-      return getRandomElement(new Set([...data.destination.cities,
-        ...data.destination.sights,
-        ...data.destination.eatingPoints,
-        ...data.destination.checkinPoints]));
-  }
-};
-
-const getOffer = (offerDescription, config) => ({
+//  Сформировать предложение. {описание, цена, активность}
+const getOfferData = (offerDescription, config) => ({
   description: offerDescription,
   price: getRandomNumber(config.offer.price.min, config.offer.price.max),
   isActive: getRandomFlag()
 });
-const getEventData = (data, config) => {
+
+//  Сгенерировать случайные данные пункта назначения. Данные пункт назначения содержат:
+//  {описание, цену, предложения, фотографии}
+const getRandomDestinationData = (data, config) => ({
+  description: shuffle(data.sentences)
+  .slice(0, getRandomNumber(config.sentences.minAmount, config.sentences.maxAmount))
+  .join(`. `),
+  price: getRandomNumber(config.price.min, config.price.max),
+  offers: shuffle(data.offerDescriptions)
+  .slice(0, getRandomNumber(config.offer.minAmount, config.offer.maxAmount))
+  .map((offerDescription) => getOfferData(offerDescription, config)),
+  photos: new Array(getRandomNumber(config.photos.minAmount, config.photos.maxAmount))
+  .fill(``)
+  .map(() => data.photosDefaultURL + Math.random())
+});
+
+//  Сгенерировать случайные мок-данные для одной точки
+const getEventData = (data, config, id) => {
   const randomType = getRandomElement(new Set([...data.types.transfer, ...data.types.activity]));
+  const optimalDestination = getRandomOptimalDestination(randomType, data);
+  const destinationData = getRandomDestinationData(data, config);
 
   return {
-    type: randomType,
-    destination: getRandomDestination(randomType, data),
-    description: shuffle(data.sentences)
-      .slice(0, getRandomNumber(config.sentences.minAmount, config.sentences.maxAmount))
-      .join(`. `),
+    id,
+    type: generateTypeData(randomType, data),
+    destination: optimalDestination,
+    description: destinationData.description,
     time: getRandomEventTime(config.periodOfTime.past, config.periodOfTime.future),
-    price: getRandomNumber(config.price.min, config.price.max),
-    offers: shuffle(data.offerDescriptions)
-      .slice(0, getRandomNumber(config.offer.minAmount, config.offer.maxAmount))
-      .map((offerDescription) => getOffer(offerDescription, config)),
-    photos: new Array(getRandomNumber(config.photos.minAmount, eventConfig.photos.maxAmount))
-      .fill(``)
-      .map(() => data.photosDefaultURL + Math.random()),
+    price: destinationData.price,
+    offers: destinationData.offers,
+    photos: destinationData.photos,
     isFavorite: getRandomFlag(),
   };
 };
 
 
-export {getEventData, eventsData};
+export {getEventData, getRandomDestinationData, generateTypeData, eventsData};

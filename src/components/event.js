@@ -1,6 +1,5 @@
 import AbstractComponent from './abstract.js';
-import {TimeValue, capitalizeFirstLetter} from '../utils/utils.js';
-import {eventsData} from '../data/events-data';
+import {TimeValue, formatDateTime, formatDateTimeView} from '../utils/utils.js';
 
 
 class Event extends AbstractComponent {
@@ -25,26 +24,22 @@ class Event extends AbstractComponent {
     this._price = price;
   }
 
-  _isTransferType() {
-    return eventsData.types.transfer.has(this._type);
-  }
-
   _getTemplate() {
     return `<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.toLowerCase()}.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.icon}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${capitalizeFirstLetter(this._type)} ${this._isTransferType() ? `to` : `into`} ${this._destination}</h3>
+        <h3 class="event__title">${this._type.title} ${this._destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
             <time class="event__start-time"
-              datetime="${new Date(this._time.start).getFullYear()}-${new Date(this._time.start).getMonth()}-${new Date(this._time.start).getDate()}T${new Date(this._time.start).getHours()}:${new Date(this._time.start).getMinutes()}"
-              >${new Date(this._time.start).getHours() < 10 ? `0${new Date(this._time.start).getHours()}` : `${new Date(this._time.start).getHours()}`}:${new Date(this._time.start).getMinutes() < 10 ? `0${new Date(this._time.start).getMinutes()}` : `${new Date(this._time.start).getMinutes()}`}</time>
+              datetime="${formatDateTime(this._time.start)}"
+              >${formatDateTimeView(this._time.start)}</time>
             —
-            <time class="event__end-time" datetime="${new Date(this._time.end).getFullYear()}-${new Date(this._time.end).getMonth()}-${new Date(this._time.end).getDate()}T${new Date(this._time.end).getHours()}:${new Date(this._time.end).getMinutes()}">
-            ${new Date(this._time.end).getHours() < 10 ? `0${new Date(this._time.end).getHours()}` : `${new Date(this._time.end).getHours()}`}:${new Date(this._time.end).getMinutes() < 10 ? `0${new Date(this._time.end).getMinutes()}` : `${new Date(this._time.end).getMinutes()}`}</time>
+            <time class="event__end-time" datetime="${formatDateTime(this._time.end)}">
+            ${formatDateTimeView(this._time.end)}</time>
           </p>
           <p class="event__duration">
             ${this._timeDuration.days !== 0 ? `${this._timeDuration.days}D` : ``} ${this._timeDuration.hours !== 0 ? `${this._timeDuration.hours}H` : ``} ${this._timeDuration.minutes !== 0 ? `${this._timeDuration.minutes}M` : ``}</p>
