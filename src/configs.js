@@ -5,7 +5,7 @@ export const eventConfig = {
   },
   periodOfTime: {
     past: -1,
-    future: 2
+    future: 1
   },
 
   sentences: {
@@ -32,6 +32,6 @@ export const eventConfig = {
 };
 
 export const eventsListConfig = {
-  minAmount: 20,
-  maxAmount: 30
+  minAmount: 1,
+  maxAmount: 5
 };
