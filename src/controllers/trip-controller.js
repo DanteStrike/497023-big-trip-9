@@ -1,9 +1,8 @@
 import NoEvents from '../components/no-events.js';
 import Sort from '../components/sorting.js';
 import TripBoard from '../components/trip-board.js';
-import TripDay from '../components/trip-day.js';
-import {render, Position, TimeValue} from '../utils/utils.js';
-import PointController from './point-controller.js';
+import {render, Position, showElement, hideElement, unrender} from '../utils/utils.js';
+import TripListController from './trip-list-controller.js';
 
 class TripController {
   constructor(container, data) {
@@ -16,13 +15,7 @@ class TripController {
     //  Тип текущей сортировки. Сортировка при изменении данных должна сохраняться.
     this._sortType = `default`;
 
-    this._subscriptions = [];
-    this._onChangeView = this._onChangeView.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
-  }
-
-  getTripCost() {
-    return this._events.reduce((accum, event) => accum + event.price, 0);
   }
 
   init() {
@@ -42,10 +35,14 @@ class TripController {
     newPointController.init();
 
     this._subscriptions.push(newPointController.setDefaultView.bind(newPointController));
+  show() {
+    showElement(this._container);
   }
 
   _onChangeView() {
     this._subscriptions.forEach((sub) => sub());
+  hide() {
+    hideElement(this._container);
   }
 
   _onDataChange(oldData, newData) {
