@@ -1,5 +1,5 @@
 import AbstractComponent from './abstract.js';
-import {createElement, hideElement, showElement, formatDateTimeValue} from '../utils/utils.js';
+import {createElement, hideElement, showElement, formatDateTimeValue, Mode} from '../utils/utils.js';
 
 
 import flatpickr from 'flatpickr';
@@ -8,7 +8,7 @@ import 'flatpickr/dist/themes/light.css';
 
 
 class EventEdit extends AbstractComponent {
-  constructor({type, description, destination, time, price, offers, isFavorite, photos}, datalistOptions, onDestinationChange, onTypeChange) {
+  constructor({type, description, destination, time, price, offers, isFavorite, photos}, datalistOptions, mode, onDestinationChange, onTypeChange) {
     super();
     this._type = type;
     this._destination = destination;
@@ -19,6 +19,8 @@ class EventEdit extends AbstractComponent {
     this._photos = photos;
     this._isFavorite = isFavorite;
     this._datalistOptions = datalistOptions;
+
+    this._mode = mode;
 
     //  Передать контроллеру информацию, что было обращение к серверу за данными
     this._onDestinationChange = onDestinationChange;
@@ -81,7 +83,9 @@ class EventEdit extends AbstractComponent {
 
     hideElement(detailsSectionElement);
     eventInputDestination.value = ``;
-    eventFavoriteInput.checked = false;
+    if (eventFavoriteInput) {
+      eventFavoriteInput.checked = false;
+    }
   }
 
   //  При изменении типа точки, изменить доступные варианты выбора пункта назначения
@@ -103,7 +107,7 @@ class EventEdit extends AbstractComponent {
     const oldDataList = dataListContainer.querySelector(`datalist#destination-list-1`);
     const newDataList = createElement(this._getDataListTemplate(newDatalistOptions));
 
-    eventIconImg.src = `${eventIconImg.baseURI}img/icons/${newTypeData.icon}.png`;
+    eventIconImg.src = `${eventIconImg.baseURI.replace(`#`, ``)}img/icons/${newTypeData.icon}.png`;
     eventTypeOutput.textContent = `${newTypeData.title}`;
 
     this._resetEventInfo();
@@ -195,8 +199,8 @@ class EventEdit extends AbstractComponent {
   }
 
   _getTemplate() {
-    return `<li class="trip-events__item">
-      <form class="event  event--edit" action="#" method="post">
+    return `${this._mode === Mode.ADDING ? `` : `<li class="trip-events__item">`}
+      <form class="event  event--edit ${!this._destination ? `trip-events__item` : ``}" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
             <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -270,7 +274,7 @@ class EventEdit extends AbstractComponent {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${this._type.title}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination}" list="destination-list-1" required autocomplete="off">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination ? `${this._destination}` : ``}" list="destination-list-1" required autocomplete="off">
             ${this._getDataListTemplate(this._datalistOptions)}
           </div>
 
@@ -291,12 +295,12 @@ class EventEdit extends AbstractComponent {
               <span class="visually-hidden">Price</span>
               €
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._price}">
+            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._price ? `${this._price}` : ``}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">Delete</button>
-
+          ${this._mode === Mode.ADDING ? `` : `
           <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
           <label class="event__favorite-btn" for="event-favorite-1">
             <span class="visually-hidden">Add to favorite</span>
@@ -307,10 +311,10 @@ class EventEdit extends AbstractComponent {
 
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
-          </button>
+          </button>`}
         </header>
 
-        <section class="event__details">
+        <section class="event__details ${!this._destination ? `visually-hidden` : ``}">
 
           <section class="event__section  event__section--offers ${(this._offers.length === 0) ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -320,7 +324,7 @@ class EventEdit extends AbstractComponent {
 
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${this._description}</p>
+            <p class="event__destination-description">${this._description ? `${this._description}` : ``}</p>
 
             <div class="event__photos-container">
               ${this._getPhotosTemplate(this._photos)}
@@ -328,7 +332,7 @@ class EventEdit extends AbstractComponent {
           </section>
         </section>
       </form>
-    </li>`.trim();
+    ${this._mode === Mode.ADDING ? `` : `</li>`}`.trim();
   }
 }
 
