@@ -4,8 +4,8 @@ export const eventConfig = {
     maxAmount: 3
   },
   periodOfTime: {
-    past: -1,
-    future: 1
+    past: -2,
+    future: 2
   },
 
   sentences: {
@@ -32,6 +32,6 @@ export const eventConfig = {
 };
 
 export const eventsListConfig = {
-  minAmount: 1,
-  maxAmount: 5
+  minAmount: 10,
+  maxAmount: 15
 };
