@@ -16,10 +16,12 @@ class TripInfoController {
   }
 
   update(newData) {
+    this._events = newData.sort((a, b) => a.time.start - b.time.start);
+    this._tripPriceElement.innerHTML = `${this._getTripPrice()}`;
+
     if (newData.length === 0) {
       if (this._container.contains(this._tripInfo.getElement())) {
         unrender(this._tripInfo.getElement());
-        this._tripInfo.removeElement();
       }
       return;
     }
@@ -28,7 +30,6 @@ class TripInfoController {
       render(this._container, this._tripInfo.getElement(), Position.AFTERBEGIN);
     }
 
-    this._events = newData.sort((a, b) => a.time.start - b.time.start);
     const cities = this._getCities(this._events);
 
     const citiesData = {
@@ -42,12 +43,11 @@ class TripInfoController {
     };
 
     this._tripInfo.update(citiesData, datesData);
-    this._tripPriceElement.innerHTML = `${this._getTripPrice()}`;
   }
 
   _getCities() {
     return this._events.reduce((accum, event) => {
-      if (eventsData.destination.cities.has(event.destination) && !accum.find((el) => el === event.destination)) {
+      if (eventsData.destination.cities.has(event.destination)) {
         accum.push(event.destination);
       }
 
