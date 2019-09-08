@@ -5,7 +5,7 @@ import {render, Position, showElement, hideElement, unrender} from '../utils/uti
 import TripListController from './trip-list-controller.js';
 
 class TripController {
-  constructor(container, data) {
+  constructor(container, data, onDataChange) {
     this._container = container;
     this._events = data;
     this._board = new TripBoard();
@@ -17,6 +17,8 @@ class TripController {
 
     this._onDataChange = this._onDataChange.bind(this);
     this._tripListController = new TripListController(this._board.getElement(), this._sort.getElement(), this._onDataChange);
+
+    this._onMainDataChange = onDataChange;
   }
 
   init() {
@@ -40,20 +42,26 @@ class TripController {
     hideElement(this._container);
   }
 
-  createEvent() {
+  createEvent(createButton) {
     if (this._events.length === 0) {
       unrender(this._noEvents.getElement());
       render(this._container, this._sort.getElement(), Position.BEFOREEND);
       render(this._container, this._board.getElement(), Position.BEFOREEND);
     }
 
-    this._tripListController.createEvent();
+    this._tripListController.createEvent(createButton);
+  }
+
+  setFilterType(newType) {
+    this._tripListController.setFilterType(newType);
+    this._renderBoard();
   }
 
   _onDataChange(events) {
     this._events = events;
 
     this._renderBoard();
+    this._onMainDataChange(events);
   }
 
   _renderBoard() {
@@ -87,11 +95,11 @@ class TripController {
 
   _onSortBtnClick(evt) {
     const target = evt.target;
-    if (target.tagName !== `INPUT` || this._events.length === 0) {
+    if (target.tagName !== `INPUT` || target.dataset.sortType === this._sortType) {
       return;
     }
 
-    this._sortType = target.dataset ? target.dataset.sortType : `default`;
+    this._sortType = target.dataset.sortType;
     this._renderBoard();
   }
 }

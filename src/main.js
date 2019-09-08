@@ -19,12 +19,21 @@ const tripListElement = tripPageMainContainer.querySelector(`.trip-events`);
 
 let eventsListMock = Array.from(eventsList);
 
+const onFilterTypeChange = (newType) => {
+  tripController.setFilterType(newType);
+};
+
+const onDataChange = (events) => {
+  eventsListMock = events;
+  tripInfoController.update(eventsListMock);
+};
+
 const tripInfoController = new TripInfoController(tripInfoElement, eventsListMock);
-const filtersController = new FiltersController(filtersHeaderElement);
-const tripController = new TripController(tripListElement, eventsListMock);
+const filtersController = new FiltersController(filtersHeaderElement, onFilterTypeChange);
+const tripController = new TripController(tripListElement, eventsListMock, onDataChange);
 const statsController = new StatsController(tripPageMainContainer);
 
-const pagesController = new PagesController(menuHeaderElement, tripController, statsController, createEventButton);
+const pagesController = new PagesController(menuHeaderElement, filtersController, tripController, statsController, createEventButton);
 
 tripInfoController.init();
 filtersController.init();
