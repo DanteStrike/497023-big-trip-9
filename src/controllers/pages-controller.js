@@ -3,21 +3,22 @@ import Menu from '../components/menu';
 
 
 class PagesController {
-  constructor(menuContainer, tripController, statsController, createEventButton) {
+  constructor(menuContainer, filtersController, tripController, statsController, createEventButton) {
     this._menuContainer = menuContainer;
 
+    this._filtersController = filtersController;
     this._tripController = tripController;
     this._statsController = statsController;
 
     this._createEventButton = createEventButton;
 
     this._menu = new Menu();
-    this._onMenuClick = this._onMenuClick.bind(this);
   }
 
   init() {
     render(this._menuContainer, this._menu.getElement(), Position.AFTEREND);
-    this._menu.getElement().addEventListener(`click`, this._onMenuClick);
+    this._menu.getElement().addEventListener(`click`, (evt) => this._onMenuClick(evt));
+    this._createEventButton.addEventListener(`click`, (evt) => this._onCreateEventButtonClick(evt));
 
     this._tripController.show();
     this._statsController.hide();
@@ -40,16 +41,23 @@ class PagesController {
 
     switch (clickedButton.dataset.page) {
       case `table`:
+        this._filtersController.show();
         this._tripController.show();
         this._statsController.hide();
         this._createEventButton.disabled = false;
         break;
 
       case `stats`:
+        this._filtersController.hide();
         this._tripController.hide();
         this._statsController.show();
         this._createEventButton.disabled = true;
     }
+  }
+
+  _onCreateEventButtonClick(evt) {
+    this._tripController.createEvent(evt.target);
+    this._createEventButton.disabled = true;
   }
 }
 
