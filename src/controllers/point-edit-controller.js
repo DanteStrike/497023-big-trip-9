@@ -113,6 +113,7 @@ class PointEditController {
     const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
 
     const entry = {
+      id: this._data.id,
       type: getTypeData(formData.get(`event-type`)),
       destination: formData.get(`event-destination`),
       description: newDestinationData.description,
@@ -125,7 +126,7 @@ class PointEditController {
           offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
           return offer;
         }),
-      price: formData.get(`event-price`),
+      price: Number(formData.get(`event-price`)),
       photos: newDestinationData.photos,
       isFavorite: formData.get(`event-favorite`) ? true : false
     };
