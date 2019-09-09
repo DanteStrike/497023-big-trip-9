@@ -1,33 +1,45 @@
-import {render, Position} from './utils/utils.js';
-import {tripMenu} from './data/menu-data';
-import {tripFilters} from './data/filter-data.js';
 import {eventsList} from './data/events-list.js';
 import TripController from './controllers/trip-controller.js';
-import TripInfo from './components/trip-info.js';
-import Menu from './components/menu.js';
-import Filters from './components/trip-filters.js';
+import TripInfoController from './controllers/trip-info-controller.js';
+import PagesController from './controllers/pages-controller.js';
+import StatsController from './controllers/stats-controller.js';
+import FiltersController from './controllers/filters-controller.js';
 
 
-const mock = {
-  eventsList,
-  tripFilters,
-  tripMenu
+const tripInfoElement = document.querySelector(`.trip-info`);
+
+const controlsElement = document.querySelector(`.trip-controls`);
+const menuHeaderElement = controlsElement.querySelector(`h2:first-child`);
+const filtersHeaderElement = controlsElement.querySelector(`h2:last-child`);
+const createEventButton = document.querySelector(`.trip-main__event-add-btn`);
+
+const tripPageMainContainer = document.querySelector(`.page-main .page-body__container`);
+const tripListElement = tripPageMainContainer.querySelector(`.trip-events`);
+
+
+let eventsListMock = Array.from(eventsList);
+
+const onFilterTypeChange = (newType) => {
+  tripController.setFilterType(newType);
 };
 
+const onDataChange = (events) => {
+  eventsListMock = events;
+  tripInfoController.update(eventsListMock);
+};
 
-const menuElement = document.querySelector(`.trip-controls`);
-const tripMainElement = document.querySelector(`.trip-main`);
-const tripListElement = document.querySelector(`.trip-events`);
-const tripController = new TripController(tripListElement, mock.eventsList);
+const tripInfoController = new TripInfoController(tripInfoElement, eventsListMock);
+const filtersController = new FiltersController(filtersHeaderElement, onFilterTypeChange);
+const tripController = new TripController(tripListElement, eventsListMock, onDataChange);
+const statsController = new StatsController(tripPageMainContainer);
 
-if (mock.eventsList.length === 0) {
-  tripMainElement.querySelector(`.trip-main__event-add-btn`).disabled = true;
-} else {
-  const tripInfoElement = tripMainElement.querySelector(`.trip-info`);
-  render(tripInfoElement, new TripInfo(eventsList).getElement(), Position.AFTERBEGIN);
-}
+const pagesController = new PagesController(menuHeaderElement, filtersController, tripController, statsController, createEventButton);
 
-tripMainElement.querySelector(`.trip-info__cost-value`).innerHTML = tripController.getTripCost();
-render(menuElement, new Menu(mock.tripMenu).getElement(), Position.AFTERBEGIN);
-render(menuElement, new Filters(mock.tripFilters).getElement(), Position.BEFOREEND);
+tripInfoController.init();
+filtersController.init();
+
+pagesController.init();
+
 tripController.init();
+statsController.init();
+

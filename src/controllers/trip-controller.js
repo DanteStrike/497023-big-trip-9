@@ -1,12 +1,11 @@
 import NoEvents from '../components/no-events.js';
 import Sort from '../components/sorting.js';
 import TripBoard from '../components/trip-board.js';
-import TripDay from '../components/trip-day.js';
-import {render, Position, TimeValue} from '../utils/utils.js';
-import PointController from './point-controller.js';
+import {render, Position, showElement, hideElement, unrender} from '../utils/utils.js';
+import TripListController from './trip-list-controller.js';
 
 class TripController {
-  constructor(container, data) {
+  constructor(container, data, onDataChange) {
     this._container = container;
     this._events = data;
     this._board = new TripBoard();
@@ -16,13 +15,10 @@ class TripController {
     //  Тип текущей сортировки. Сортировка при изменении данных должна сохраняться.
     this._sortType = `default`;
 
-    this._subscriptions = [];
-    this._onChangeView = this._onChangeView.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
-  }
+    this._tripListController = new TripListController(this._board.getElement(), this._sort.getElement(), this._onDataChange);
 
-  getTripCost() {
-    return this._events.reduce((accum, event) => accum + event.price, 0);
+    this._onMainDataChange = onDataChange;
   }
 
   init() {
@@ -34,88 +30,77 @@ class TripController {
     render(this._container, this._sort.getElement(), Position.BEFOREEND);
     this._sort.getElement().addEventListener(`click`, (evt) => this._onSortBtnClick(evt));
     render(this._container, this._board.getElement(), Position.BEFOREEND);
-    this._renderEventsByDays();
+
+    this._tripListController.setEventsByDays(this._events);
   }
 
-  _renderEvent(event, listElement) {
-    const newPointController = new PointController(listElement, event, this._onChangeView, this._onDataChange);
-    newPointController.init();
-
-    this._subscriptions.push(newPointController.setDefaultView.bind(newPointController));
+  show() {
+    showElement(this._container);
   }
 
-  _onChangeView() {
-    this._subscriptions.forEach((sub) => sub());
+  hide() {
+    hideElement(this._container);
   }
 
-  _onDataChange(oldData, newData) {
-    this._events[this._events.findIndex((task) => task === oldData)] = newData;
-
-    //  Согласно ТЗ обновленные данные должны соответствовать текущей сортировке
-    this._sortEvents();
-  }
-
-  _onSortBtnClick(evt) {
-    const target = evt.target;
-    if (target.tagName !== `INPUT` || this._events.length === 0) {
-      return;
+  createEvent(createButton) {
+    if (this._events.length === 0) {
+      unrender(this._noEvents.getElement());
+      render(this._container, this._sort.getElement(), Position.BEFOREEND);
+      render(this._container, this._board.getElement(), Position.BEFOREEND);
     }
 
-    this._sortType = target.dataset ? target.dataset.sortType : `default`;
+    this._tripListController.createEvent(createButton);
+  }
+
+  setFilterType(newType) {
+    this._tripListController.setFilterType(newType);
+    this._renderBoard();
+  }
+
+  _onDataChange(events) {
+    this._events = events;
+
+    this._renderBoard();
+    this._onMainDataChange(events);
+  }
+
+  _renderBoard() {
     this._sortEvents();
+
+    if (this._events.length === 0) {
+      unrender(this._board.getElement());
+      unrender(this._sort.getElement());
+      render(this._container, this._noEvents.getElement(), Position.BEFOREEND);
+    }
   }
 
   //  Отсортировать точки согласно текущей сортировке (this._sortType)
   _sortEvents() {
-    // Закрыть все карточки и убрать обработчики нажатия кнопки ESC
-    this._onChangeView();
-    // Обнулить всех "подписчиков", не допускать утечку памяти
-    this._subscriptions = [];
-    this._board.getElement().innerHTML = ``;
-    const newTripDay = new TripDay();
-
     switch (this._sortType) {
       case `time`:
         const sortedByEventDuration = this._events.sort((a, b) => (b.time.end - b.time.start) - (a.time.end - a.time.start));
-        render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
-
-        for (const event of sortedByEventDuration) {
-          this._renderEvent(event, newTripDay.getEventsListElement());
-        }
+        this._tripListController.setEvents(sortedByEventDuration);
         return;
 
       case `price`:
         const sortedByPrice = this._events.sort((a, b) => b.price - a.price);
-        render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
-
-        for (const event of sortedByPrice) {
-          this._renderEvent(event, newTripDay.getEventsListElement());
-        }
+        this._tripListController.setEvents(sortedByPrice);
         return;
 
       case `default`:
-        this._renderEventsByDays();
+        this._tripListController.setEventsByDays(this._events);
         return;
     }
   }
 
-  _renderEventsByDays() {
-    const sortedByEvent = this._events.sort((a, b) => a.time.start - b.time.start);
-    const firstTripDay = new Date(this._events[0].time.start).setHours(0, 0, 0, 0);
-    const lastTripDay = new Date(this._events[this._events.length - 1].time.start).setHours(0, 0, 0, 0);
-    let dayIndex = 0;
-
-    for (let day = firstTripDay; day <= lastTripDay; day += TimeValue.MILLISECONDS_IN_DAY) {
-      const dayEvents = sortedByEvent.filter((event) => new Date(event.time.start).setHours(0, 0, 0, 0) === day);
-      dayIndex++;
-
-      const newTripDay = new TripDay(dayIndex, day);
-      render(this._board.getElement(), newTripDay.getElement(), Position.BEFOREEND);
-
-      for (const event of dayEvents) {
-        this._renderEvent(event, newTripDay.getEventsListElement());
-      }
+  _onSortBtnClick(evt) {
+    const target = evt.target;
+    if (target.tagName !== `INPUT` || target.dataset.sortType === this._sortType) {
+      return;
     }
+
+    this._sortType = target.dataset.sortType;
+    this._renderBoard();
   }
 }
 

@@ -10,7 +10,13 @@ export const TimeValue = {
 
 export const Position = {
   AFTERBEGIN: `afterbegin`,
-  BEFOREEND: `beforeend`
+  BEFOREEND: `beforeend`,
+  AFTEREND: `afterend`
+};
+
+export const Mode = {
+  ADDING: `adding`,
+  DEFAULT: `default`,
 };
 
 // export const Keys = {
@@ -90,6 +96,9 @@ export const render = (container, element, place) => {
       break;
     case Position.BEFOREEND:
       container.append(element);
+      break;
+    case Position.AFTEREND:
+      container.insertAdjacentElement(place, element);
       break;
   }
 };
