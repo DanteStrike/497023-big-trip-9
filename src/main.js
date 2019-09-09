@@ -1,10 +1,16 @@
 import {eventsList} from './data/events-list.js';
+import API from './utils/api.js';
 import TripController from './controllers/trip-controller.js';
 import TripInfoController from './controllers/trip-info-controller.js';
 import PagesController from './controllers/pages-controller.js';
 import StatsController from './controllers/stats-controller.js';
 import FiltersController from './controllers/filters-controller.js';
+import {serverConfig} from './configs.js';
 
+const api = new API(serverConfig);
+api.getPoints().then((res) => console.log(res));
+api.getDestinations().then((res) => console.log(res));
+api.getOffers().then((res) => console.log(res));
 
 const tripInfoElement = document.querySelector(`.trip-info`);
 

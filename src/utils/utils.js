@@ -19,6 +19,13 @@ export const Mode = {
   DEFAULT: `default`,
 };
 
+export const Method = {
+  GET: `GET`,
+  POST: `POST`,
+  PUT: `PUT`,
+  DELETE: `DELETE`
+};
+
 // export const Keys = {
 //   ESCAPE: `Escape`,
 //   ieESC: `Esc`
@@ -159,4 +166,16 @@ export const formatDateToMonthDay = (date) => {
     .split(` `)
     .slice(1, 3)
     .join(` `);
+};
+
+export const toJSON = (response) => {
+  return response.json();
+};
+
+
+export const getAuthToken = () => {
+  const numberSystem = 36;
+
+  return Math.random()
+    .toString(numberSystem);
 };

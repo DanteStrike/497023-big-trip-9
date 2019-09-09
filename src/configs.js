@@ -1,3 +1,6 @@
+import {getAuthToken} from './utils/utils';
+
+
 export const eventConfig = {
   descriptions: {
     minAmount: 1,
@@ -35,3 +38,9 @@ export const eventsListConfig = {
   minAmount: 10,
   maxAmount: 15
 };
+
+export const serverConfig = {
+  endPoint: `https://htmlacademy-es-9.appspot.com/big-trip/`,
+  authToken: `Basic ${getAuthToken()}`
+};
+
