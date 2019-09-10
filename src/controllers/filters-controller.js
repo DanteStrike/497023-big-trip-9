@@ -1,4 +1,5 @@
-import {render, Position, unrender} from '../utils/utils';
+import {Position} from '../utils/enum.js';
+import {render, unrender} from '../utils/dom.js';
 import Filters from '../components/trip-filters';
 
 class FiltersController {

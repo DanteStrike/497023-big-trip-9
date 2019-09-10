@@ -1,35 +1,35 @@
-import {eventsData} from './events-data.js';
+// import {eventsData} from './events-data.js';
 
-// Получит с сервера варианты пунктов назначения (для Datalist формы редактирования)
-const getNewDatalistOptions = (type) => {
-  let options = [];
+// // Получит с сервера варианты пунктов назначения (для Datalist формы редактирования)
+// const getNewDatalistOptions = (type) => {
+//   let options = [];
 
-  switch (type) {
-    case `flight`:
-      options = Array.from(eventsData.destination.cities);
-      break;
+//   switch (type) {
+//     case `flight`:
+//       options = Array.from(eventsData.destination.cities);
+//       break;
 
-    case `check-in`:
-      options = Array.from(eventsData.destination.checkinPoints);
-      break;
+//     case `check-in`:
+//       options = Array.from(eventsData.destination.checkinPoints);
+//       break;
 
-    case `sightseeing`:
-      options = Array.from(eventsData.destination.sights);
-      break;
+//     case `sightseeing`:
+//       options = Array.from(eventsData.destination.sights);
+//       break;
 
-    case `restaurant`:
-      options = Array.from(eventsData.destination.eatingPoints);
-      break;
+//     case `restaurant`:
+//       options = Array.from(eventsData.destination.eatingPoints);
+//       break;
 
-    default:
-      options = Array.from(new Set([...eventsData.destination.cities,
-        ...eventsData.destination.sights,
-        ...eventsData.destination.eatingPoints,
-        ...eventsData.destination.checkinPoints]));
-  }
+//     default:
+//       options = Array.from(new Set([...eventsData.destination.cities,
+//         ...eventsData.destination.sights,
+//         ...eventsData.destination.eatingPoints,
+//         ...eventsData.destination.checkinPoints]));
+//   }
 
-  return options;
-};
+//   return options;
+// };
 
 
-export {getNewDatalistOptions};
+// export {getNewDatalistOptions};

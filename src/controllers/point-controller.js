@@ -1,12 +1,13 @@
-import {render, Position, Mode, unrender} from '../utils/utils.js';
+import {Position, Mode} from '../utils/enum.js';
+import {render, unrender} from '../utils/dom.js';
 import Event from '../components/event.js';
 import PointEditController from './point-edit-controller.js';
 
 
 class PointController {
-  constructor(container, eventData, mode, onChangeView, onDataChange) {
+  constructor(container, data, mode, onChangeView, onDataChange) {
     this._container = container;
-    this._data = eventData;
+    this._data = data;
     this._mode = mode;
 
     this._onChangeView = onChangeView;

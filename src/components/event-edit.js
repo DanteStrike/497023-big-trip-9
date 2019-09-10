@@ -1,5 +1,7 @@
 import AbstractComponent from './abstract.js';
-import {createElement, hideElement, showElement, formatDateTimeValue, Mode} from '../utils/utils.js';
+import {Mode} from '../utils/enum.js';
+import {createElement, hideElement, showElement} from '../utils/dom.js';
+import {formatDateTimeValue} from '../utils/utils.js';
 
 
 import flatpickr from 'flatpickr';

@@ -1,5 +1,6 @@
 import AbstractComponent from './abstract.js';
-import {TimeValue, formatDateTime, formatDateTimeView} from '../utils/utils.js';
+import {TimeValue} from '../utils/enum.js';
+import {formatDateTime, formatDateTimeView} from '../utils/utils.js';
 
 
 class Event extends AbstractComponent {

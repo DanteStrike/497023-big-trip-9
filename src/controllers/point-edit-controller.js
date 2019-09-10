@@ -1,8 +1,6 @@
+import {Mode} from '../utils/enum.js';
 import EditEvent from '../components/event-edit.js';
-import {getNewDestinationData} from '../data/destination-data.js';
-import {getNewDatalistOptions} from '../data/datalist-data.js';
-import {getTypeData} from '../data/type-data.js';
-import {Mode} from '../utils/utils.js';
+
 
 class PointEditController {
   constructor(eventData, mode, onEditClose, onEditSave) {
@@ -28,7 +26,7 @@ class PointEditController {
   }
 
   init() {
-    const datalistOptions = getNewDatalistOptions(this._data.type.name);
+    const datalistOptions = [];
     this._pointEdit = new EditEvent(this._data, datalistOptions, this._mode, this._onDestinationChange, this._onTypeChange);
     this._hangHandlers();
   }
@@ -39,8 +37,8 @@ class PointEditController {
 
   //  При изменении типа точки менять доступные пункты назначения
   _onTypeChange(newType) {
-    const newTypeData = getTypeData(newType);
-    const newDatalistOptions = getNewDatalistOptions(newType);
+    const newTypeData = [];
+    const newDatalistOptions = [];
     return {
       newTypeData,
       newDatalistOptions
@@ -49,7 +47,7 @@ class PointEditController {
 
   //  При изменении пункты назначения загружать новые данные
   _onDestinationChange(newDestination) {
-    this._tempDestinationData = getNewDestinationData(newDestination);
+    this._tempDestinationData = [];
     return this._tempDestinationData;
   }
 
@@ -99,47 +97,47 @@ class PointEditController {
   }
 
   _onSubmit(evt) {
-    evt.preventDefault();
-    let formData;
+    // evt.preventDefault();
+    // let formData;
 
-    if (this._mode === Mode.ADDING) {
-      formData = new FormData(this._pointEdit.getElement());
-    } else {
-      formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
-    }
+    // if (this._mode === Mode.ADDING) {
+    //   formData = new FormData(this._pointEdit.getElement());
+    // } else {
+    //   formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
+    // }
 
-    //  Если пользователь выбрал и получил данные новой точки назначения с сервера,
-    //  изменить описание, предложение и фотографии текущей точки.
-    const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
+    // //  Если пользователь выбрал и получил данные новой точки назначения с сервера,
+    // //  изменить описание, предложение и фотографии текущей точки.
+    // const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
 
-    const entry = {
-      id: this._data.id,
-      type: getTypeData(formData.get(`event-type`)),
-      destination: formData.get(`event-destination`),
-      description: newDestinationData.description,
-      time: {
-        start: new Date(formData.get(`event-start-time`)).valueOf(),
-        end: new Date(formData.get(`event-end-time`)).valueOf()
-      },
-      offers: newDestinationData.offers
-        .map((offer, index) => {
-          offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
-          return offer;
-        }),
-      price: Number(formData.get(`event-price`)),
-      photos: newDestinationData.photos,
-      isFavorite: formData.get(`event-favorite`) ? true : false
-    };
+    // const entry = {
+    //   id: this._data.id,
+    //   type: getTypeData(formData.get(`event-type`)),
+    //   destination: formData.get(`event-destination`),
+    //   description: newDestinationData.description,
+    //   time: {
+    //     start: new Date(formData.get(`event-start-time`)).valueOf(),
+    //     end: new Date(formData.get(`event-end-time`)).valueOf()
+    //   },
+    //   offers: newDestinationData.offers
+    //     .map((offer, index) => {
+    //       offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
+    //       return offer;
+    //     }),
+    //   price: Number(formData.get(`event-price`)),
+    //   photos: newDestinationData.photos,
+    //   isFavorite: formData.get(`event-favorite`) ? true : false
+    // };
 
-    switch (this._mode) {
-      case Mode.ADDING:
-        this._onEditSave(null, entry);
-        break;
+    // switch (this._mode) {
+    //   case Mode.ADDING:
+    //     this._onEditSave(null, entry);
+    //     break;
 
-      case Mode.DEFAULT:
-        this._onEditSave(this._data, entry);
-        break;
-    }
+    //   case Mode.DEFAULT:
+    //     this._onEditSave(this._data, entry);
+    //     break;
+    // }
   }
 }
 
