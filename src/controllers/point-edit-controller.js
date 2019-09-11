@@ -1,22 +1,23 @@
 import {Mode} from '../utils/enum.js';
-import EditEvent from '../components/event-edit.js';
+import PointEditView from '../components/point-edit-view.js';
 
 
 class PointEditController {
-  constructor(eventData, mode, onEditClose, onEditSave) {
-    this._data = eventData;
+  constructor(data, destinations, offers, mode, onEditClose, onEditSave) {
+    this._data = data;
     this._mode = mode;
+
+    this._destinations = destinations;
+    this._offers = offers;
 
     this._onEditClose = onEditClose;
     this._onEditSave = onEditSave;
 
-    //  От потери окружения
+    //  От потери окружения. Сохраняем событие, чтобы потом корректно удалить.
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
 
     //  Обратная связь с формой редактирования при изменении пункта назначения
-    this._tempDestinationData = null;
     this._onDestinationChange = this._onDestinationChange.bind(this);
-
     //  Обратная связь с формой редактирования при изменении типа точки
     this._onTypeChange = this._onTypeChange.bind(this);
   }
@@ -26,8 +27,7 @@ class PointEditController {
   }
 
   init() {
-    const datalistOptions = [];
-    this._pointEdit = new EditEvent(this._data, datalistOptions, this._mode, this._onDestinationChange, this._onTypeChange);
+    this._pointEdit = new PointEditView(this._data, this._destinations.getNames(), this._mode, this._onDestinationChange, this._onTypeChange);
     this._hangHandlers();
   }
 
@@ -35,20 +35,14 @@ class PointEditController {
     document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
-  //  При изменении типа точки менять доступные пункты назначения
+  //  При изменении типа точки менять предложения
   _onTypeChange(newType) {
-    const newTypeData = [];
-    const newDatalistOptions = [];
-    return {
-      newTypeData,
-      newDatalistOptions
-    };
+    return this._offers.getTypeOffers(newType);
   }
 
   //  При изменении пункты назначения загружать новые данные
   _onDestinationChange(newDestination) {
-    this._tempDestinationData = [];
-    return this._tempDestinationData;
+    return this._destinations.getInfo(newDestination);
   }
 
   _hangHandlers() {
@@ -97,7 +91,7 @@ class PointEditController {
   }
 
   _onSubmit(evt) {
-    // evt.preventDefault();
+    evt.preventDefault();
     // let formData;
 
     // if (this._mode === Mode.ADDING) {

@@ -1,7 +1,9 @@
 import {getAuthToken} from './utils/utils';
 
 
-export const eventConfig = {
+export const transferTypes = new Set([`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`]);
+
+export const pointConfig = {
   maxOffers: 3
 };
 

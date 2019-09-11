@@ -1,9 +1,10 @@
 import AbstractComponent from './abstract.js';
 import {TimeValue} from '../utils/enum.js';
 import {formatDateTime, formatDateTimeView} from '../utils/utils.js';
+import {pointConfig} from '../configs.js';
 
 
-class Event extends AbstractComponent {
+class PointView extends AbstractComponent {
   constructor({type, destination, time, price, offers}) {
     super();
     this._type = type;
@@ -31,7 +32,7 @@ class Event extends AbstractComponent {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${this._type.icon}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${this._type.title} ${this._destination}</h3>
+        <h3 class="event__title">${this._type.title} ${this._destination.name}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
@@ -52,10 +53,10 @@ class Event extends AbstractComponent {
 
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${this._offers.map((offer) => `<li class="event__offer" ${offer.isActive ? `` : `style="color: gray;"`}>
-          <span class="event__offer-title" ${offer.isActive ? `` : `style="color: gray;"`}>${offer.description}</span>
+          ${this._offers.slice(-pointConfig.maxOffers).map((offer) => `<li class="event__offer">
+          <span class="event__offer-title">${offer.title}</span>
           +
-          €&nbsp;<span class="event__offer-price" ${offer.isActive ? `` : `style="color: gray;"`}>${offer.price}</span>
+          €&nbsp;<span class="event__offer-price">${offer.price}</span>
           </li>`).join(``)}
 
         </ul>
@@ -69,4 +70,4 @@ class Event extends AbstractComponent {
 }
 
 
-export default Event;
+export default PointView;

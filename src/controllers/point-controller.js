@@ -1,14 +1,17 @@
 import {Position, Mode} from '../utils/enum.js';
 import {render, unrender} from '../utils/dom.js';
-import Event from '../components/event.js';
+import PointView from '../components/point-view.js';
 import PointEditController from './point-edit-controller.js';
 
 
 class PointController {
-  constructor(container, data, mode, onChangeView, onDataChange) {
+  constructor(container, data, destinations, offers, mode, onChangeView, onDataChange) {
     this._container = container;
     this._data = data;
     this._mode = mode;
+
+    this._destinations = destinations;
+    this._offers = offers;
 
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
@@ -21,13 +24,13 @@ class PointController {
   init() {
     switch (this._mode) {
       case Mode.ADDING:
-        this._newPointEditController = new PointEditController(this._data, this._mode, this._onEditClose, this._onEditSave);
+        this._newPointEditController = new PointEditController(this._data, this._destinations, this._offers, this._mode, this._onEditClose, this._onEditSave);
         this._newPointEditController.init();
         render(this._container, this._newPointEditController.getPointEditElement(), Position.AFTEREND);
         break;
 
       case Mode.DEFAULT:
-        this._pointView = new Event(this._data);
+        this._pointView = new PointView(this._data);
         this._pointView.getElement().querySelector(`.event__rollup-btn`)
           .addEventListener(`click`, () => this._onRollupBtnClick());
         render(this._container, this._pointView.getElement(), Position.BEFOREEND);
@@ -52,7 +55,7 @@ class PointController {
 
   _onRollupBtnClick() {
     this._onChangeView();
-    this._newPointEditController = new PointEditController(this._data, this._mode, this._onEditClose, this._onEditSave);
+    this._newPointEditController = new PointEditController(this._data, this._destinations, this._offers, this._mode, this._onEditClose, this._onEditSave);
     this._newPointEditController.init();
     this._container.replaceChild(this._newPointEditController.getPointEditElement(), this._pointView.getElement());
   }

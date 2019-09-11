@@ -23,19 +23,17 @@ class TripController {
     this._onMainDataChange = onDataChange;
   }
 
+  setDestinations(destinations) {
+    this._tripListController.setDestinations(destinations);
+  }
+
+  setOffers(offers) {
+    this._tripListController.setOffers(offers);
+  }
+
   init() {
-    render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
     this._sort.getElement().addEventListener(`click`, (evt) => this._onSortBtnClick(evt));
   }
-  // if (this._points.length === 0) {
-  //   return;
-  // }
-
-  // render(this._container, this._sort.getElement(), Position.BEFOREEND);
-  // this._sort.getElement().addEventListener(`click`, (evt) => this._onSortBtnClick(evt));
-  // render(this._container, this._board.getElement(), Position.BEFOREEND);
-
-  // this._tripListController.setEventsByDays(this._points);
 
   show() {
     showElement(this._container);

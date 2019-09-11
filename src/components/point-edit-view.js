@@ -1,5 +1,5 @@
 import AbstractComponent from './abstract.js';
-import {Mode} from '../utils/enum.js';
+import {Mode, TagName} from '../utils/enum.js';
 import {createElement, hideElement, showElement} from '../utils/dom.js';
 import {formatDateTimeValue} from '../utils/utils.js';
 
@@ -9,27 +9,46 @@ import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 
 
-class EventEdit extends AbstractComponent {
-  constructor({type, description, destination, time, price, offers, isFavorite, photos}, datalistOptions, mode, onDestinationChange, onTypeChange) {
+class PointEditView extends AbstractComponent {
+  constructor({type, destination, time, basePrice, offers, isFavorite}, datalistOptions, mode, onDestinationChange, onTypeChange) {
     super();
     this._type = type;
     this._destination = destination;
-    this._description = description;
     this._time = time;
     this._offers = offers;
-    this._price = price;
-    this._photos = photos;
+    this._basePrice = basePrice;
     this._isFavorite = isFavorite;
     this._datalistOptions = datalistOptions;
-
     this._mode = mode;
 
-    //  Передать контроллеру информацию, что было обращение к серверу за данными
+    this._currentIconImg = this.getElement().querySelector(`.event__type-icon`);
+    this._typeOutput = this.getElement().querySelector(`.event__type-output`);
+    this._typeToggle = this.getElement().querySelector(`.event__type-toggle`);
+    this._typeListElement = this.getElement().querySelector(`.event__type-list`);
+    this._destinationInputElement = this.getElement().querySelector(`.event__input--destination`);
+    this._priceInputElement = this.getElement().querySelector(`.event__input--price`);
+    this._favoriteInputElement = this.getElement().querySelector(`input#event-favorite-1`);
+    this._detailsSectionElement = this.getElement().querySelector(`.event__details`);
+    this._destinationDescriptionElement = this._detailsSectionElement.querySelector(`.event__destination-description`);
+    this._offersSectionElement = this._detailsSectionElement.querySelector(`.event__section--offers`);
+    this._offersElement = this._offersSectionElement.querySelector(`.event__available-offers`);
+    this._picturesContainerElement = this._detailsSectionElement.querySelector(`.event__photos-container`);
+    this._picturesElement = this._picturesContainerElement.querySelector(`.event__photos-tape`);
+    //  Передать контроллеру информацию  о соответствующих изменениях
     this._onDestinationChange = onDestinationChange;
     this._onTypeChange = onTypeChange;
 
     this._initFlatpickr();
     this._hangHandlers();
+  }
+
+  _getOffersCost(offers) {
+    return offers.reduce((accum, offer) => {
+      if (offer.accepted) {
+        accum += offer.price;
+      }
+      return accum;
+    }, 0);
   }
 
   _initFlatpickr() {
@@ -67,116 +86,73 @@ class EventEdit extends AbstractComponent {
   }
 
   _hangHandlers() {
-    this.getElement().querySelector(`.event__type-list`)
-      .addEventListener(`click`, (evt) => this._onEventTypeListClick(evt));
-    this.getElement().querySelector(`input.event__input--destination`)
-      .addEventListener(`input`, (evt) => this._onDestinationInput(evt));
-    this.getElement().querySelector(`input.event__input--destination`)
-      .addEventListener(`keydown`, (evt) => this._onDestinationKeyDown(evt));
-    this.getElement().querySelector(`.event__section--offers`)
-      .addEventListener(`click`, (evt) => this._onOffersClick(evt));
-  }
-
-  //  Сбросить информацию о точке
-  _resetEventInfo() {
-    const detailsSectionElement = this.getElement().querySelector(`.event__details`);
-    const eventFavoriteInput = this.getElement().querySelector(`input#event-favorite-1`);
-    const eventInputDestination = this.getElement().querySelector(`input.event__input--destination`);
-
-    hideElement(detailsSectionElement);
-    eventInputDestination.value = ``;
-    if (eventFavoriteInput) {
-      eventFavoriteInput.checked = false;
-    }
+    this._typeListElement.addEventListener(`click`, (evt) => this._onPointTypeListClick(evt));
+    this._destinationInputElement.addEventListener(`input`, (evt) => this._onDestinationInput(evt));
+    this._destinationInputElement.addEventListener(`keydown`, (evt) => this._onDestinationKeyDown(evt));
+    this._offersSectionElement.addEventListener(`click`, (evt) => this._onOffersClick(evt));
   }
 
   //  При изменении типа точки, изменить доступные варианты выбора пункта назначения
-  _onEventTypeListClick(evt) {
+  _onPointTypeListClick(evt) {
     const target = evt.target;
-
-    if (target.tagName !== `INPUT`) {
+    if (target.tagName !== TagName.INPUT) {
       return;
     }
-
     const newType = target.value;
-    const {newTypeData, newDatalistOptions} = this._onTypeChange(newType);
+    const {type, offers} = this._onTypeChange(newType);
+    const newOffersElement = createElement(this._getOffersTemplate(offers));
 
-    const eventIconImg = this.getElement().querySelector(`img.event__type-icon`);
-    const eventTypeOutput = this.getElement().querySelector(`label.event__type-output`);
-    const eventTypeToggle = this.getElement().querySelector(`input.event__type-toggle`);
+    if (offers.length === 0) {
+      hideElement(this._offersSectionElement);
+    } else {
+      showElement(this._offersSectionElement);
+    }
+    this._offersSectionElement.replaceChild(newOffersElement, this._offersElement);
+    this._offersElement = newOffersElement;
 
-    const dataListContainer = this.getElement().querySelector(`.event__field-group--destination`);
-    const oldDataList = dataListContainer.querySelector(`datalist#destination-list-1`);
-    const newDataList = createElement(this._getDataListTemplate(newDatalistOptions));
-
-    eventIconImg.src = `${eventIconImg.baseURI.replace(`#`, ``)}img/icons/${newTypeData.icon}.png`;
-    eventTypeOutput.textContent = `${newTypeData.title}`;
-
-    this._resetEventInfo();
-
-    dataListContainer.replaceChild(newDataList, oldDataList);
-    eventTypeToggle.checked = false;
+    this._currentIconImg.src = `${this._currentIconImg.baseURI.replace(`#`, ``)}img/icons/${type.icon}.png`;
+    this._typeOutput.textContent = `${type.title}`;
+    this._typeToggle.checked = false;
   }
 
   //  При изменении пункта назначения изменить отображение согласно новым данным, поступившим с сервера.
   _onDestinationInput(evt) {
     evt.preventDefault();
-
-    const target = evt.currentTarget;
-    const newDestination = target.value;
+    const newDestination = evt.currentTarget.value;
     const newDestinationData = this._onDestinationChange(newDestination);
+    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
 
-    const detailsSectionElement = this.getElement().querySelector(`.event__details`);
-    const destinationDescriptionElement = detailsSectionElement.querySelector(`.event__destination-description`);
-    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
-
-    const offersSectionElement = detailsSectionElement.querySelector(`.event__section--offers`);
-    const oldOffersElement = offersSectionElement.querySelector(`.event__available-offers`);
-    const newOffersElement = createElement(this._getOffersTemplate(newDestinationData.offers));
-
-    const photosContainerElement = this.getElement().querySelector(`.event__photos-container`);
-    const oldPhotosElement = photosContainerElement.querySelector(`.event__photos-tape`);
-    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.photos));
-
-    showElement(detailsSectionElement);
-    destinationDescriptionElement.textContent = newDestinationData.description;
-    eventPriceInput.value = newDestinationData.price;
-
-    if (newDestinationData.offers.length === 0) {
-      hideElement(offersSectionElement);
-    } else {
-      showElement(offersSectionElement);
-    }
-    offersSectionElement.replaceChild(newOffersElement, oldOffersElement);
-
-    photosContainerElement.replaceChild(newPhotosElement, oldPhotosElement);
+    showElement(this._detailsSectionElement);
+    this._destinationDescriptionElement.innerHTML = newDestinationData.description;
+    this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
+    this._picturesElement = newPhotosElement;
   }
 
   //  Согласно ТЗ пользователь не может вводить сам пункт назначения
   _onDestinationKeyDown(evt) {
     evt.preventDefault();
-
     if (evt.key === `Backspace` || evt.key === `Delete`) {
-      this._resetEventInfo();
+      hideElement(this._detailsSectionElement);
+      if (this._favoriteInputElement) {
+        this._favoriteInputElement.checked = false;
+      }
+      this._destinationInputElement.value = ``;
     }
   }
 
   //  Включение/Отключение предложения должно влиять на цену
   _onOffersClick(evt) {
     const target = evt.target;
-
-    if (target.tagName !== `INPUT`) {
+    if (target.tagName !== TagName.INPUT) {
       return;
     }
-
     const offer = target;
-    const eventPriceInput = this.getElement().querySelector(`.event__input--price`);
-    eventPriceInput.value = (offer.checked) ? Number(eventPriceInput.value) + Number(offer.value) : Number(eventPriceInput.value) - Number(offer.value);
+    this._priceInputElement.value = (offer.checked) ? Number(this._priceInputElement.value) + Number(offer.value) : Number(this._priceInputElement.value) - Number(offer.value);
   }
 
-  _getPhotosTemplate(photos) {
+  _getPhotosTemplate(pictures) {
     return `<div class="event__photos-tape">
-              ${photos.map((photoURL) => `<img class="event__photo" src="${photoURL}" alt="Event photo">`)
+              ${pictures.map(({src, description}) => `<img class="event__photo" src="${src}" alt="${description}">`)
                 .join(``)}
             </div>`;
   }
@@ -184,9 +160,9 @@ class EventEdit extends AbstractComponent {
   _getOffersTemplate(offers) {
     return `<div class="event__available-offers">
       ${offers.map((offer, index) => `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" value="${offer.price}" ${offer.isActive ? `checked` : ``}>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" value="${offer.price}" ${offer.accepted ? `checked` : ``}>
           <label class="event__offer-label" for="event-offer-luggage-${index}">
-            <span class="event__offer-title">${offer.description}</span>
+            <span class="event__offer-title">${offer.title}</span>
             +
             €&nbsp;<span class="event__offer-price">${offer.price}</span>
           </label>
@@ -202,7 +178,7 @@ class EventEdit extends AbstractComponent {
 
   _getTemplate() {
     return `${this._mode === Mode.ADDING ? `` : `<li class="trip-events__item">`}
-      <form class="event  event--edit ${!this._destination ? `trip-events__item` : ``}" action="#" method="post">
+      <form class="event  event--edit ${this._mode === Mode.ADDING ? `trip-events__item` : ``}" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
             <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -276,7 +252,7 @@ class EventEdit extends AbstractComponent {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${this._type.title}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination ? `${this._destination}` : ``}" list="destination-list-1" required autocomplete="off">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${this._destination.name ? `${this._destination.name}` : ``}" list="destination-list-1" required autocomplete="off">
             ${this._getDataListTemplate(this._datalistOptions)}
           </div>
 
@@ -297,7 +273,7 @@ class EventEdit extends AbstractComponent {
               <span class="visually-hidden">Price</span>
               €
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._price ? `${this._price}` : ``}">
+            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._mode === Mode.ADDING ? `` : `${this._basePrice + this._getOffersCost(this._offers)}`}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -316,7 +292,7 @@ class EventEdit extends AbstractComponent {
           </button>`}
         </header>
 
-        <section class="event__details ${!this._destination ? `visually-hidden` : ``}">
+        <section class="event__details ${this._mode === Mode.ADDING ? `visually-hidden` : ``}">
 
           <section class="event__section  event__section--offers ${(this._offers.length === 0) ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -326,10 +302,10 @@ class EventEdit extends AbstractComponent {
 
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${this._description ? `${this._description}` : ``}</p>
+            <p class="event__destination-description">${this._destination.description ? `${this._destination.description}` : ``}</p>
 
             <div class="event__photos-container">
-              ${this._getPhotosTemplate(this._photos)}
+              ${this._getPhotosTemplate(this._destination.pictures)}
             </div>
           </section>
         </section>
@@ -339,4 +315,4 @@ class EventEdit extends AbstractComponent {
 }
 
 
-export default EventEdit;
+export default PointEditView;

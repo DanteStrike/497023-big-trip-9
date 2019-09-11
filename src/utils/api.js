@@ -3,6 +3,7 @@ import {toJSON} from './utils.js';
 import {Method} from './enum.js';
 import Destinations from '../data/destinations.js';
 import Offers from '../data/offers.js';
+import Point from '../data/point.js';
 
 
 class API {
@@ -13,7 +14,8 @@ class API {
 
   getPoints() {
     return this._load({url: `points`})
-      .then(toJSON);
+      .then(toJSON)
+      .then((jsonData) => Point.parsePoints(jsonData));
   }
 
   getDestinations() {

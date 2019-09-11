@@ -23,8 +23,6 @@ const onFilterTypeChange = (newType) => {
 };
 
 const onDataChange = (events) => {
-  eventsListMock = events;
-  tripInfoController.update(eventsListMock);
 };
 
 const tripInfoController = new TripInfoController(tripInfoElement);
@@ -38,11 +36,11 @@ filtersController.init();
 
 tripController.init();
 statsController.init();
-// api.getDestinations().then((destinations) => tripController.setDestinations(destinations));
-// api.getOffers().then((offers) => tripController.setOffers(offers));
+api.getDestinations().then((destinations) => tripController.setDestinations(destinations));
+api.getOffers().then((offers) => tripController.setOffers(offers));
 api.getPoints().then((points) => {
   tripController.showPoints(points);
-  statsController.setPoints(points);
+//  statsController.setPoints(points);
 });
 
 pagesController.init();

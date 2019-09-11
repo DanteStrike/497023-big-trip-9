@@ -4,7 +4,10 @@ class Destinations {
   }
 
   getNames() {
-    return this._data.reduce((accum, destination) => accum.push(destination.name), []);
+    return this._data.reduce((accum, destination) => {
+      accum.push(destination.name);
+      return accum;
+    }, []);
   }
 
   getInfo(name) {
