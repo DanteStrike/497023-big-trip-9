@@ -1,4 +1,4 @@
-import {Mode} from '../utils/enum.js';
+import {Mode, Key, Action} from '../utils/enum.js';
 import PointEditView from '../components/point-edit-view.js';
 
 
@@ -28,6 +28,8 @@ class PointEditController {
 
   init() {
     this._pointEdit = new PointEditView(this._data, this._destinations.getNames(), this._mode, this._onDestinationChange, this._onTypeChange);
+    this._formElement = (this._mode === Mode.ADDING) ? this._pointEdit.getElement() : this._pointEdit.getElement().querySelector(`form`);
+    this._rollupButtonElement = this._formElement.querySelector(`.event__rollup-btn`);
     this._hangHandlers();
   }
 
@@ -45,29 +47,39 @@ class PointEditController {
     return this._destinations.getInfo(newDestination);
   }
 
-  _hangHandlers() {
-    switch (this._mode) {
-      case Mode.ADDING:
-        this._pointEdit.getElement()
-        .addEventListener(`submit`, (evt) => this._onSubmit(evt));
-        this._pointEdit.getElement()
-          .addEventListener(`reset`, (evt) => this._onReset(evt));
-        break;
+  _update(data) {
+    const formData = new FormData(this._formElement);
+    const typeData = this._offers.getTypeOffers(formData.get(`event-type`));
 
-      case Mode.DEFAULT:
-        this._pointEdit.getElement().querySelector(`.event__rollup-btn`)
-          .addEventListener(`click`, () => this._onRollupBtnClick());
-        this._pointEdit.getElement().querySelector(`form`)
-          .addEventListener(`submit`, (evt) => this._onSubmit(evt));
-        this._pointEdit.getElement().querySelector(`form`)
-          .addEventListener(`reset`, (evt) => this._onReset(evt));
-        document.addEventListener(`keydown`, this._onEscKeyDown);
-        break;
+    data.type = typeData.type;
+    data.destination = this._destinations.getInfo(formData.get(`event-destination`));
+    data.time = {
+      start: new Date(formData.get(`event-start-time`)).valueOf(),
+      end: new Date(formData.get(`event-end-time`)).valueOf()
+    };
+    data.basePrice = Number(formData.get(`event-price`));
+    data.offers = typeData.offers
+      .map((offer, index) => {
+        offer.accepted = formData.get(`event-offer-luggage-${index}`) ? true : false;
+        return offer;
+      });
+    data.isFavorite = Boolean(formData.get(`event-favorite`));
+
+    return data;
+  }
+
+  _hangHandlers() {
+    this._formElement.addEventListener(`submit`, (evt) => this._onSubmit(evt));
+    this._formElement.addEventListener(`reset`, (evt) => this._onReset(evt));
+
+    if (this._mode === Mode.DEFAULT) {
+      this._rollupButtonElement.addEventListener(`click`, () => this._onRollupBtnClick());
+      document.addEventListener(`keydown`, this._onEscKeyDown);
     }
   }
 
   _onEscKeyDown(evt) {
-    if (evt.key === `Esc` || evt.key === `Escape`) {
+    if (evt.key === Key.IE_ESC || evt.key === Key.ESCAPE) {
       this._onEditClose();
       this.removeOnEscKeyDown();
     }
@@ -83,55 +95,28 @@ class PointEditController {
 
     switch (this._mode) {
       case Mode.ADDING:
-        this._onEditSave(null, null);
+        this._onEditSave(Action.NONE, null);
         break;
       case Mode.DEFAULT:
-        this._onEditSave(this._data, null);
+        this._onEditSave(Action.DELETE, this._data);
+        break;
     }
   }
 
   _onSubmit(evt) {
     evt.preventDefault();
-    // let formData;
 
-    // if (this._mode === Mode.ADDING) {
-    //   formData = new FormData(this._pointEdit.getElement());
-    // } else {
-    //   formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
-    // }
+    const update = this._update(this._data);
 
-    // //  Если пользователь выбрал и получил данные новой точки назначения с сервера,
-    // //  изменить описание, предложение и фотографии текущей точки.
-    // const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
+    switch (this._mode) {
+      case Mode.ADDING:
+        this._onEditSave(Action.CREATE, update);
+        break;
 
-    // const entry = {
-    //   id: this._data.id,
-    //   type: getTypeData(formData.get(`event-type`)),
-    //   destination: formData.get(`event-destination`),
-    //   description: newDestinationData.description,
-    //   time: {
-    //     start: new Date(formData.get(`event-start-time`)).valueOf(),
-    //     end: new Date(formData.get(`event-end-time`)).valueOf()
-    //   },
-    //   offers: newDestinationData.offers
-    //     .map((offer, index) => {
-    //       offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
-    //       return offer;
-    //     }),
-    //   price: Number(formData.get(`event-price`)),
-    //   photos: newDestinationData.photos,
-    //   isFavorite: formData.get(`event-favorite`) ? true : false
-    // };
-
-    // switch (this._mode) {
-    //   case Mode.ADDING:
-    //     this._onEditSave(null, entry);
-    //     break;
-
-    //   case Mode.DEFAULT:
-    //     this._onEditSave(this._data, entry);
-    //     break;
-    // }
+      case Mode.DEFAULT:
+        this._onEditSave(Action.UPDATE, update);
+        break;
+    }
   }
 }
 

@@ -30,11 +30,11 @@ class API {
       .then((jsonData) => new Offers(jsonData));
   }
 
-  createPoint({point}) {
+  createPoint(data) {
     return this._load({
-      url: `points`,
+      url: `points/`,
       method: Method.POST,
-      body: JSON.stringify(point),
+      body: JSON.stringify(data),
       headers: new Headers({'Content-type': `application/json`})
     })
       .then(toJSON);

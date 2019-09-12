@@ -44,13 +44,13 @@ class PointController {
     this._newPointEditController = null;
   }
 
-  _onEditSave(oldData, newData) {
+  _onEditSave(action, data) {
     if (this._mode === Mode.ADDING) {
       unrender(this._newPointEditController.getPointEditElement());
       this._newPointEditController = null;
     }
 
-    this._onDataChange(oldData, newData);
+    this._onDataChange(action, data);
   }
 
   _onRollupBtnClick() {

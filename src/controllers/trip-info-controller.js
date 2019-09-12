@@ -4,9 +4,9 @@ import {render, unrender} from '../utils/dom.js';
 
 
 class TripInfoController {
-  constructor(container, data) {
+  constructor(container) {
     this._container = container;
-    this._points = data;
+    this._points = [];
     this._tripInfo = new TripInfo();
     this._tripPriceElement = container.querySelector(`.trip-info__cost-value`);
   }
@@ -45,12 +45,33 @@ class TripInfoController {
     this._tripInfo.update(citiesData, datesData);
   }
 
+  _getOffersCost(offers) {
+    return offers.reduce((accum, offer) => {
+      if (offer.accepted) {
+        accum += offer.price;
+      }
+      return accum;
+    }, 0);
+  }
+
   _getCities() {
-    return this._points.reduce((accum, point) => accum.push(point.destination.name), []);
+    return this._points.reduce((cities, point) => {
+      cities.push(point.destination.name);
+      return cities;
+    }, []);
   }
 
   _getTripPrice() {
-    return this._points.reduce((accum, point) => accum + point.price, 0);
+    return this._points.reduce((totalCost, point) => {
+      totalCost += point.basePrice;
+      totalCost += point.offers.reduce((additionalCost, offer) => {
+        if (offer.accepted) {
+          additionalCost += offer.price;
+        }
+        return additionalCost;
+      }, 0);
+      return totalCost;
+    }, 0);
   }
 
 }

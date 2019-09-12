@@ -43,6 +43,10 @@ class TripController {
     hideElement(this._container);
   }
 
+  createEvent(createButton) {
+    this._tripListController.createEvent(createButton);
+  }
+
   showPoints(points) {
     if (points.length === 0 && !this._container.contains(this._noPoints.getElement())) {
       unrender(this._board);
@@ -82,8 +86,8 @@ class TripController {
   //   this._renderBoard();
   // }
 
-  _onDataChange({action, id, point}) {
-    this._onMainDataChange({action, id, point});
+  _onDataChange(action, data) {
+    this._onMainDataChange(action, data);
   }
 
   _renderBoard() {
@@ -94,7 +98,7 @@ class TripController {
         return;
 
       case SortType.PRICE:
-        const sortedByPrice = this._points.sort((a, b) => b.price - a.price);
+        const sortedByPrice = this._points.sort((a, b) => b.basePrice - a.basePrice);
         this._tripListController.setPoints(sortedByPrice);
         return;
 

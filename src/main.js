@@ -1,4 +1,6 @@
 import {serverConfig} from './configs.js';
+import {Action, FilterType} from './utils/enum.js';
+import {filterPoints} from './utils/filter-points.js';
 import API from './utils/api.js';
 import TripController from './controllers/trip-controller.js';
 import TripInfoController from './controllers/trip-info-controller.js';
@@ -18,11 +20,45 @@ const tripPageMainContainer = document.querySelector(`.page-main .page-body__con
 const tripListElement = tripPageMainContainer.querySelector(`.trip-events`);
 
 
-const onFilterTypeChange = (newType) => {
-  tripController.setFilterType(newType);
+let filterType = FilterType.EVERYTHING;
+let downloadedPoints = null;
+
+const onPointsDownload = (points) => {
+  downloadedPoints = points;
+  const filteredPoints = filterPoints(filterType, downloadedPoints);
+  tripController.showPoints(filteredPoints);
+  tripInfoController.update(downloadedPoints);
 };
 
-const onDataChange = (events) => {
+const onFilterTypeChange = (newType) => {
+  filterType = newType;
+  const filteredPoints = filterPoints(filterType, downloadedPoints);
+  tripController.showPoints(filteredPoints);
+};
+
+const onDataChange = (action, update) => {
+  switch (action) {
+    case Action.CREATE:
+      api.createPoint(update.toRAW())
+      .then(api.getPoints()
+        .then(onPointsDownload));
+      break;
+
+    case Action.UPDATE:
+      api.updatePoint({
+        id: update.id,
+        data: update.toRAW()
+      })
+      .then(api.getPoints()
+        .then(onPointsDownload));
+      break;
+
+    case Action.DELETE:
+      api.deletePoint(update.id)
+      .then(api.getPoints()
+        .then(onPointsDownload));
+      break;
+  }
 };
 
 const tripInfoController = new TripInfoController(tripInfoElement);
@@ -31,18 +67,19 @@ const tripController = new TripController(tripListElement, onDataChange);
 const statsController = new StatsController(tripPageMainContainer);
 const pagesController = new PagesController(menuHeaderElement, filtersController, tripController, statsController, createEventButton);
 
-//tripInfoController.init();
-filtersController.init();
-
+tripInfoController.init();
 tripController.init();
 statsController.init();
-api.getDestinations().then((destinations) => tripController.setDestinations(destinations));
-api.getOffers().then((offers) => tripController.setOffers(offers));
-api.getPoints().then((points) => {
-  tripController.showPoints(points);
-//  statsController.setPoints(points);
-});
-
 pagesController.init();
 
-
+api.getDestinations().
+then((destinations) => {
+  tripController.setDestinations(destinations);
+  api.getOffers()
+  .then((offers) => {
+    tripController.setOffers(offers);
+    api.getPoints()
+    .then(onPointsDownload)
+    .then(() => filtersController.init());
+  });
+});

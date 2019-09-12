@@ -15,7 +15,7 @@ class Offers {
         type: {
           name: foundedOffers.type,
           icon: foundedOffers.type,
-          title: transferTypes.has(foundedOffers.type) ? `${capitalizeFirstLetter(foundedOffers.type)} to` : `${capitalizeFirstLetter(foundedOffer.type)} in`
+          title: transferTypes.has(foundedOffers.type) ? `${capitalizeFirstLetter(foundedOffers.type)} to` : `${capitalizeFirstLetter(foundedOffers.type)} in`
         },
         offers: foundedOffers.offers.map((offer) => ({
           title: offer.name,

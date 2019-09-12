@@ -5,7 +5,7 @@ import {pointConfig} from '../configs.js';
 
 
 class PointView extends AbstractComponent {
-  constructor({type, destination, time, price, offers}) {
+  constructor({type, destination, time, basePrice, offers}) {
     super();
     this._type = type;
     this._destination = destination;
@@ -23,7 +23,7 @@ class PointView extends AbstractComponent {
         return Math.floor((this.milliseconds - this.days * TimeValue.MILLISECONDS_IN_DAY - this.hours * TimeValue.MILLISECONDS_IN_HOUR) / TimeValue.MILLISECONDS_IN_MINUTE);
       }};
     this._offers = offers;
-    this._price = price;
+    this._basePrice = basePrice;
   }
 
   _getTemplate() {
@@ -48,12 +48,12 @@ class PointView extends AbstractComponent {
         </div>
 
         <p class="event__price">
-          €&nbsp;<span class="event__price-value">${this._price}</span>
+          €&nbsp;<span class="event__price-value">${this._basePrice}</span>
         </p>
 
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${this._offers.slice(-pointConfig.maxOffers).map((offer) => `<li class="event__offer">
+          ${this._offers.filter((offer) => offer.accepted).slice(0, pointConfig.maxOffers).map((offer) => `<li class="event__offer">
           <span class="event__offer-title">${offer.title}</span>
           +
           €&nbsp;<span class="event__offer-price">${offer.price}</span>

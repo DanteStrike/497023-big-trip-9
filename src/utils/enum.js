@@ -29,7 +29,8 @@ export const FilterType = {
 export const Action = {
   CREATE: `create`,
   UPDATE: `update`,
-  DELETE: `delete`
+  DELETE: `delete`,
+  NONE: `none`
 };
 
 export const Mode = {
@@ -46,7 +47,9 @@ export const Method = {
 
 export const Key = {
   ESCAPE: `Escape`,
-  IE_ESC: `Esc`
+  IE_ESC: `Esc`,
+  BACKSPACE: `Backspace`,
+  DELETE: `Delete`
 };
 
 export const TagName = {

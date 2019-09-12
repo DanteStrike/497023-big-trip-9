@@ -1,6 +1,6 @@
 import AbstractComponent from './abstract.js';
-import {Mode, TagName} from '../utils/enum.js';
-import {createElement, hideElement, showElement} from '../utils/dom.js';
+import {Mode, TagName, Key, Position} from '../utils/enum.js';
+import {createElement, hideElement, showElement, render, unrender} from '../utils/dom.js';
 import {formatDateTimeValue} from '../utils/utils.js';
 
 
@@ -15,11 +15,16 @@ class PointEditView extends AbstractComponent {
     this._type = type;
     this._destination = destination;
     this._time = time;
-    this._offers = offers;
     this._basePrice = basePrice;
     this._isFavorite = isFavorite;
     this._datalistOptions = datalistOptions;
     this._mode = mode;
+
+    //  Передать контроллеру информацию о соответствующих событиях
+    this._onDestinationChange = onDestinationChange;
+    this._onTypeChange = onTypeChange;
+
+    this._offers = (this._mode === Mode.DEFAULT) ? offers : this._onTypeChange(this._type.name).offers;
 
     this._currentIconImg = this.getElement().querySelector(`.event__type-icon`);
     this._typeOutput = this.getElement().querySelector(`.event__type-output`);
@@ -27,28 +32,23 @@ class PointEditView extends AbstractComponent {
     this._typeListElement = this.getElement().querySelector(`.event__type-list`);
     this._destinationInputElement = this.getElement().querySelector(`.event__input--destination`);
     this._priceInputElement = this.getElement().querySelector(`.event__input--price`);
-    this._favoriteInputElement = this.getElement().querySelector(`input#event-favorite-1`);
+    this._pointResetButtonElement = this.getElement().querySelector(`.event__reset-btn`);
     this._detailsSectionElement = this.getElement().querySelector(`.event__details`);
     this._destinationDescriptionElement = this._detailsSectionElement.querySelector(`.event__destination-description`);
     this._offersSectionElement = this._detailsSectionElement.querySelector(`.event__section--offers`);
     this._offersElement = this._offersSectionElement.querySelector(`.event__available-offers`);
     this._picturesContainerElement = this._detailsSectionElement.querySelector(`.event__photos-container`);
     this._picturesElement = this._picturesContainerElement.querySelector(`.event__photos-tape`);
-    //  Передать контроллеру информацию  о соответствующих изменениях
-    this._onDestinationChange = onDestinationChange;
-    this._onTypeChange = onTypeChange;
+
+    this._favoriteInputElement = this.getElement().querySelector(`#event-favorite-1`);
+    this._favoriteButtonElement = this.getElement().querySelector(`.event__favorite-btn`);
+    if (this._mode === Mode.ADDING) {
+      unrender(this._favoriteInputElement);
+      unrender(this._favoriteButtonElement);
+    }
 
     this._initFlatpickr();
     this._hangHandlers();
-  }
-
-  _getOffersCost(offers) {
-    return offers.reduce((accum, offer) => {
-      if (offer.accepted) {
-        accum += offer.price;
-      }
-      return accum;
-    }, 0);
   }
 
   _initFlatpickr() {
@@ -89,7 +89,6 @@ class PointEditView extends AbstractComponent {
     this._typeListElement.addEventListener(`click`, (evt) => this._onPointTypeListClick(evt));
     this._destinationInputElement.addEventListener(`input`, (evt) => this._onDestinationInput(evt));
     this._destinationInputElement.addEventListener(`keydown`, (evt) => this._onDestinationKeyDown(evt));
-    this._offersSectionElement.addEventListener(`click`, (evt) => this._onOffersClick(evt));
   }
 
   //  При изменении типа точки, изменить доступные варианты выбора пункта назначения
@@ -122,6 +121,9 @@ class PointEditView extends AbstractComponent {
     const newDestinationData = this._onDestinationChange(newDestination);
     const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
 
+    render(this._pointResetButtonElement, this._favoriteInputElement, Position.AFTEREND);
+    render(this._favoriteInputElement, this._favoriteButtonElement, Position.AFTEREND);
+
     showElement(this._detailsSectionElement);
     this._destinationDescriptionElement.innerHTML = newDestinationData.description;
     this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
@@ -131,23 +133,14 @@ class PointEditView extends AbstractComponent {
   //  Согласно ТЗ пользователь не может вводить сам пункт назначения
   _onDestinationKeyDown(evt) {
     evt.preventDefault();
-    if (evt.key === `Backspace` || evt.key === `Delete`) {
+    if (evt.key === Key.BACKSPACE || evt.key === Key.DELETE) {
       hideElement(this._detailsSectionElement);
       if (this._favoriteInputElement) {
-        this._favoriteInputElement.checked = false;
+        unrender(this._favoriteInputElement);
+        unrender(this._favoriteButtonElement);
       }
       this._destinationInputElement.value = ``;
     }
-  }
-
-  //  Включение/Отключение предложения должно влиять на цену
-  _onOffersClick(evt) {
-    const target = evt.target;
-    if (target.tagName !== TagName.INPUT) {
-      return;
-    }
-    const offer = target;
-    this._priceInputElement.value = (offer.checked) ? Number(this._priceInputElement.value) + Number(offer.value) : Number(this._priceInputElement.value) - Number(offer.value);
   }
 
   _getPhotosTemplate(pictures) {
@@ -273,12 +266,11 @@ class PointEditView extends AbstractComponent {
               <span class="visually-hidden">Price</span>
               €
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._mode === Mode.ADDING ? `` : `${this._basePrice + this._getOffersCost(this._offers)}`}">
+            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._mode === Mode.ADDING ? `` : `${this._basePrice}`}" required>
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">Delete</button>
-          ${this._mode === Mode.ADDING ? `` : `
           <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
           <label class="event__favorite-btn" for="event-favorite-1">
             <span class="visually-hidden">Add to favorite</span>
@@ -286,7 +278,7 @@ class PointEditView extends AbstractComponent {
               <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"></path>
             </svg>
           </label>
-
+          ${this._mode === Mode.ADDING ? `` : `
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>`}

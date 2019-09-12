@@ -1,14 +1,16 @@
+import {defaultPointData} from '../configs.js';
 import {Position, TimeValue, Mode} from '../utils/enum.js';
 import {render} from '../utils/dom.js';
 import PointController from './point-controller.js';
 import TripDay from '../components/trip-day.js';
+import Point from '../data/point.js';
 
 class TripListController {
   constructor(container, createTaskContainer, onDataChange) {
     this._container = container;
     this._createTaskContainer = createTaskContainer;
     this._points = [];
-    this._creatingEvent = null;
+    this._creatingPoint = null;
     this._destinations = [];
     this._offers = [];
 
@@ -27,38 +29,21 @@ class TripListController {
     this._offers = offers;
   }
 
-  // createEvent(createButton) {
-  //   //  Запретить создавать более одной карточки за раз
-  //   if (this._creatingEvent) {
-  //     return;
-  //   }
+  createEvent(createButton) {
+    //  Запретить создавать более одной карточки за раз
+    if (this._creatingPoint) {
+      return;
+    }
 
-  //   const defaultEventData = {
-  //     type: {
-  //       name: `flight`,
-  //       icon: `flight`,
-  //       title: `Flight to`
-  //     },
-  //     destination: null,
-  //     description: null,
-  //     time: {
-  //       start: Date.now(),
-  //       end: Date.now(),
-  //     },
-  //     price: null,
-  //     offers: [],
-  //     photos: [],
-  //     isFavorite: false
-  //   };
-
-  //   this._creatingEvent = new PointController(this._createTaskContainer, defaultEventData, Mode.ADDING, this._onChangeView,
-  //       (...arg) => {
-  //         this._creatingEvent = null;
-  //         createButton.disabled = false;
-  //         this._onDataChange(...arg);
-  //       });
-  //   this._creatingEvent.init();
-  // }
+    const defaultPoint = new Point(defaultPointData);
+    this._creatingPoint = new PointController(this._createTaskContainer, defaultPoint, this._destinations, this._offers, Mode.ADDING, this._onChangeView,
+        (...arg) => {
+          this._creatingPoint = null;
+          createButton.disabled = false;
+          this._onDataChange(...arg);
+        });
+    this._creatingPoint.init();
+  }
 
   setPoints(points) {
     this._updatePoints(points);
@@ -117,27 +102,8 @@ class TripListController {
     this._subscriptions.forEach((sub) => sub());
   }
 
-  _onDataChange(oldData, newData) {
-    // NONE
-    if (oldData === null && newData === null && this._points.length !== 0) {
-      return;
-    }
-    //  ADD
-    if (oldData === null && newData !== null) {
-      this._points = [newData, ...this._points];
-    }
-    //  DEL
-    if (oldData !== null && newData === null) {
-      const index = this._points.findIndex((point) => point === oldData);
-      this._points = [...this._points.slice(0, index), ...this._points.slice(index + 1)];
-    }
-    //  UPDATE
-    if (oldData !== null && newData !== null) {
-      const index = this._points.findIndex((point) => point === oldData);
-      this._points[index] = newData;
-    }
-
-    this._onBoardDataChange(this._points);
+  _onDataChange(action, data) {
+    this._onBoardDataChange(action, data);
   }
 }
 
