@@ -1,4 +1,9 @@
-import {toJSON, Method} from './utils';
+
+import {toJSON} from './utils.js';
+import {Method} from './enum.js';
+import Destinations from '../data/destinations.js';
+import Offers from '../data/offers.js';
+import Point from '../data/point.js';
 
 
 class API {
@@ -9,24 +14,27 @@ class API {
 
   getPoints() {
     return this._load({url: `points`})
-      .then(toJSON);
+      .then(toJSON)
+      .then((jsonData) => Point.parsePoints(jsonData));
   }
 
   getDestinations() {
     return this._load({url: `destinations`})
-      .then(toJSON);
+      .then(toJSON)
+      .then((jsonData) => new Destinations(jsonData));
   }
 
   getOffers() {
     return this._load({url: `offers`})
-      .then(toJSON);
+      .then(toJSON)
+      .then((jsonData) => new Offers(jsonData));
   }
 
-  createPoint({point}) {
+  createPoint(data) {
     return this._load({
-      url: `points`,
+      url: `points/`,
       method: Method.POST,
-      body: JSON.stringify(point),
+      body: JSON.stringify(data),
       headers: new Headers({'Content-type': `application/json`})
     })
       .then(toJSON);
@@ -63,7 +71,6 @@ class API {
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
       .then(checkStatus)
       .catch((err) => {
-        console.error(`fetch error: ${err}`);
         throw err;
       });
   }
