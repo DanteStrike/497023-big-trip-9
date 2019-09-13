@@ -1,4 +1,5 @@
-import {render, Position} from '../utils/utils';
+import {Position} from '../utils/enum.js';
+import {render} from '../utils/dom.js';
 import Menu from '../components/menu';
 
 

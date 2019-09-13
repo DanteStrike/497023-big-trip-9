@@ -1,25 +1,25 @@
-import EditEvent from '../components/event-edit.js';
-import {getNewDestinationData} from '../data/destination-data.js';
-import {getNewDatalistOptions} from '../data/datalist-data.js';
-import {getTypeData} from '../data/type-data.js';
-import {Mode} from '../utils/utils.js';
+import {Mode, Key, Action} from '../utils/enum.js';
+import PointEditView from '../components/point-edit-view.js';
+
 
 class PointEditController {
-  constructor(eventData, mode, onEditClose, onEditSave) {
-    this._data = eventData;
+  constructor(data, destinations, offers, mode, onEditClose, onEditSave) {
+    this._data = data;
     this._mode = mode;
+
+    this._destinations = destinations;
+    this._offers = offers;
 
     this._onEditClose = onEditClose;
     this._onEditSave = onEditSave;
 
-    //  От потери окружения
+    //  От потери окружения. Сохраняем событие, чтобы потом корректно удалить.
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
 
     //  Обратная связь с формой редактирования при изменении пункта назначения
-    this._tempDestinationData = null;
     this._onDestinationChange = this._onDestinationChange.bind(this);
-
     //  Обратная связь с формой редактирования при изменении типа точки
+    this._isTypeChange = false;
     this._onTypeChange = this._onTypeChange.bind(this);
   }
 
@@ -28,8 +28,9 @@ class PointEditController {
   }
 
   init() {
-    const datalistOptions = getNewDatalistOptions(this._data.type.name);
-    this._pointEdit = new EditEvent(this._data, datalistOptions, this._mode, this._onDestinationChange, this._onTypeChange);
+    this._pointEdit = new PointEditView(this._data, this._destinations.getNames(), this._mode, this._onDestinationChange, this._onTypeChange);
+    this._formElement = (this._mode === Mode.ADDING) ? this._pointEdit.getElement() : this._pointEdit.getElement().querySelector(`form`);
+    this._rollupButtonElement = this._formElement.querySelector(`.event__rollup-btn`);
     this._hangHandlers();
   }
 
@@ -37,45 +38,50 @@ class PointEditController {
     document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
-  //  При изменении типа точки менять доступные пункты назначения
+  //  При изменении типа точки менять предложения
   _onTypeChange(newType) {
-    const newTypeData = getTypeData(newType);
-    const newDatalistOptions = getNewDatalistOptions(newType);
-    return {
-      newTypeData,
-      newDatalistOptions
-    };
+    this._isTypeChange = true;
+    return this._offers.getTypeOffers(newType);
   }
 
   //  При изменении пункты назначения загружать новые данные
   _onDestinationChange(newDestination) {
-    this._tempDestinationData = getNewDestinationData(newDestination);
-    return this._tempDestinationData;
+    return this._destinations.getInfo(newDestination);
+  }
+
+  _update(data) {
+    const formData = new FormData(this._formElement);
+    const typeData = this._offers.getTypeOffers(formData.get(`event-type`));
+    const offers = this._isTypeChange ? typeData.offers : this._data.offers;
+
+    data.type = typeData.type;
+    data.destination = this._destinations.getInfo(formData.get(`event-destination`));
+    data.time = {
+      start: new Date(formData.get(`event-start-time`)).valueOf(),
+      end: new Date(formData.get(`event-end-time`)).valueOf()
+    };
+    data.basePrice = Number(formData.get(`event-price`));
+    data.offers = offers.map((offer, index) => {
+      offer.accepted = formData.get(`event-offer-${index}`) ? true : false;
+      return offer;
+    });
+    data.isFavorite = Boolean(formData.get(`event-favorite`));
+
+    return data;
   }
 
   _hangHandlers() {
-    switch (this._mode) {
-      case Mode.ADDING:
-        this._pointEdit.getElement()
-        .addEventListener(`submit`, (evt) => this._onSubmit(evt));
-        this._pointEdit.getElement()
-          .addEventListener(`reset`, (evt) => this._onReset(evt));
-        break;
+    this._formElement.addEventListener(`submit`, (evt) => this._onSubmit(evt));
+    this._formElement.addEventListener(`reset`, (evt) => this._onReset(evt));
 
-      case Mode.DEFAULT:
-        this._pointEdit.getElement().querySelector(`.event__rollup-btn`)
-          .addEventListener(`click`, () => this._onRollupBtnClick());
-        this._pointEdit.getElement().querySelector(`form`)
-          .addEventListener(`submit`, (evt) => this._onSubmit(evt));
-        this._pointEdit.getElement().querySelector(`form`)
-          .addEventListener(`reset`, (evt) => this._onReset(evt));
-        document.addEventListener(`keydown`, this._onEscKeyDown);
-        break;
+    if (this._mode === Mode.DEFAULT) {
+      this._rollupButtonElement.addEventListener(`click`, () => this._onRollupBtnClick());
+      document.addEventListener(`keydown`, this._onEscKeyDown);
     }
   }
 
   _onEscKeyDown(evt) {
-    if (evt.key === `Esc` || evt.key === `Escape`) {
+    if (evt.key === Key.IE_ESC || evt.key === Key.ESCAPE) {
       this._onEditClose();
       this.removeOnEscKeyDown();
     }
@@ -91,53 +97,26 @@ class PointEditController {
 
     switch (this._mode) {
       case Mode.ADDING:
-        this._onEditSave(null, null);
+        this._onEditSave(Action.NONE, null);
         break;
       case Mode.DEFAULT:
-        this._onEditSave(this._data, null);
+        this._onEditSave(Action.DELETE, this._data);
+        break;
     }
   }
 
   _onSubmit(evt) {
     evt.preventDefault();
-    let formData;
 
-    if (this._mode === Mode.ADDING) {
-      formData = new FormData(this._pointEdit.getElement());
-    } else {
-      formData = new FormData(this._pointEdit.getElement().querySelector(`form.event`));
-    }
-
-    //  Если пользователь выбрал и получил данные новой точки назначения с сервера,
-    //  изменить описание, предложение и фотографии текущей точки.
-    const newDestinationData = (this._tempDestinationData) ? this._tempDestinationData : this._data;
-
-    const entry = {
-      id: this._data.id,
-      type: getTypeData(formData.get(`event-type`)),
-      destination: formData.get(`event-destination`),
-      description: newDestinationData.description,
-      time: {
-        start: new Date(formData.get(`event-start-time`)).valueOf(),
-        end: new Date(formData.get(`event-end-time`)).valueOf()
-      },
-      offers: newDestinationData.offers
-        .map((offer, index) => {
-          offer.isActive = formData.get(`event-offer-luggage-${index}`) ? true : false;
-          return offer;
-        }),
-      price: Number(formData.get(`event-price`)),
-      photos: newDestinationData.photos,
-      isFavorite: formData.get(`event-favorite`) ? true : false
-    };
+    const update = this._update(this._data);
 
     switch (this._mode) {
       case Mode.ADDING:
-        this._onEditSave(null, entry);
+        this._onEditSave(Action.CREATE, update);
         break;
 
       case Mode.DEFAULT:
-        this._onEditSave(this._data, entry);
+        this._onEditSave(Action.UPDATE, update);
         break;
     }
   }

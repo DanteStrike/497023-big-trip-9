@@ -1,4 +1,5 @@
-import {render, Position, hideElement, showElement} from '../utils/utils';
+import {Position} from '../utils/enum.js';
+import {render, hideElement, showElement} from '../utils/dom.js';
 import Stats from '../components/stats';
 
 
