@@ -19,6 +19,7 @@ class PointEditController {
     //  Обратная связь с формой редактирования при изменении пункта назначения
     this._onDestinationChange = this._onDestinationChange.bind(this);
     //  Обратная связь с формой редактирования при изменении типа точки
+    this._isTypeChange = false;
     this._onTypeChange = this._onTypeChange.bind(this);
   }
 
@@ -39,6 +40,7 @@ class PointEditController {
 
   //  При изменении типа точки менять предложения
   _onTypeChange(newType) {
+    this._isTypeChange = true;
     return this._offers.getTypeOffers(newType);
   }
 
@@ -50,6 +52,7 @@ class PointEditController {
   _update(data) {
     const formData = new FormData(this._formElement);
     const typeData = this._offers.getTypeOffers(formData.get(`event-type`));
+    const offers = this._isTypeChange ? typeData.offers : this._data.offers;
 
     data.type = typeData.type;
     data.destination = this._destinations.getInfo(formData.get(`event-destination`));
@@ -58,11 +61,10 @@ class PointEditController {
       end: new Date(formData.get(`event-end-time`)).valueOf()
     };
     data.basePrice = Number(formData.get(`event-price`));
-    data.offers = typeData.offers
-      .map((offer, index) => {
-        offer.accepted = formData.get(`event-offer-luggage-${index}`) ? true : false;
-        return offer;
-      });
+    data.offers = offers.map((offer, index) => {
+      offer.accepted = formData.get(`event-offer-${index}`) ? true : false;
+      return offer;
+    });
     data.isFavorite = Boolean(formData.get(`event-favorite`));
 
     return data;

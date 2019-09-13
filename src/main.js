@@ -10,7 +10,6 @@ import FiltersController from './controllers/filters-controller.js';
 
 
 const api = new API(serverConfig);
-
 const tripInfoElement = document.querySelector(`.trip-info`);
 const controlsElement = document.querySelector(`.trip-controls`);
 const menuHeaderElement = controlsElement.querySelector(`h2:first-child`);
@@ -23,12 +22,13 @@ const tripListElement = tripPageMainContainer.querySelector(`.trip-events`);
 let filterType = FilterType.EVERYTHING;
 let downloadedPoints = null;
 
-const onPointsDownload = (points) => {
-  downloadedPoints = points;
-  const filteredPoints = filterPoints(filterType, downloadedPoints);
-  tripController.showPoints(filteredPoints);
-  tripInfoController.update(downloadedPoints);
-};
+const downloadPoints = () => api.getPoints()
+    .then((points) => {
+      downloadedPoints = points;
+      const filteredPoints = filterPoints(filterType, downloadedPoints);
+      tripController.showPoints(filteredPoints);
+      tripInfoController.update(downloadedPoints);
+    });
 
 const onFilterTypeChange = (newType) => {
   filterType = newType;
@@ -40,8 +40,7 @@ const onDataChange = (action, update) => {
   switch (action) {
     case Action.CREATE:
       api.createPoint(update.toRAW())
-      .then(api.getPoints()
-        .then(onPointsDownload));
+      .then(downloadPoints);
       break;
 
     case Action.UPDATE:
@@ -49,14 +48,12 @@ const onDataChange = (action, update) => {
         id: update.id,
         data: update.toRAW()
       })
-      .then(api.getPoints()
-        .then(onPointsDownload));
+      .then(downloadPoints);
       break;
 
     case Action.DELETE:
       api.deletePoint(update.id)
-      .then(api.getPoints()
-        .then(onPointsDownload));
+      .then(downloadPoints);
       break;
   }
 };
@@ -78,8 +75,7 @@ then((destinations) => {
   api.getOffers()
   .then((offers) => {
     tripController.setOffers(offers);
-    api.getPoints()
-    .then(onPointsDownload)
-    .then(() => filtersController.init());
+    downloadPoints()
+      .then(() => filtersController.init());
   });
 });

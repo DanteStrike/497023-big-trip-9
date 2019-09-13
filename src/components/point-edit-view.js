@@ -153,8 +153,8 @@ class PointEditView extends AbstractComponent {
   _getOffersTemplate(offers) {
     return `<div class="event__available-offers">
       ${offers.map((offer, index) => `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage-${index}" value="${offer.price}" ${offer.accepted ? `checked` : ``}>
-          <label class="event__offer-label" for="event-offer-luggage-${index}">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${index}" type="checkbox" name="event-offer-${index}" value="${offer.price}" ${offer.accepted ? `checked` : ``}>
+          <label class="event__offer-label" for="event-offer-${index}">
             <span class="event__offer-title">${offer.title}</span>
             +
             €&nbsp;<span class="event__offer-price">${offer.price}</span>
