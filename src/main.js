@@ -1,4 +1,4 @@
-import {serverConfig} from './configs.js';
+import {serverConfig} from './configs/configs.js';
 import {Action, FilterType} from './utils/enum.js';
 import {filterPoints} from './utils/filter-points.js';
 import API from './utils/api.js';
@@ -27,6 +27,7 @@ const downloadPoints = () => api.getPoints()
       downloadedPoints = points;
       const filteredPoints = filterPoints(filterType, downloadedPoints);
       tripController.showPoints(filteredPoints);
+      statsController.update(downloadedPoints);
       tripInfoController.update(downloadedPoints);
     });
 

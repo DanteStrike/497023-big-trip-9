@@ -1,5 +1,5 @@
 import {capitalizeFirstLetter} from '../utils/utils.js';
-import {transferTypes} from '../configs.js';
+import {transferTypes} from '../configs/configs.js';
 
 
 class Point {

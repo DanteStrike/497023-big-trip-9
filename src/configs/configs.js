@@ -1,4 +1,4 @@
-import {getAuthToken} from './utils/utils';
+import {getAuthToken} from '../utils/utils.js';
 
 
 export const transferTypes = new Set([`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`]);
@@ -27,3 +27,7 @@ export const serverConfig = {
   authToken: `Basic ${getAuthToken()}`
 };
 
+export const chartContainerConfig = {
+  rowHeight: 50,
+  minContainerHeight: 250
+};
