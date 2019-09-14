@@ -1,4 +1,4 @@
-import {defaultPointData} from '../configs.js';
+import {defaultPointData} from '../configs/configs.js';
 import {Position, TimeValue, Mode} from '../utils/enum.js';
 import {render} from '../utils/dom.js';
 import PointController from './point-controller.js';

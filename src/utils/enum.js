@@ -55,3 +55,24 @@ export const Key = {
 export const TagName = {
   INPUT: `INPUT`
 };
+
+export const ChartType = {
+  MONEY: `money`,
+  TRANSPORT: `transport`,
+  TIME: `time`
+};
+
+export const Emoji = {
+  FLAG: `🚩`,
+  BUS: `🚍`,
+  CHECK_IN: `🏨`,
+  DRIVE: `🚘`,
+  FLIGHT: `✈️`,
+  RESTAURANT: `🍴`,
+  SHIP: `🚢`,
+  SIGHTSEEING: `👁️`,
+  TAXI: `🚖`,
+  TRAIN: `🚂`,
+  TRANSPORT: `🚆`,
+  TRIP: `🗻`
+};

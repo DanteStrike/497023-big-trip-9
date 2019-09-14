@@ -1,7 +1,7 @@
 import AbstractComponent from './abstract.js';
 import {TimeValue} from '../utils/enum.js';
 import {formatDateTime, formatDateTimeView} from '../utils/utils.js';
-import {pointConfig} from '../configs.js';
+import {pointConfig} from '../configs/configs.js';
 
 
 class PointView extends AbstractComponent {

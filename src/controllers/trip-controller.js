@@ -44,13 +44,19 @@ class TripController {
   }
 
   createEvent(createButton) {
+    if (this._points.length === 0) {
+      unrender(this._noPoints.getElement());
+      render(this._container, this._board.getElement(), Position.BEFOREEND);
+    }
     this._tripListController.createEvent(createButton);
   }
 
   showPoints(points) {
+    this._points = points;
     if (points.length === 0 && !this._container.contains(this._noPoints.getElement())) {
-      unrender(this._board);
-      unrender(this._sort);
+      this._board.getElement.innerHTML = ``;
+      unrender(this._board.getElement());
+      unrender(this._sort.getElement());
       render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
       return;
     }
@@ -67,7 +73,6 @@ class TripController {
       render(this._container, this._board.getElement(), Position.BEFOREEND);
     }
 
-    this._points = points;
     this._renderBoard();
   }
 
@@ -80,11 +85,6 @@ class TripController {
 
     this._tripListController.createPoint(createButton);
   }
-
-  // setFilterType(newType) {
-  //   this._tripListController.setFilterType(newType);
-  //   this._renderBoard();
-  // }
 
   _onDataChange(action, data) {
     this._onMainDataChange(action, data);
