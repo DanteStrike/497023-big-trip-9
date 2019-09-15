@@ -34,7 +34,7 @@ class Stats extends AbstractComponent {
     this._timeChart.resize(0);
   }
 
-  updateChartData(type, labels, data) {
+  updateChartData(type, {labels, data}) {
     let optimalChartContainerHeight = chartContainerConfig.rowHeight * labels.length;
     if (optimalChartContainerHeight < chartContainerConfig.minContainerHeight) {
       optimalChartContainerHeight = chartContainerConfig.minContainerHeight;

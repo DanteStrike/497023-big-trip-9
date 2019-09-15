@@ -68,45 +68,43 @@ class StatsController {
 
   _updateChartMoney() {
     const sortedByMoneySpend = this._statsByTypes.sort((a, b) => b.moneySpend - a.moneySpend);
-    const chartMoneyLabels = sortedByMoneySpend.reduce((labels, stat) => {
-      labels.push(`${Emoji[stat.label.replace(`-`, `_`).toUpperCase()]}  ${stat.label}`.toUpperCase());
-      return labels;
-    }, []);
-    const chartMoneyData = sortedByMoneySpend.reduce((data, stat) => {
-      data.push(stat.moneySpend);
-      return data;
-    }, []);
-    this._stats.updateChartData(ChartType.MONEY, chartMoneyLabels, chartMoneyData);
+    const chartMoneyDataset = sortedByMoneySpend.reduce((dataset, stat) => {
+      dataset.labels.push(`${Emoji[stat.label.replace(`-`, `_`).toUpperCase()]}  ${stat.label}`.toUpperCase());
+      dataset.data.push(stat.moneySpend);
+      return dataset;
+    }, {
+      labels: [],
+      data: []
+    });
+    this._stats.updateChartData(ChartType.MONEY, chartMoneyDataset);
   }
 
   _updateChartTransport() {
     const sortedByAmount = this._statsByTypes.sort((a, b) => b.amount - a.amount);
-    const chartTransportLabels = sortedByAmount.reduce((labels, stat) => {
+    const chartTransportDataset = sortedByAmount.reduce((dataset, stat) => {
       if (transferTypes.has(stat.label)) {
-        labels.push(`${Emoji[stat.label.toUpperCase()]}  ${stat.label}`.toUpperCase());
+        dataset.labels.push(`${Emoji[stat.label.toUpperCase()]}  ${stat.label}`.toUpperCase());
+        dataset.data.push(stat.amount);
       }
-      return labels;
-    }, []);
-    const chartTransportData = sortedByAmount.reduce((data, stat) => {
-      if (transferTypes.has(stat.label)) {
-        data.push(stat.amount);
-      }
-      return data;
-    }, []);
-    this._stats.updateChartData(ChartType.TRANSPORT, chartTransportLabels, chartTransportData);
+      return dataset;
+    }, {
+      labels: [],
+      data: []
+    });
+    this._stats.updateChartData(ChartType.TRANSPORT, chartTransportDataset);
   }
 
   _updateChartTime() {
     const sortedByTimeSpend = this._statsByDestinations.sort((a, b) => b.timeSpend - a.timeSpend);
-    const chartTimeLabels = sortedByTimeSpend.reduce((labels, stat) => {
-      labels.push(`${Emoji.FLAG}  ${stat.label}`.toUpperCase());
-      return labels;
-    }, []);
-    const chartTimeData = sortedByTimeSpend.reduce((data, stat) => {
-      data.push(stat.timeSpend);
-      return data;
-    }, []);
-    this._stats.updateChartData(ChartType.TIME, chartTimeLabels, chartTimeData);
+    const chartTimeDataset = sortedByTimeSpend.reduce((dataset, stat) => {
+      dataset.labels.push(`${Emoji.FLAG}  ${stat.label}`.toUpperCase());
+      dataset.data.push(stat.timeSpend);
+      return dataset;
+    }, {
+      labels: [],
+      data: []
+    });
+    this._stats.updateChartData(ChartType.TIME, chartTimeDataset);
   }
 }
 
