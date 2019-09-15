@@ -47,7 +47,8 @@ class API {
       body: JSON.stringify(data),
       headers: new Headers({'Content-type': `application/json`})
     })
-      .then(toJSON);
+      .then(toJSON)
+      .then((jsonData) => Point.parsePoint(jsonData));
   }
 
   deletePoint(id) {

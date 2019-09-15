@@ -80,9 +80,9 @@ class PointEditView extends AbstractComponent {
       }
     });
 
-    this.getElement().querySelectorAll(`.event__input--time`).forEach((node) => {
-      node.style.width = `150px`;
-    });
+    // this.getElement().querySelectorAll(`.event__input--time`).forEach((node) => {
+    //   node.style.width = `150px`;
+    // });
   }
 
   _hangHandlers() {

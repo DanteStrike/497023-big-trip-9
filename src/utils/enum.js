@@ -54,6 +54,13 @@ export const Key = {
 
 export const TagName = {
   INPUT: `INPUT`
+  INPUT: `INPUT`,
+  A: `A`
+};
+
+export const Page = {
+  TABLE: `table`,
+  STATS: `stats`
 };
 
 export const ChartType = {

@@ -1,6 +1,6 @@
 import {TimeValue, FilterType} from './enum';
 
-export const filterPoints = (type, points) => {
+export const filterPoints = ({filterType: type, downloadedPoints: points}) => {
   switch (type) {
     case FilterType.EVERYTHING:
       return points;

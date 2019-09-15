@@ -1,4 +1,4 @@
-import {Position} from '../utils/enum.js';
+import {Position, FilterType, TagName} from '../utils/enum.js';
 import {render, unrender} from '../utils/dom.js';
 import Filters from '../components/trip-filters';
 
@@ -6,16 +6,14 @@ class FiltersController {
   constructor(container, onFilterTypeChange) {
     this._container = container;
     this._filters = new Filters();
-    this._currentType = `everything`;
+    this._currentType = FilterType.EVERYTHING;
 
     this._onFilterTypeChange = onFilterTypeChange;
-
-    this._onFiltersClick = this._onFiltersClick.bind(this);
   }
 
   init() {
     this.show();
-    this._filters.getElement().addEventListener(`click`, this._onFiltersClick);
+    this._filters.getElement().addEventListener(`click`, (evt) => this._onFiltersClick(evt));
   }
 
   show() {
@@ -27,7 +25,7 @@ class FiltersController {
   }
 
   _onFiltersClick(evt) {
-    if (evt.target.tagName !== `INPUT` || evt.target.value === this._currentType) {
+    if (evt.target.tagName !== TagName.INPUT || evt.target.value === this._currentType) {
       return;
     }
 

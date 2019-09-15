@@ -31,11 +31,49 @@ class PointEditController {
     this._pointEdit = new PointEditView(this._data, this._destinations.getNames(), this._mode, this._onDestinationChange, this._onTypeChange);
     this._formElement = (this._mode === Mode.ADDING) ? this._pointEdit.getElement() : this._pointEdit.getElement().querySelector(`form`);
     this._rollupButtonElement = this._formElement.querySelector(`.event__rollup-btn`);
+    this._saveButton = this._formElement.querySelector(`.event__save-btn`);
+    this._deleteButton = this._formElement.querySelector(`.event__reset-btn`);
     this._hangHandlers();
   }
 
   removeOnEscKeyDown() {
     document.removeEventListener(`keydown`, this._onEscKeyDown);
+  }
+
+  onServerError() {
+    this._shake();
+    this._unBlock();
+  }
+
+  _block() {
+    this._formElement.querySelectorAll(`input`).forEach((input) => {
+      input.disabled = true;
+    });
+    this._saveButton.disabled = true;
+    this._deleteButton.disabled = true;
+    if (this._rollupButtonElement) {
+      this._rollupButtonElement.disabled = true;
+    }
+    this.removeOnEscKeyDown();
+  }
+
+  _unBlock() {
+    this._formElement.querySelectorAll(`input`).forEach((input) => {
+      input.disabled = false;
+    });
+    this._saveButton.disabled = false;
+    this._deleteButton.disabled = false;
+    if (this._rollupButtonElement) {
+      this._rollupButtonElement.disabled = false;
+    }
+    document.addEventListener(`keydown`, this._onEscKeyDown);
+    this._saveButton.innerHTML = `Save`;
+    this._deleteButton.innerHTML = `Delete`;
+  }
+
+  _shake() {
+    this._formElement.classList.add(`shake`);
+    this._formElement.classList.add(`event--server-error`);
   }
 
   //  При изменении типа точки менять предложения
@@ -103,6 +141,11 @@ class PointEditController {
         this._onEditSave(Action.DELETE, this._data);
         break;
     }
+
+    this._deleteButton.innerHTML = `Deleting...`;
+    this._formElement.classList.remove(`shake`);
+    this._formElement.classList.remove(`event--server-error`);
+    this._block();
   }
 
   _onSubmit(evt) {
@@ -119,6 +162,11 @@ class PointEditController {
         this._onEditSave(Action.UPDATE, update);
         break;
     }
+
+    this._saveButton.innerHTML = `Saving...`;
+    this._formElement.classList.remove(`shake`);
+    this._formElement.classList.remove(`event--server-error`);
+    this._block();
   }
 }
 

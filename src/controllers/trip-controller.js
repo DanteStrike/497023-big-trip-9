@@ -86,8 +86,8 @@ class TripController {
     this._tripListController.createPoint(createButton);
   }
 
-  _onDataChange(action, data) {
-    this._onMainDataChange(action, data);
+  _onDataChange(action, data, initiator) {
+    this._onMainDataChange(action, data, initiator);
   }
 
   _renderBoard() {

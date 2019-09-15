@@ -1,4 +1,4 @@
-import {Position} from '../utils/enum.js';
+import {Position, TagName, Page} from '../utils/enum.js';
 import {render} from '../utils/dom.js';
 import Menu from '../components/menu';
 
@@ -10,7 +10,6 @@ class PagesController {
     this._filtersController = filtersController;
     this._tripController = tripController;
     this._statsController = statsController;
-
     this._createEventButton = createEventButton;
 
     this._menu = new Menu();
@@ -28,7 +27,7 @@ class PagesController {
   _onMenuClick(evt) {
     const activeClass = `trip-tabs__btn--active`;
 
-    if (evt.target.tagName !== `A` || evt.target.classList.contains(activeClass)) {
+    if (evt.target.tagName !== TagName.A || evt.target.classList.contains(activeClass)) {
       return;
     }
 
@@ -41,14 +40,14 @@ class PagesController {
     clickedButton.classList.add(activeClass);
 
     switch (clickedButton.dataset.page) {
-      case `table`:
+      case Page.TABLE:
         this._filtersController.show();
         this._tripController.show();
         this._statsController.hide();
         this._createEventButton.disabled = false;
         break;
 
-      case `stats`:
+      case Page.STATS:
         this._filtersController.hide();
         this._tripController.hide();
         this._statsController.show();

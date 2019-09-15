@@ -9,7 +9,6 @@ import StatsController from './controllers/stats-controller.js';
 import FiltersController from './controllers/filters-controller.js';
 
 
-const api = new API(serverConfig);
 const tripInfoElement = document.querySelector(`.trip-info`);
 const controlsElement = document.querySelector(`.trip-controls`);
 const menuHeaderElement = controlsElement.querySelector(`h2:first-child`);
@@ -18,30 +17,34 @@ const createEventButton = document.querySelector(`.trip-main__event-add-btn`);
 const tripPageMainContainer = document.querySelector(`.page-main .page-body__container`);
 const tripListElement = tripPageMainContainer.querySelector(`.trip-events`);
 
-
-let filterType = FilterType.EVERYTHING;
-let downloadedPoints = null;
-
-const downloadPoints = () => api.getPoints()
-    .then((points) => {
-      downloadedPoints = points;
-      const filteredPoints = filterPoints(filterType, downloadedPoints);
-      tripController.showPoints(filteredPoints);
-      statsController.update(downloadedPoints);
-      tripInfoController.update(downloadedPoints);
-    });
-
-const onFilterTypeChange = (newType) => {
-  filterType = newType;
-  const filteredPoints = filterPoints(filterType, downloadedPoints);
-  tripController.showPoints(filteredPoints);
+const api = new API(serverConfig);
+const appData = {
+  filterType: FilterType.EVERYTHING,
+  downloadedPoints: []
 };
 
-const onDataChange = (action, update) => {
+const updateControllers = () => {
+  tripController.showPoints(filterPoints(appData));
+  statsController.update(appData.downloadedPoints);
+  tripInfoController.update(appData.downloadedPoints);
+};
+
+const onFilterTypeChange = (newType) => {
+  appData.filterType = newType;
+  tripController.showPoints(filterPoints(appData));
+};
+
+const onDataChange = (action, update, initiator) => {
   switch (action) {
     case Action.CREATE:
       api.createPoint(update.toRAW())
-      .then(downloadPoints);
+      .then((point) => {
+        appData.downloadedPoints.push(point);
+        updateControllers();
+      })
+      .catch(() => {
+        initiator.onServerError();
+      });
       break;
 
     case Action.UPDATE:
@@ -49,12 +52,24 @@ const onDataChange = (action, update) => {
         id: update.id,
         data: update.toRAW()
       })
-      .then(downloadPoints);
+      .then((point) => {
+        appData.downloadedPoints[appData.downloadedPoints.findIndex((downloadedPoint) => downloadedPoint.id === point.id)] = point;
+        updateControllers();
+      })
+      .catch(() => {
+        initiator.onServerError();
+      });
       break;
 
     case Action.DELETE:
       api.deletePoint(update.id)
-      .then(downloadPoints);
+      .then(() => {
+        appData.downloadedPoints.splice(appData.downloadedPoints.findIndex((downloadedPoint) => downloadedPoint.id === update.id), 1);
+        updateControllers();
+      })
+      .catch(() => {
+        initiator.onServerError();
+      });
       break;
   }
 };
@@ -64,19 +79,18 @@ const filtersController = new FiltersController(filtersHeaderElement, onFilterTy
 const tripController = new TripController(tripListElement, onDataChange);
 const statsController = new StatsController(tripPageMainContainer);
 const pagesController = new PagesController(menuHeaderElement, filtersController, tripController, statsController, createEventButton);
-
 tripInfoController.init();
+filtersController.init();
 tripController.init();
 statsController.init();
 pagesController.init();
 
-api.getDestinations().
-then((destinations) => {
+Promise.all([api.getDestinations(), api.getOffers(), api.getPoints()])
+.then(([destinations, offers, points]) => {
+  appData.downloadedPoints = points;
   tripController.setDestinations(destinations);
-  api.getOffers()
-  .then((offers) => {
-    tripController.setOffers(offers);
-    downloadPoints()
-      .then(() => filtersController.init());
-  });
+  tripController.setOffers(offers);
+  tripController.showPoints(filterPoints(appData));
+  statsController.update(appData.downloadedPoints);
+  tripInfoController.update(appData.downloadedPoints);
 });

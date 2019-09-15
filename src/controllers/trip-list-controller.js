@@ -102,8 +102,8 @@ class TripListController {
     this._subscriptions.forEach((sub) => sub());
   }
 
-  _onDataChange(action, data) {
-    this._onBoardDataChange(action, data);
+  _onDataChange(action, data, initiator) {
+    this._onBoardDataChange(action, data, initiator);
   }
 }
 
