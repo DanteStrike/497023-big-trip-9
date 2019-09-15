@@ -1,4 +1,4 @@
-import {Position, SortType, TagName} from '../utils/enum.js';
+import {Position, SortType, TagName, BoardState} from '../utils/enum.js';
 import {render, showElement, hideElement, unrender} from '../utils/dom.js';
 import NoEvents from '../components/no-events.js';
 import Sort from '../components/sorting.js';
@@ -9,6 +9,7 @@ class TripController {
   constructor(container, onDataChange) {
     this._container = container;
     this._points = [];
+    this._boardState = BoardState.NO_POINTS;
 
     this._board = new TripBoard();
     this._noPoints = new NoEvents();
@@ -18,7 +19,7 @@ class TripController {
     this._sortType = SortType.DEFAULT;
 
     this._onDataChange = this._onDataChange.bind(this);
-    this._tripListController = new TripListController(this._board.getElement(), this._sort.getElement(), this._onDataChange);
+    this._tripListController = new TripListController(this._container.getElement(), this._sort.getElement(), this._onDataChange);
 
     this._onMainDataChange = onDataChange;
   }
@@ -33,6 +34,7 @@ class TripController {
 
   init() {
     this._sort.getElement().addEventListener(`click`, (evt) => this._onSortBtnClick(evt));
+    render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
   }
 
   show() {
@@ -52,7 +54,6 @@ class TripController {
   }
 
   showPoints(points) {
-    this._points = points;
     if (points.length === 0 && !this._container.contains(this._noPoints.getElement())) {
       this._board.getElement.innerHTML = ``;
       unrender(this._board.getElement());
@@ -73,7 +74,33 @@ class TripController {
       render(this._container, this._board.getElement(), Position.BEFOREEND);
     }
 
+    this._points = points;
     this._renderBoard();
+  }
+
+  setBoardState(state) {
+    if (state === this._boardState) {
+      return;
+    }
+
+    switch (state) {
+      case BoardState.NO_POINTS:
+        this._board.getElement.innerHTML = ``;
+        unrender(this._board.getElement());
+        unrender(this._sort.getElement());
+        render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
+        break;
+
+      case BoardState.FIRST_POINT:
+        unrender(this._noPoints.getElement());
+        break;
+
+      case BoardState.DEFAULT:
+        unrender(this._noPoints.getElement());
+        render(this._container, this._sort.getElement(), Position.BEFOREEND);
+        render(this._container, this._board.getElement(), Position.BEFOREEND);
+        break;
+    }
   }
 
   createPoint(createButton) {

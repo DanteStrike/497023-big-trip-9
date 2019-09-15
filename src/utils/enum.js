@@ -38,6 +38,12 @@ export const Mode = {
   DEFAULT: `default`,
 };
 
+export const BoardState = {
+  NO_POINTS: `no-points`,
+  FIRST_POINT: `first-point`,
+  DEFAULT: `default`
+};
+
 export const Method = {
   GET: `GET`,
   POST: `POST`,
@@ -53,7 +59,6 @@ export const Key = {
 };
 
 export const TagName = {
-  INPUT: `INPUT`
   INPUT: `INPUT`,
   A: `A`
 };
