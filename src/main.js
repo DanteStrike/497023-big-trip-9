@@ -1,5 +1,5 @@
 import {serverConfig} from './configs/configs.js';
-import {Action, FilterType} from './utils/enum.js';
+import {Action, FilterType, BoardState} from './utils/enum.js';
 import {filterPoints} from './utils/filter-points.js';
 import API from './utils/api.js';
 import TripController from './controllers/trip-controller.js';
@@ -24,14 +24,21 @@ const appData = {
 };
 
 const updateControllers = () => {
-  tripController.showPoints(filterPoints(appData));
+  if (appData.downloadedPoints.length === 0) {
+    tripController.setBoardState(BoardState.NO_POINTS);
+  } else {
+    tripController.setBoardState(BoardState.DEFAULT);
+    tripController.showPoints(filterPoints(appData));
+  }
   statsController.update(appData.downloadedPoints);
   tripInfoController.update(appData.downloadedPoints);
 };
 
 const onFilterTypeChange = (newType) => {
   appData.filterType = newType;
-  tripController.showPoints(filterPoints(appData));
+  if (appData.downloadedPoints.length !== 0) {
+    tripController.showPoints(filterPoints(appData));
+  }
 };
 
 const onDataChange = (action, update, initiator) => {
@@ -90,7 +97,12 @@ Promise.all([api.getDestinations(), api.getOffers(), api.getPoints()])
   appData.downloadedPoints = points;
   tripController.setDestinations(destinations);
   tripController.setOffers(offers);
-  tripController.showPoints(filterPoints(appData));
+  if (appData.downloadedPoints.length === 0) {
+    tripController.setBoardState(BoardState.NO_POINTS);
+  } else {
+    tripController.setBoardState(BoardState.DEFAULT);
+    tripController.showPoints(filterPoints(appData));
+  }
   statsController.update(appData.downloadedPoints);
   tripInfoController.update(appData.downloadedPoints);
 });

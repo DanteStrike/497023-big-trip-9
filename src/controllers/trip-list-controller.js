@@ -29,14 +29,19 @@ class TripListController {
     this._offers = offers;
   }
 
-  createEvent(createButton) {
+  createEvent(createButton, isFirstPoint) {
     //  Запретить создавать более одной карточки за раз
     if (this._creatingPoint) {
       return;
     }
 
     const defaultPoint = new Point(defaultPointData);
-    this._creatingPoint = new PointController(this._createTaskContainer, defaultPoint, this._destinations, this._offers, Mode.ADDING, this._onChangeView,
+    let createTaskContainer = this._createTaskContainer;
+    if (isFirstPoint) {
+      createTaskContainer = this._container;
+    }
+
+    this._creatingPoint = new PointController(createTaskContainer, defaultPoint, isFirstPoint, this._destinations, this._offers, Mode.ADDING, this._onChangeView,
         (...arg) => {
           this._creatingPoint = null;
           createButton.disabled = false;
@@ -88,11 +93,10 @@ class TripListController {
     this._subscriptions = [];
     //  Ререндер
     this._points = points;
-    this._container.innerHTML = ``;
   }
 
   _renderPoint(point, listElement) {
-    const newPointController = new PointController(listElement, point, this._destinations, this._offers, Mode.DEFAULT, this._onChangeView, this._onDataChange);
+    const newPointController = new PointController(listElement, point, false, this._destinations, this._offers, Mode.DEFAULT, this._onChangeView, this._onDataChange);
     newPointController.init();
 
     this._subscriptions.push(newPointController.setDefaultView.bind(newPointController));

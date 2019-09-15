@@ -1,4 +1,4 @@
-import {Position, SortType, TagName, BoardState} from '../utils/enum.js';
+import {Position, SortType, TagName, BoardState, Action} from '../utils/enum.js';
 import {render, showElement, hideElement, unrender} from '../utils/dom.js';
 import NoEvents from '../components/no-events.js';
 import Sort from '../components/sorting.js';
@@ -9,7 +9,6 @@ class TripController {
   constructor(container, onDataChange) {
     this._container = container;
     this._points = [];
-    this._boardState = BoardState.NO_POINTS;
 
     this._board = new TripBoard();
     this._noPoints = new NoEvents();
@@ -19,7 +18,7 @@ class TripController {
     this._sortType = SortType.DEFAULT;
 
     this._onDataChange = this._onDataChange.bind(this);
-    this._tripListController = new TripListController(this._container.getElement(), this._sort.getElement(), this._onDataChange);
+    this._tripListController = new TripListController(this._container, this._sort.getElement(), this._onDataChange);
 
     this._onMainDataChange = onDataChange;
   }
@@ -34,7 +33,6 @@ class TripController {
 
   init() {
     this._sort.getElement().addEventListener(`click`, (evt) => this._onSortBtnClick(evt));
-    render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
   }
 
   show() {
@@ -46,34 +44,15 @@ class TripController {
   }
 
   createEvent(createButton) {
-    if (this._points.length === 0) {
-      unrender(this._noPoints.getElement());
-      render(this._container, this._board.getElement(), Position.BEFOREEND);
+    if (this._boardState === BoardState.NO_POINTS) {
+      this.setBoardState(BoardState.FIRST_POINT);
+      this._tripListController.createEvent(createButton, true);
+    } else {
+      this._tripListController.createEvent(createButton, false);
     }
-    this._tripListController.createEvent(createButton);
   }
 
   showPoints(points) {
-    if (points.length === 0 && !this._container.contains(this._noPoints.getElement())) {
-      this._board.getElement.innerHTML = ``;
-      unrender(this._board.getElement());
-      unrender(this._sort.getElement());
-      render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
-      return;
-    }
-
-    if (this._container.contains(this._noPoints.getElement())) {
-      unrender(this._noPoints.getElement());
-    }
-
-    if (!this._container.contains(this._sort.getElement())) {
-      render(this._container, this._sort.getElement(), Position.BEFOREEND);
-    }
-
-    if (!this._container.contains(this._board.getElement())) {
-      render(this._container, this._board.getElement(), Position.BEFOREEND);
-    }
-
     this._points = points;
     this._renderBoard();
   }
@@ -88,7 +67,9 @@ class TripController {
         this._board.getElement.innerHTML = ``;
         unrender(this._board.getElement());
         unrender(this._sort.getElement());
-        render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
+        if (!this._container.contains(this._noPoints.getElement())) {
+          render(this._container, this._noPoints.getElement(), Position.BEFOREEND);
+        }
         break;
 
       case BoardState.FIRST_POINT:
@@ -97,10 +78,18 @@ class TripController {
 
       case BoardState.DEFAULT:
         unrender(this._noPoints.getElement());
-        render(this._container, this._sort.getElement(), Position.BEFOREEND);
-        render(this._container, this._board.getElement(), Position.BEFOREEND);
+
+        if (!this._container.contains(this._sort.getElement())) {
+          render(this._container, this._sort.getElement(), Position.BEFOREEND);
+        }
+
+        if (!this._container.contains(this._board.getElement())) {
+          render(this._container, this._board.getElement(), Position.BEFOREEND);
+        }
         break;
     }
+
+    this._boardState = state;
   }
 
   createPoint(createButton) {
@@ -114,10 +103,14 @@ class TripController {
   }
 
   _onDataChange(action, data, initiator) {
+    if (action === Action.NONE && this._boardState === BoardState.FIRST_POINT) {
+      this.setBoardState(BoardState.NO_POINTS);
+    }
     this._onMainDataChange(action, data, initiator);
   }
 
   _renderBoard() {
+    this._board.getElement().innerHTML = ``;
     switch (this._sortType) {
       case SortType.TIME:
         const sortedByEventDuration = this._points.sort((a, b) => (b.time.end - b.time.start) - (a.time.end - a.time.start));

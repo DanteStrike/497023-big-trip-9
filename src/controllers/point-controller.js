@@ -5,9 +5,10 @@ import PointEditController from './point-edit-controller.js';
 
 
 class PointController {
-  constructor(container, data, destinations, offers, mode, onChangeView, onDataChange) {
+  constructor(container, data, isFirstPoint, destinations, offers, mode, onChangeView, onDataChange) {
     this._container = container;
     this._data = data;
+    this._isFirstPoint = isFirstPoint;
     this._mode = mode;
 
     this._destinations = destinations;
@@ -26,7 +27,11 @@ class PointController {
       case Mode.ADDING:
         this._newPointEditController = new PointEditController(this._data, this._destinations, this._offers, this._mode, this._onEditClose, this._onEditSave);
         this._newPointEditController.init();
-        render(this._container, this._newPointEditController.getPointEditElement(), Position.AFTEREND);
+        let position = Position.AFTEREND;
+        if (this._isFirstPoint) {
+          position = Position.AFTERBEGIN;
+        }
+        render(this._container, this._newPointEditController.getPointEditElement(), position);
         break;
 
       case Mode.DEFAULT:
