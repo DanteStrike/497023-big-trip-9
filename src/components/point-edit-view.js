@@ -47,7 +47,7 @@ class PointEditView extends AbstractComponent {
       altInput: true,
       allowInput: true,
       altFormat: `d.m.Y H:i`,
-      dateFormat: `Y-m-d H:i:S`,
+      dateFormat: `Y-m-dTH:i:S`,
       enableTime: true,
       defaultDate: this._time.start ? this._time.start : Date.now(),
       onClose(selectedDates) {
