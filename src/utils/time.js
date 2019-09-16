@@ -2,7 +2,7 @@ import {leadIntoTwoDigitView} from './utils.js';
 
 
 export const formatDateTimeValue = (time) => {
-  return `${leadIntoTwoDigitView(new Date(time).getDate())}/${leadIntoTwoDigitView(new Date(time).getMonth())}/${new Date(time).getFullYear()} ${leadIntoTwoDigitView(new Date(time).getHours())}:${leadIntoTwoDigitView(new Date(time).getMinutes())}`;
+  return `${leadIntoTwoDigitView(new Date(time).getDate())}/${leadIntoTwoDigitView(new Date(time).getMonth())}/${new Date(time).getFullYear()}T${leadIntoTwoDigitView(new Date(time).getHours())}:${leadIntoTwoDigitView(new Date(time).getMinutes())}`;
 };
 
 export const formatDateTime = (time) => {
