@@ -1,10 +1,10 @@
 import {Position, SortType, TagName, BoardState, Action} from '../utils/enum.js';
 import {render, showElement, hideElement, unrender} from '../utils/dom.js';
-import NoPoints from '../components/no-points.js';
+import NoPointsWarning from '../components/no-points-warning.js';
 import Sort from '../components/sorting.js';
 import TripBoard from '../components/trip-board.js';
 import TripListController from './trip-list-controller.js';
-import LoadingPoints from '../components/loading-points.js';
+import LoadingPointsWarning from '../components/loading-points-warning.js';
 
 class TripController {
   constructor(container, onDataChange) {
@@ -12,9 +12,9 @@ class TripController {
     this._points = [];
 
     this._boardState = BoardState.LOADING;
-    this._loadingPoints = new LoadingPoints();
+    this._loadingPoints = new LoadingPointsWarning();
     this._board = new TripBoard();
-    this._noPoints = new NoPoints();
+    this._noPoints = new NoPointsWarning();
     this._sort = new Sort();
 
     //  Тип текущей сортировки. Сортировка при изменении данных должна сохраняться.
@@ -100,24 +100,24 @@ class TripController {
     this._boardState = state;
   }
 
-  _onDataChange(action, data, initiator) {
+  _onDataChange(action, update, initiator) {
     if (action === Action.NONE && this._boardState === BoardState.FIRST_POINT) {
       this.setBoardState(BoardState.NO_POINTS);
     }
-    this._onMainDataChange(action, data, initiator);
+    this._onMainDataChange(action, update, initiator);
   }
 
   _renderBoard() {
     this._board.getElement().innerHTML = ``;
     switch (this._sortType) {
       case SortType.TIME:
-        const sortedByEventDuration = this._points.sort((a, b) => (b.time.end - b.time.start) - (a.time.end - a.time.start));
-        this._tripListController.setPoints(sortedByEventDuration);
+        const sortedByEventDurationPoints = this._points.sort((a, b) => (b.time.end - b.time.start) - (a.time.end - a.time.start));
+        this._tripListController.setPoints(sortedByEventDurationPoints);
         return;
 
       case SortType.PRICE:
-        const sortedByPrice = this._points.sort((a, b) => b.basePrice - a.basePrice);
-        this._tripListController.setPoints(sortedByPrice);
+        const sortedByPricePoints = this._points.sort((a, b) => b.basePrice - a.basePrice);
+        this._tripListController.setPoints(sortedByPricePoints);
         return;
 
       case SortType.DEFAULT:
