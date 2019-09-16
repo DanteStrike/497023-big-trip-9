@@ -1,6 +1,6 @@
 import {Mode, TagName, Key} from '../utils/enum.js';
 import {createElement, hideElement, showElement} from '../utils/dom.js';
-import {formatDateTimeValue} from '../utils/time.js';
+import {formatDateTime} from '../utils/time.js';
 import AbstractComponent from './abstract.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -233,12 +233,12 @@ class PointEditView extends AbstractComponent {
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTimeValue(this._time.start)}" required>
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTime(this._time.start)}" required>
             —
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTimeValue(this._time.end)}" required>
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTime(this._time.end)}" required>
           </div>
 
           <div class="event__field-group  event__field-group--price">
