@@ -34,6 +34,7 @@ class TripInfoController {
 
     const citiesData = {
       firstCity: cities[0],
+      secondCity: cities.length > 2 ? cities[1] : null,
       lastCity: cities[cities.length - 1],
       amount: cities.length
     };

@@ -61,6 +61,7 @@ export const chartTransportConfig = {
         ticks: {
           beginAtZero: true
         },
+        minBarLength: 40,
         gridLines: {
           display: false
         }

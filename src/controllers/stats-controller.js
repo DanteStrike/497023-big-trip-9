@@ -53,7 +53,7 @@ class StatsController {
       return accum;
     }, [])
       .map((element) => {
-        element.timeSpend = Math.ceil(element.timeSpend / TimeValue.MILLISECONDS_IN_HOUR);
+        element.timeSpend = Number((element.timeSpend / TimeValue.MILLISECONDS_IN_HOUR).toFixed(1));
         return element;
       });
 
@@ -70,11 +70,11 @@ class StatsController {
     const sortedByMoneySpend = this._statsByTypes.sort((a, b) => b.moneySpend - a.moneySpend);
     const chartMoneyDataset = sortedByMoneySpend.reduce((dataset, stat) => {
       dataset.labels.push(`${Emoji[stat.label.replace(`-`, `_`).toUpperCase()]}  ${stat.label}`.toUpperCase());
-      dataset.data.push(stat.moneySpend);
+      dataset.values.push(stat.moneySpend);
       return dataset;
     }, {
       labels: [],
-      data: []
+      values: []
     });
     this._stats.updateChartData(ChartType.MONEY, chartMoneyDataset);
   }
@@ -84,12 +84,12 @@ class StatsController {
     const chartTransportDataset = sortedByAmount.reduce((dataset, stat) => {
       if (transferTypes.has(stat.label)) {
         dataset.labels.push(`${Emoji[stat.label.toUpperCase()]}  ${stat.label}`.toUpperCase());
-        dataset.data.push(stat.amount);
+        dataset.values.push(stat.amount);
       }
       return dataset;
     }, {
       labels: [],
-      data: []
+      values: []
     });
     this._stats.updateChartData(ChartType.TRANSPORT, chartTransportDataset);
   }
@@ -98,11 +98,11 @@ class StatsController {
     const sortedByTimeSpend = this._statsByDestinations.sort((a, b) => b.timeSpend - a.timeSpend);
     const chartTimeDataset = sortedByTimeSpend.reduce((dataset, stat) => {
       dataset.labels.push(`${Emoji.FLAG}  ${stat.label}`.toUpperCase());
-      dataset.data.push(stat.timeSpend);
+      dataset.values.push(stat.timeSpend);
       return dataset;
     }, {
       labels: [],
-      data: []
+      values: []
     });
     this._stats.updateChartData(ChartType.TIME, chartTimeDataset);
   }

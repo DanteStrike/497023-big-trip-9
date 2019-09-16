@@ -85,6 +85,11 @@ class PointEditController {
     this._deleteButton.innerHTML = `Delete`;
   }
 
+  _resetShake() {
+    this._formElement.classList.remove(`shake`);
+    this._formElement.classList.remove(`event--server-error`);
+  }
+
   _shake() {
     this._formElement.classList.add(`shake`);
     this._formElement.classList.add(`event--server-error`);
@@ -104,7 +109,7 @@ class PointEditController {
   _update(data) {
     const formData = new FormData(this._formElement);
     const typeData = this._offers.getTypeOffers(formData.get(`event-type`));
-    const offers = this._isTypeChange ? typeData.offers : this._data.offers;
+    const offersData = this._isTypeChange ? typeData.offers : this._data.offers;
     data.type = typeData.type;
     data.destination = this._destinations.getInfo(formData.get(`event-destination`));
     data.time = {
@@ -112,10 +117,14 @@ class PointEditController {
       end: new Date(formData.get(`event-end-time`)).valueOf()
     };
     data.basePrice = Number(formData.get(`event-price`));
-    data.offers = offers.map((offer, index) => {
-      offer.accepted = formData.get(`event-offer-${index}`) ? true : false;
-      return offer;
-    });
+    data.offers = offersData.reduce((offers, offer, index) => {
+      offers.push({
+        title: offer.title,
+        price: offer.price,
+        accepted: formData.get(`event-offer-${index}`) ? true : false
+      });
+      return offers;
+    }, []);
     data.isFavorite = Boolean(formData.get(`event-favorite`));
     return data;
   }
@@ -135,8 +144,7 @@ class PointEditController {
     evt.preventDefault();
 
     const patch = this._data;
-    this._formElement.classList.remove(`shake`);
-    this._formElement.classList.remove(`event--server-error`);
+    this._resetShake();
     this._block();
     this._onEditSave(Action.PATCH_FAVORITE, patch);
   }
@@ -156,6 +164,7 @@ class PointEditController {
   _onReset(evt) {
     evt.preventDefault();
 
+    this._deleteButton.innerHTML = `Deleting...`;
     switch (this._mode) {
       case Mode.ADDING:
         this._onEditSave(Action.NONE, null);
@@ -164,30 +173,24 @@ class PointEditController {
         this._onEditSave(Action.DELETE, this._data);
         break;
     }
-
-    this._deleteButton.innerHTML = `Deleting...`;
-    this._formElement.classList.remove(`shake`);
-    this._formElement.classList.remove(`event--server-error`);
+    this._resetShake();
     this._block();
   }
 
   _onSubmit(evt) {
     evt.preventDefault();
 
+    this._saveButton.innerHTML = `Saving...`;
     const update = this._update(this._data);
     switch (this._mode) {
       case Mode.ADDING:
         this._onEditSave(Action.CREATE, update);
         break;
-
       case Mode.DEFAULT:
         this._onEditSave(Action.UPDATE, update);
         break;
     }
-
-    this._saveButton.innerHTML = `Saving...`;
-    this._formElement.classList.remove(`shake`);
-    this._formElement.classList.remove(`event--server-error`);
+    this._resetShake();
     this._block();
   }
 }

@@ -10,10 +10,8 @@ export const formatDateTimeView = (time) => {
 };
 
 export const formatDateToMonthDay = (date) => {
+  const splittedDate = new Date(date).toDateString().split(` `);
   const monthIndex = 1;
   const dayIndex = 2;
-  return new Date(date).toDateString()
-    .split(` `)
-    .slice(monthIndex, dayIndex + 1)
-    .join(` `);
+  return `${splittedDate[dayIndex]} ${splittedDate[monthIndex]}`;
 };

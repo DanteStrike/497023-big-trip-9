@@ -17,11 +17,9 @@ class PointEditView extends AbstractComponent {
     this._isFavorite = isFavorite;
     this._datalistOptions = datalistOptions;
     this._mode = mode;
-
     //  Передать контроллеру информацию о соответствующих событиях
     this._onDestinationChange = onDestinationChange;
     this._onTypeChange = onTypeChange;
-
     this._offers = (this._mode === Mode.DEFAULT) ? offers : this._onTypeChange(this._type.name).offers;
 
     this._currentIconImg = this.getElement().querySelector(`.event__type-icon`);
@@ -29,10 +27,9 @@ class PointEditView extends AbstractComponent {
     this._typeToggle = this.getElement().querySelector(`.event__type-toggle`);
     this._typeListElement = this.getElement().querySelector(`.event__type-list`);
     this._destinationInputElement = this.getElement().querySelector(`.event__input--destination`);
-    this._priceInputElement = this.getElement().querySelector(`.event__input--price`);
-    this._pointResetButtonElement = this.getElement().querySelector(`.event__reset-btn`);
     this._detailsSectionElement = this.getElement().querySelector(`.event__details`);
-    this._destinationDescriptionElement = this._detailsSectionElement.querySelector(`.event__destination-description`);
+    this._destinationSectionElement = this._detailsSectionElement.querySelector(`.event__section--destination`);
+    this._destinationDescriptionElement = this._destinationSectionElement.querySelector(`.event__destination-description`);
     this._offersSectionElement = this._detailsSectionElement.querySelector(`.event__section--offers`);
     this._offersElement = this._offersSectionElement.querySelector(`.event__available-offers`);
     this._picturesContainerElement = this._detailsSectionElement.querySelector(`.event__photos-container`);
@@ -108,7 +105,7 @@ class PointEditView extends AbstractComponent {
     const newDestinationData = this._onDestinationChange(newDestination);
     const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
 
-    showElement(this._detailsSectionElement);
+    showElement(this._destinationSectionElement);
     this._destinationDescriptionElement.innerHTML = newDestinationData.description;
     this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
     this._picturesElement = newPhotosElement;
@@ -118,7 +115,7 @@ class PointEditView extends AbstractComponent {
   _onDestinationKeyDown(evt) {
     evt.preventDefault();
     if (evt.key === Key.BACKSPACE || evt.key === Key.DELETE) {
-      hideElement(this._detailsSectionElement);
+      hideElement(this._destinationSectionElement);
       this._destinationInputElement.value = ``;
     }
   }
@@ -165,37 +162,37 @@ class PointEditView extends AbstractComponent {
                 <legend class="visually-hidden">Transfer</legend>
 
                 <div class="event__type-item">
-                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${(this._type.name.toLowerCase() === `taxi`) ? `checked` : ``}>
+                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${(this._type.name === `taxi`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${(this._type.name.toLowerCase() === `bus`) ? `checked` : ``}>
+                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${(this._type.name === `bus`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${(this._type.name.toLowerCase() === `train`) ? `checked` : ``}>
+                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${(this._type.name === `train`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${(this._type.name.toLowerCase() === `ship`) ? `checked` : ``}>
+                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${(this._type.name === `ship`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport" ${(this._type.name.toLowerCase() === `transport`) ? `checked` : ``}>
+                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport" ${(this._type.name === `transport`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${(this._type.name.toLowerCase() === `drive`) ? `checked` : ``}>
+                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${(this._type.name === `drive`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${(this._type.name.toLowerCase() === `flight`) ? `checked` : ``}>
+                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${(this._type.name === `flight`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
                 </div>
               </fieldset>
@@ -204,17 +201,17 @@ class PointEditView extends AbstractComponent {
                 <legend class="visually-hidden">Activity</legend>
 
                 <div class="event__type-item">
-                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${(this._type.name.toLowerCase() === `check-in`) ? `checked` : ``}>
+                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${(this._type.name === `check-in`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${(this._type.name.toLowerCase() === `sightseeing`) ? `checked` : ``}>
+                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${(this._type.name === `sightseeing`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${(this._type.name.toLowerCase() === `restaurant`) ? `checked` : ``}>
+                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${(this._type.name === `restaurant`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
                 </div>
               </fieldset>
@@ -264,7 +261,7 @@ class PointEditView extends AbstractComponent {
           </button>`}
         </header>
 
-        <section class="event__details ${this._mode === Mode.ADDING ? `visually-hidden` : ``}">
+        <section class="event__details">
 
           <section class="event__section  event__section--offers ${(this._offers.length === 0) ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -272,7 +269,7 @@ class PointEditView extends AbstractComponent {
             ${this._getOffersTemplate(this._offers)}
           </section>
 
-          <section class="event__section  event__section--destination">
+          <section class="event__section  event__section--destination ${this._mode === Mode.ADDING ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
             <p class="event__destination-description">${this._destination.description ? `${this._destination.description}` : ``}</p>
 

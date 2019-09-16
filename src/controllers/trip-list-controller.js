@@ -38,6 +38,7 @@ class TripListController {
     if (this._creatingPoint) {
       return;
     }
+    this._onChangeView();
 
     const pointOptions = Object.assign({}, this._pointDefaultOptions);
     pointOptions.container = container;

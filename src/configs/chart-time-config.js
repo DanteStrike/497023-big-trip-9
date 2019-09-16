@@ -61,6 +61,7 @@ export const chartTimeConfig = {
         ticks: {
           beginAtZero: true
         },
+        minBarLength: 40,
         gridLines: {
           display: false
         }
