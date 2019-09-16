@@ -1,7 +1,7 @@
 import AbstractComponent from './abstract.js';
 
 
-class NoPoints extends AbstractComponent {
+class NoPointsWarning extends AbstractComponent {
   constructor() {
     super();
   }
@@ -12,4 +12,4 @@ class NoPoints extends AbstractComponent {
 }
 
 
-export default NoPoints;
+export default NoPointsWarning;
