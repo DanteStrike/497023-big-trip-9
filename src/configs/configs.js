@@ -18,7 +18,7 @@ export const defaultPointData = {
   'is_favorite': false
 };
 
-export const pointConfig = {
+export const pointViewConfig = {
   maxOffers: 3
 };
 

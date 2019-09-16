@@ -6,63 +6,72 @@ import TripDay from '../components/trip-day.js';
 import Point from '../data/point.js';
 
 class TripListController {
-  constructor(container, createTaskContainer, onDataChange) {
+  constructor(container, onDataChange) {
     this._container = container;
-    this._createTaskContainer = createTaskContainer;
     this._points = [];
     this._creatingPoint = null;
-    this._destinations = [];
-    this._offers = [];
-
     this._onBoardDataChange = onDataChange;
-
     this._subscriptions = [];
-    this._onChangeView = this._onChangeView.bind(this);
-    this._onDataChange = this._onDataChange.bind(this);
+
+    this._pointDefaultOptions = {
+      container: this._container,
+      renderPosition: Position.BEFOREEND,
+      data: null,
+      destinations: [],
+      offers: [],
+      mode: Mode.DEFAULT,
+      onChangeView: this._onChangeView.bind(this),
+      onDataChange: this._onDataChange.bind(this)
+    };
   }
 
   setDestinations(destinations) {
-    this._destinations = destinations;
+    this._pointDefaultOptions.destinations = destinations;
   }
 
   setOffers(offers) {
-    this._offers = offers;
+    this._pointDefaultOptions.offers = offers;
   }
 
-  createEvent(createButton, isFirstPoint) {
+  createPoint(createButton, container, renderPosition) {
     //  Запретить создавать более одной карточки за раз
     if (this._creatingPoint) {
       return;
     }
 
-    const defaultPoint = new Point(defaultPointData);
-    let createTaskContainer = this._createTaskContainer;
-    if (isFirstPoint) {
-      createTaskContainer = this._container;
-    }
+    const pointOptions = Object.assign({}, this._pointDefaultOptions);
+    pointOptions.container = container;
+    pointOptions.renderPosition = renderPosition;
+    pointOptions.data = new Point(defaultPointData);
+    pointOptions.mode = Mode.ADDING;
+    pointOptions.onTripListAddPointClose = () => {
+      this._creatingPoint = null;
+      createButton.disabled = false;
+    };
 
-    this._creatingPoint = new PointController(createTaskContainer, defaultPoint, isFirstPoint, this._destinations, this._offers, Mode.ADDING, this._onChangeView,
-        (...arg) => {
-          this._creatingPoint = null;
-          createButton.disabled = false;
-          this._onDataChange(...arg);
-        });
+    this._creatingPoint = new PointController(pointOptions);
     this._creatingPoint.init();
   }
 
   setPoints(points) {
     this._updatePoints(points);
+    if (this._points.length === 0) {
+      return;
+    }
 
     const newTripDay = new TripDay();
     render(this._container, newTripDay.getElement(), Position.BEFOREEND);
 
     for (const point of this._points) {
-      this._renderPoint(point, newTripDay.getEventsListElement());
+      this._renderPoint(point, newTripDay.getElement().querySelector(`.trip-events__list`));
     }
   }
 
   setPointsByDays(points) {
     this._updatePoints(points);
+    if (this._points.length === 0) {
+      return;
+    }
 
     const sortedByEvent = this._points.sort((a, b) => a.time.start - b.time.start);
     const firstTripDay = new Date(this._points[0].time.start).setHours(0, 0, 0, 0);
@@ -72,33 +81,31 @@ class TripListController {
     for (let day = firstTripDay; day <= lastTripDay; day += TimeValue.MILLISECONDS_IN_DAY) {
       const dayPoints = sortedByEvent.filter((point) => new Date(point.time.start).setHours(0, 0, 0, 0) === day);
       dayIndex++;
-
       //  Не вставлять в разметку пустые дни
       if (dayPoints.length === 0) {
         continue;
       }
-
       const newTripDay = new TripDay(dayIndex, day);
       render(this._container, newTripDay.getElement(), Position.BEFOREEND);
-
       for (const dayEvent of dayPoints) {
-        this._renderPoint(dayEvent, newTripDay.getEventsListElement());
+        this._renderPoint(dayEvent, newTripDay.getElement().querySelector(`.trip-events__list`));
       }
     }
   }
 
   _updatePoints(points) {
-    //  Убрать всех слушателей
     this._onChangeView();
     this._subscriptions = [];
-    //  Ререндер
     this._points = points;
   }
 
   _renderPoint(point, listElement) {
-    const newPointController = new PointController(listElement, point, false, this._destinations, this._offers, Mode.DEFAULT, this._onChangeView, this._onDataChange);
-    newPointController.init();
+    const pointOptions = Object.assign({}, this._pointDefaultOptions);
+    pointOptions.container = listElement;
+    pointOptions.data = point;
 
+    const newPointController = new PointController(pointOptions);
+    newPointController.init();
     this._subscriptions.push(newPointController.setDefaultView.bind(newPointController));
   }
 

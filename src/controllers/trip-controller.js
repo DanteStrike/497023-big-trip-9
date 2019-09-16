@@ -1,24 +1,27 @@
 import {Position, SortType, TagName, BoardState, Action} from '../utils/enum.js';
 import {render, showElement, hideElement, unrender} from '../utils/dom.js';
-import NoEvents from '../components/no-events.js';
+import NoPoints from '../components/no-points.js';
 import Sort from '../components/sorting.js';
 import TripBoard from '../components/trip-board.js';
 import TripListController from './trip-list-controller.js';
+import LoadingPoints from '../components/loading-points.js';
 
 class TripController {
   constructor(container, onDataChange) {
     this._container = container;
     this._points = [];
 
+    this._boardState = BoardState.LOADING;
+    this._loadingPoints = new LoadingPoints();
     this._board = new TripBoard();
-    this._noPoints = new NoEvents();
+    this._noPoints = new NoPoints();
     this._sort = new Sort();
 
     //  Тип текущей сортировки. Сортировка при изменении данных должна сохраняться.
     this._sortType = SortType.DEFAULT;
 
     this._onDataChange = this._onDataChange.bind(this);
-    this._tripListController = new TripListController(this._container, this._sort.getElement(), this._onDataChange);
+    this._tripListController = new TripListController(this._board.getElement(), this._onDataChange);
 
     this._onMainDataChange = onDataChange;
   }
@@ -33,6 +36,7 @@ class TripController {
 
   init() {
     this._sort.getElement().addEventListener(`click`, (evt) => this._onSortBtnClick(evt));
+    render(this._container, this._loadingPoints.getElement(), Position.BEFOREEND);
   }
 
   show() {
@@ -43,12 +47,12 @@ class TripController {
     hideElement(this._container);
   }
 
-  createEvent(createButton) {
+  createPoint(createButton) {
     if (this._boardState === BoardState.NO_POINTS) {
       this.setBoardState(BoardState.FIRST_POINT);
-      this._tripListController.createEvent(createButton, true);
+      this._tripListController.createPoint(createButton, this._container, Position.AFTERBEGIN);
     } else {
-      this._tripListController.createEvent(createButton, false);
+      this._tripListController.createPoint(createButton, this._sort.getElement(), Position.AFTEREND);
     }
   }
 
@@ -62,9 +66,13 @@ class TripController {
       return;
     }
 
+    if (this._boardState === BoardState.LOADING) {
+      unrender(this._loadingPoints.getElement());
+    }
+
     switch (state) {
       case BoardState.NO_POINTS:
-        this._board.getElement.innerHTML = ``;
+        this._board.getElement().innerHTML = ``;
         unrender(this._board.getElement());
         unrender(this._sort.getElement());
         if (!this._container.contains(this._noPoints.getElement())) {
@@ -90,16 +98,6 @@ class TripController {
     }
 
     this._boardState = state;
-  }
-
-  createPoint(createButton) {
-    if (this._points.length === 0) {
-      unrender(this._noPoints.getElement());
-      render(this._container, this._sort.getElement(), Position.BEFOREEND);
-      render(this._container, this._board.getElement(), Position.BEFOREEND);
-    }
-
-    this._tripListController.createPoint(createButton);
   }
 
   _onDataChange(action, data, initiator) {

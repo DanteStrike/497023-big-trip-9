@@ -1,7 +1,8 @@
-import AbstractComponent from './abstract.js';
 import {TimeValue} from '../utils/enum.js';
-import {formatDateTime, formatDateTimeView} from '../utils/utils.js';
-import {pointConfig} from '../configs/configs.js';
+import {leadIntoTwoDigitView} from '../utils/utils.js';
+import {formatDateTime, formatDateTimeView} from '../utils/time.js';
+import {pointViewConfig} from '../configs/configs.js';
+import AbstractComponent from './abstract.js';
 
 
 class PointView extends AbstractComponent {
@@ -11,7 +12,8 @@ class PointView extends AbstractComponent {
     this._destination = destination;
     this._time = time;
     this._timeDuration = {
-      milliseconds: this._time.end - this._time.start,
+      //  Точность до минуты (ТЗ)
+      milliseconds: new Date(this._time.end).setSeconds(0, 0) - new Date(this._time.start).setSeconds(0, 0),
 
       get days() {
         return Math.floor(this.milliseconds / TimeValue.MILLISECONDS_IN_DAY);
@@ -24,6 +26,12 @@ class PointView extends AbstractComponent {
       }};
     this._offers = offers;
     this._basePrice = basePrice;
+  }
+
+  _getTimeDurationString() {
+    return `${this._timeDuration.days !== 0 ? `${leadIntoTwoDigitView(this._timeDuration.days)}D` : ``}
+            ${this._timeDuration.hours !== 0 ? `${leadIntoTwoDigitView(this._timeDuration.hours)}H` : ``}
+            ${this._timeDuration.minutes !== 0 ? `${leadIntoTwoDigitView(this._timeDuration.minutes)}M` : ``}`;
   }
 
   _getTemplate() {
@@ -43,8 +51,7 @@ class PointView extends AbstractComponent {
             <time class="event__end-time" datetime="${formatDateTime(this._time.end)}">
             ${formatDateTimeView(this._time.end)}</time>
           </p>
-          <p class="event__duration">
-            ${this._timeDuration.days !== 0 ? `${this._timeDuration.days}D` : ``} ${this._timeDuration.hours !== 0 ? `${this._timeDuration.hours}H` : ``} ${this._timeDuration.minutes !== 0 ? `${this._timeDuration.minutes}M` : ``}</p>
+          <p class="event__duration">${this._getTimeDurationString()}</p>
         </div>
 
         <p class="event__price">
@@ -53,7 +60,7 @@ class PointView extends AbstractComponent {
 
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${this._offers.filter((offer) => offer.accepted).slice(0, pointConfig.maxOffers).map((offer) => `<li class="event__offer">
+          ${this._offers.filter((offer) => offer.accepted).slice(0, pointViewConfig.maxOffers).map((offer) => `<li class="event__offer">
           <span class="event__offer-title">${offer.title}</span>
           +
           €&nbsp;<span class="event__offer-price">${offer.price}</span>

@@ -29,6 +29,7 @@ export const FilterType = {
 export const Action = {
   CREATE: `create`,
   UPDATE: `update`,
+  PATCH_FAVORITE: `patch-favorite`,
   DELETE: `delete`,
   NONE: `none`
 };
@@ -41,7 +42,8 @@ export const Mode = {
 export const BoardState = {
   NO_POINTS: `no-points`,
   FIRST_POINT: `first-point`,
-  DEFAULT: `default`
+  DEFAULT: `default`,
+  LOADING: `loading`
 };
 
 export const Method = {

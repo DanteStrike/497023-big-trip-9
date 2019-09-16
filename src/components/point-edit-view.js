@@ -1,16 +1,14 @@
+import {Mode, TagName, Key} from '../utils/enum.js';
+import {createElement, hideElement, showElement} from '../utils/dom.js';
+import {formatDateTimeValue} from '../utils/time.js';
 import AbstractComponent from './abstract.js';
-import {Mode, TagName, Key, Position} from '../utils/enum.js';
-import {createElement, hideElement, showElement, render, unrender} from '../utils/dom.js';
-import {formatDateTimeValue} from '../utils/utils.js';
-
-
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 
 
 class PointEditView extends AbstractComponent {
-  constructor({type, destination, time, basePrice, offers, isFavorite}, datalistOptions, mode, onDestinationChange, onTypeChange) {
+  constructor({type, destination, time, basePrice, offers, isFavorite}, {datalistOptions, mode, onDestinationChange, onTypeChange}) {
     super();
     this._type = type;
     this._destination = destination;
@@ -40,13 +38,6 @@ class PointEditView extends AbstractComponent {
     this._picturesContainerElement = this._detailsSectionElement.querySelector(`.event__photos-container`);
     this._picturesElement = this._picturesContainerElement.querySelector(`.event__photos-tape`);
 
-    this._favoriteInputElement = this.getElement().querySelector(`#event-favorite-1`);
-    this._favoriteButtonElement = this.getElement().querySelector(`.event__favorite-btn`);
-    if (this._mode === Mode.ADDING) {
-      unrender(this._favoriteInputElement);
-      unrender(this._favoriteButtonElement);
-    }
-
     this._initFlatpickr();
     this._hangHandlers();
   }
@@ -55,7 +46,7 @@ class PointEditView extends AbstractComponent {
     const startFlatpickr = flatpickr(this.getElement().querySelector(`#event-start-time-1`), {
       altInput: true,
       allowInput: true,
-      altFormat: `d/m/Y H:i`,
+      altFormat: `d.m.Y H:i`,
       dateFormat: `Y-m-d H:i:S`,
       enableTime: true,
       defaultDate: this._time.start ? this._time.start : Date.now(),
@@ -69,7 +60,7 @@ class PointEditView extends AbstractComponent {
     const endFlatpickr = flatpickr(this.getElement().querySelector(`#event-end-time-1`), {
       altInput: true,
       allowInput: true,
-      altFormat: `d/m/Y H:i`,
+      altFormat: `d.m.Y H:i`,
       dateFormat: `Y-m-d H:i:S`,
       enableTime: true,
       defaultDate: this._time.end ? this._time.end : Date.now(),
@@ -79,10 +70,6 @@ class PointEditView extends AbstractComponent {
         }
       }
     });
-
-    // this.getElement().querySelectorAll(`.event__input--time`).forEach((node) => {
-    //   node.style.width = `150px`;
-    // });
   }
 
   _hangHandlers() {
@@ -121,9 +108,6 @@ class PointEditView extends AbstractComponent {
     const newDestinationData = this._onDestinationChange(newDestination);
     const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
 
-    render(this._pointResetButtonElement, this._favoriteInputElement, Position.AFTEREND);
-    render(this._favoriteInputElement, this._favoriteButtonElement, Position.AFTEREND);
-
     showElement(this._detailsSectionElement);
     this._destinationDescriptionElement.innerHTML = newDestinationData.description;
     this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
@@ -135,10 +119,6 @@ class PointEditView extends AbstractComponent {
     evt.preventDefault();
     if (evt.key === Key.BACKSPACE || evt.key === Key.DELETE) {
       hideElement(this._detailsSectionElement);
-      if (this._favoriteInputElement) {
-        unrender(this._favoriteInputElement);
-        unrender(this._favoriteButtonElement);
-      }
       this._destinationInputElement.value = ``;
     }
   }
@@ -253,12 +233,12 @@ class PointEditView extends AbstractComponent {
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTimeValue(this._time.start)}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTimeValue(this._time.start)}" required>
             —
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTimeValue(this._time.end)}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTimeValue(this._time.end)}" required>
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -266,19 +246,19 @@ class PointEditView extends AbstractComponent {
               <span class="visually-hidden">Price</span>
               €
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._mode === Mode.ADDING ? `` : `${this._basePrice}`}" required>
+            <input class="event__input  event__input--price" id="event-price-1" type="number" min="0" name="event-price" value="${this._mode === Mode.ADDING ? `` : `${this._basePrice}`}" required>
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">Delete</button>
           <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
+          ${this._mode === Mode.ADDING ? `` : `
           <label class="event__favorite-btn" for="event-favorite-1">
             <span class="visually-hidden">Add to favorite</span>
             <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
               <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"></path>
             </svg>
           </label>
-          ${this._mode === Mode.ADDING ? `` : `
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>`}

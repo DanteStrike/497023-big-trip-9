@@ -1,5 +1,5 @@
+import {formatDateToMonthDay} from '../utils/time.js';
 import AbstractComponent from './abstract.js';
-import {formatDateToMonthDay} from '../utils/utils.js';
 
 
 class TripInfo extends AbstractComponent {
