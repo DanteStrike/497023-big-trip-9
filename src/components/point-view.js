@@ -30,8 +30,8 @@ class PointView extends AbstractComponent {
 
   _getTimeDurationString() {
     return `${this._timeDuration.days !== 0 ? `${leadIntoTwoDigitView(this._timeDuration.days)}D` : ``}
-            ${this._timeDuration.hours !== 0 ? `${leadIntoTwoDigitView(this._timeDuration.hours)}H` : ``}
-            ${this._timeDuration.minutes !== 0 ? `${leadIntoTwoDigitView(this._timeDuration.minutes)}M` : ``}`;
+            ${(this._timeDuration.days !== 0 || this._timeDuration.hours !== 0) ? `${leadIntoTwoDigitView(this._timeDuration.hours)}H` : ``}
+            ${leadIntoTwoDigitView(this._timeDuration.minutes)}M`;
   }
 
   _getTemplate() {
