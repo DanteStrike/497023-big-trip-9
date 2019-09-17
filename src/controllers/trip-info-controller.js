@@ -2,12 +2,12 @@ import TripInfo from '../components/trip-info.js';
 import {Position} from '../utils/enum.js';
 import {render, unrender} from '../utils/dom.js';
 
-
+/** Класс представляет управление выводом информации об путешествия*/
 class TripInfoController {
   constructor(container) {
     this._container = container;
     this._points = [];
-    this._tripInfo = new TripInfo();
+    this._view = new TripInfo();
     this._tripPriceElement = container.querySelector(`.trip-info__cost-value`);
   }
 
@@ -18,20 +18,19 @@ class TripInfoController {
   update(newData) {
     this._points = newData.sort((a, b) => a.time.start - b.time.start);
     this._tripPriceElement.innerHTML = `${this._getTripPrice()}`;
-
+    //  Контроль отрисовки.
     if (newData.length === 0) {
-      if (this._container.contains(this._tripInfo.getElement())) {
-        unrender(this._tripInfo.getElement());
+      if (this._container.contains(this._view.getElement())) {
+        unrender(this._view.getElement());
       }
       return;
     }
-
-    if (!this._container.contains(this._tripInfo.getElement())) {
-      render(this._container, this._tripInfo.getElement(), Position.AFTERBEGIN);
+    if (!this._container.contains(this._view.getElement())) {
+      render(this._container, this._view.getElement(), Position.AFTERBEGIN);
     }
 
+    //  Привести данные в удобные для отрисовки вид.
     const cities = this._getCities(this._points);
-
     const citiesData = {
       firstCity: cities[0],
       secondCity: cities.length > 2 ? cities[1] : null,
@@ -42,17 +41,8 @@ class TripInfoController {
       firstDay: this._points[0].time.start,
       lastDay: this._points[this._points.length - 1].time.end
     };
-
-    this._tripInfo.update(citiesData, datesData);
-  }
-
-  _getOffersCost(offers) {
-    return offers.reduce((accum, offer) => {
-      if (offer.accepted) {
-        accum += offer.price;
-      }
-      return accum;
-    }, 0);
+    //  Отрисовать изменения
+    this._view.update(citiesData, datesData);
   }
 
   _getCities() {
@@ -62,15 +52,19 @@ class TripInfoController {
     }, []);
   }
 
+  _getOffersCost(offers) {
+    return offers.reduce((additionalCost, offer) => {
+      if (offer.accepted) {
+        additionalCost += offer.price;
+      }
+      return additionalCost;
+    }, 0);
+  }
+
+  //  ТЗ: Итоговая цена формируется из стоимости всех точек + стоимость всех принятых предложений.
   _getTripPrice() {
     return this._points.reduce((totalCost, point) => {
-      totalCost += point.basePrice;
-      totalCost += point.offers.reduce((additionalCost, offer) => {
-        if (offer.accepted) {
-          additionalCost += offer.price;
-        }
-        return additionalCost;
-      }, 0);
+      totalCost += point.basePrice + this._getOffersCost(point.offers);
       return totalCost;
     }, 0);
   }

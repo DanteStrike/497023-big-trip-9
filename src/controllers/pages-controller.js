@@ -2,7 +2,7 @@ import {Position, TagName, Page} from '../utils/enum.js';
 import {render} from '../utils/dom.js';
 import Menu from '../components/menu';
 
-
+/** Класс представляет управление переключением страниц*/
 class PagesController {
   constructor(menuContainer, filtersController, tripController, statsController, createPointButton) {
     this._menuContainer = menuContainer;
@@ -11,7 +11,7 @@ class PagesController {
     this._tripController = tripController;
     this._statsController = statsController;
     this._createPointButton = createPointButton;
-    //  Сохранение состояния кнопки при переключении
+    //  Сохранение состояния кнопки, если будет переключение на страницу статистики
     this._createPointButtonDisabled = this._createPointButton.disabled;
 
     this._menu = new Menu();
@@ -27,6 +27,7 @@ class PagesController {
   }
 
   _onMenuClick(evt) {
+    //  Класс активной страницы по markup
     const activeClass = `trip-tabs__btn--active`;
 
     if (evt.target.tagName !== TagName.A || evt.target.classList.contains(activeClass)) {
@@ -35,7 +36,6 @@ class PagesController {
 
     const clickedButton = evt.target;
     const buttons = evt.currentTarget.children;
-
     for (const button of buttons) {
       button.classList.remove(activeClass);
     }
@@ -53,6 +53,7 @@ class PagesController {
         this._filtersController.hide();
         this._tripController.hide();
         this._statsController.show();
+        //  Сохранение состояния кнопки до переключения на страницу статистики
         this._createPointButtonDisabled = this._createPointButton.disabled;
         this._createPointButton.disabled = true;
     }

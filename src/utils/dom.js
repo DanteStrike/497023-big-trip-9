@@ -5,7 +5,7 @@ import {Position} from './enum';
  * Возвращает DOM на основе разметки.
  *
  * @param {string} template - разметка.
- * @return {node} DOM разметки.
+ * @return {Node} DOM разметки.
  */
 export const createElement = (template) => {
   const newElement = document.createElement(`div`);
@@ -16,8 +16,8 @@ export const createElement = (template) => {
 /**
  * Вставляет элемент в определенную позицию контейнера.
  *
- * @param {node} container - контейнер.
- * @param {node} element - элемент.
+ * @param {Node} container - контейнер.
+ * @param {Node} element - элемент.
  * @param {Position} place - позиция.
  */
 export const render = (container, element, place) => {
@@ -37,7 +37,7 @@ export const render = (container, element, place) => {
 /**
  * Удалить DOM-элемент.
  *
- * @param {node} element - элемент.
+ * @param {Node} element - элемент.
  */
 export const unrender = (element) => {
   if (element) {

@@ -8,6 +8,8 @@ export const TimeValue = {
   MILLISECONDS_IN_DAY: 1000 * 60 * 60 * 24,
 };
 
+export const NOT_FOUND = -1;
+
 export const Position = {
   AFTERBEGIN: `afterbegin`,
   BEFOREEND: `beforeend`,

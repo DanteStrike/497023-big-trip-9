@@ -1,7 +1,8 @@
 import {Mode, Key, Action} from '../utils/enum.js';
 import PointEditView from '../components/point-edit-view.js';
+import Point from '../data/point.js';
 
-
+/** Класс представляет управление формой редактирования/создания точки*/
 class PointEditController {
   constructor({data, destinations, offers, mode, onEditClose, onEditSave, onAddPointClose}) {
     this._data = data;
@@ -13,6 +14,7 @@ class PointEditController {
     this._onAddPointClose = onAddPointClose;
     //  От потери окружения. Сохраняем событие, чтобы потом корректно удалить.
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
+    //  Детектор изменения типа точки.
     this._isTypeChange = false;
 
     this._pointEditViewOptions = {
@@ -95,20 +97,10 @@ class PointEditController {
     this._formElement.classList.add(`event--server-error`);
   }
 
-  //  При изменении типа точки менять предложения
-  _onTypeChange(newType) {
-    this._isTypeChange = true;
-    return this._offers.getTypeOffers(newType);
-  }
-
-  //  При изменении пункты назначения загружать новые данные
-  _onDestinationChange(newDestination) {
-    return this._destinations.getInfo(newDestination);
-  }
-
   _update(data) {
     const formData = new FormData(this._formElement);
     const typeData = this._offers.getTypeOffers(formData.get(`event-type`));
+    // При изменении типа точки предложения сбрасываются на доступные.
     const offersData = this._isTypeChange ? typeData.offers : this._data.offers;
     data.type = typeData.type;
     data.destination = this._destinations.getInfo(formData.get(`event-destination`));
@@ -140,10 +132,23 @@ class PointEditController {
     }
   }
 
+  //  При изменении типа точки менять предложения
+  _onTypeChange(newType) {
+    this._isTypeChange = true;
+    return this._offers.getTypeOffers(newType);
+  }
+
+  //  При изменении пункты назначения загружать новые данные
+  _onDestinationChange(newDestination) {
+    return this._destinations.getInfo(newDestination);
+  }
+
   _onFavoriteButtonClick(evt) {
     evt.preventDefault();
 
-    const patch = this._data;
+    //  Скопировать текущие данные и попытаться выполнить точечное изменение
+    const patch = new Point(this._data.toRAW());
+    patch.isFavorite = !patch.isFavorite;
     this._resetShake();
     this._block();
     this._onEditSave(Action.PATCH_FAVORITE, patch);

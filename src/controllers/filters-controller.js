@@ -2,26 +2,27 @@ import {Position, FilterType, TagName} from '../utils/enum.js';
 import {render, unrender} from '../utils/dom.js';
 import Filters from '../components/trip-filters';
 
+/** Класс представляет управление панелью фильтров*/
 class FiltersController {
   constructor(container, onFilterTypeChange) {
     this._container = container;
-    this._filters = new Filters();
+    this._controls = new Filters();
     this._currentType = FilterType.EVERYTHING;
-
+    //  Обратная связь с main. Сообщать об изменениях типа фильтра.
     this._onFilterTypeChange = onFilterTypeChange;
   }
 
   init() {
     this.show();
-    this._filters.getElement().addEventListener(`click`, (evt) => this._onFiltersClick(evt));
+    this._controls.getElement().addEventListener(`click`, (evt) => this._onFiltersClick(evt));
   }
 
   show() {
-    render(this._container, this._filters.getElement(), Position.AFTEREND);
+    render(this._container, this._controls.getElement(), Position.AFTEREND);
   }
 
   hide() {
-    unrender(this._filters.getElement());
+    unrender(this._controls.getElement());
   }
 
   _onFiltersClick(evt) {

@@ -3,7 +3,7 @@ import {render, unrender} from '../utils/dom.js';
 import PointView from '../components/point-view.js';
 import PointEditController from './point-edit-controller.js';
 
-
+/** Класс представляет управление отображением точки*/
 class PointController {
   constructor({container, renderPosition, data, destinations, offers, mode, onChangeView, onDataChange, onTripListAddPointClose}) {
     this._container = container;
@@ -13,6 +13,8 @@ class PointController {
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
     this._onTripListAddPointClose = onTripListAddPointClose;
+    //  Данные и настройки для контроллера редактирования точки передаются в запакованном объект виде.
+    //  Сформировать опции по умолчанию.
     this._pointEditOptions = {
       destinations,
       offers,

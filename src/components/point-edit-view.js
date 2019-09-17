@@ -20,6 +20,7 @@ class PointEditView extends AbstractComponent {
     //  Передать контроллеру информацию о соответствующих событиях
     this._onDestinationChange = onDestinationChange;
     this._onTypeChange = onTypeChange;
+
     this._offers = (this._mode === Mode.DEFAULT) ? offers : this._onTypeChange(this._type.name).offers;
 
     this._currentIconImg = this.getElement().querySelector(`.event__type-icon`);
@@ -47,6 +48,7 @@ class PointEditView extends AbstractComponent {
       dateFormat: `Y-m-dTH:i:S`,
       enableTime: true,
       defaultDate: this._time.start ? this._time.start : Date.now(),
+      //  ТЗ: Дата начала не может быть больше даты окончания
       onClose(selectedDates) {
         if (endFlatpickr.selectedDates[0] < selectedDates[0]) {
           endFlatpickr.setDate(selectedDates[0]);
@@ -61,6 +63,7 @@ class PointEditView extends AbstractComponent {
       dateFormat: `Y-m-dTH:i:S`,
       enableTime: true,
       defaultDate: this._time.end ? this._time.end : Date.now(),
+      //  ТЗ: Дата окончания не может быть меньше даты начала
       onClose(selectedDates) {
         if (startFlatpickr.selectedDates[0] > selectedDates[0]) {
           startFlatpickr.setDate(selectedDates[0]);

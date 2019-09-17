@@ -1,7 +1,7 @@
 import {capitalizeFirstLetter} from '../utils/utils.js';
 import {transferTypes} from '../configs/configs.js';
 
-
+/** Класс представляет адаптер между сервером и приложением по возможным предложениям*/
 class Offers {
   constructor(data) {
     this._data = data.map((element) => ({
@@ -17,6 +17,7 @@ class Offers {
     }));
   }
 
+  //  Найти возможные предложения по типу точки
   getTypeOffers(type) {
     const foundedData = this._data.find((data) => data.type.name === type);
     if (foundedData) {

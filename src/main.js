@@ -20,9 +20,11 @@ const tripListElement = tripPageMainContainer.querySelector(`.trip-events`);
 const api = new API(serverConfig);
 const appData = {
   filterType: FilterType.EVERYTHING,
+  //  Хранить данные по скачанным точкам, чтобы не обращаться каждый раз на сервер.
   downloadedPoints: []
 };
 
+//  Данные приложения (appData.downloadedPoints) изменились => сообщить ближайшим контроллерам
 const updateControllers = () => {
   if (appData.downloadedPoints.length === 0) {
     tripController.setBoardState(BoardState.NO_POINTS);
@@ -34,6 +36,7 @@ const updateControllers = () => {
   tripInfoController.update(appData.downloadedPoints);
 };
 
+//  При изменении типа фильтра отобразить соответствующие точки
 const onFilterTypeChange = (newType) => {
   appData.filterType = newType;
   if (appData.downloadedPoints.length !== 0) {
@@ -41,6 +44,7 @@ const onFilterTypeChange = (newType) => {
   }
 };
 
+//  Обработать изменение данных (update), вызванных инициатором (initiator), согласно типу изменения (action)
 const onDataChange = (action, update, initiator) => {
   switch (action) {
     case Action.CREATE:
@@ -48,9 +52,11 @@ const onDataChange = (action, update, initiator) => {
       .then((point) => {
         appData.downloadedPoints.push(point);
         updateControllers();
+        //  Разрешить закрытие формы добавления новой точки
         initiator.onAddPointClose();
       })
       .catch(() => {
+        //  Вызвать эффект "покачивания головы"
         initiator.onServerError();
       });
       break;
@@ -65,10 +71,12 @@ const onDataChange = (action, update, initiator) => {
         updateControllers();
       })
       .catch(() => {
+        //  Вызвать эффект "покачивания головы"
         initiator.onServerError();
       });
       break;
 
+    //  Частичное изменения. Изменить "Like" точки.
     case Action.PATCH_FAVORITE:
       api.updatePoint({
         id: update.id,
@@ -78,6 +86,7 @@ const onDataChange = (action, update, initiator) => {
         initiator.onFavoriteSuccess();
       })
       .catch(() => {
+        //  Вызвать эффект "покачивания головы"
         initiator.onServerError();
       });
       break;
@@ -89,6 +98,7 @@ const onDataChange = (action, update, initiator) => {
         updateControllers();
       })
       .catch(() => {
+        //  Вызвать эффект "покачивания головы"
         initiator.onServerError();
       });
       break;
@@ -101,6 +111,8 @@ const tripController = new TripController(tripListElement, onDataChange);
 const statsController = new StatsController(tripPageMainContainer);
 const pagesController = new PagesController(menuHeaderElement, filtersController, tripController, statsController, createPointButton);
 
+// Инициализация приложения, ждем поступления всех данных.
+// Для предупреждения загрузки инициируем tripController раньше.
 tripController.init();
 Promise.all([api.getDestinations(), api.getOffers(), api.getPoints()])
 .then(([destinations, offers, points]) => {

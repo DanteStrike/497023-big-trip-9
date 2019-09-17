@@ -6,7 +6,7 @@ import {chartTransportConfig} from '../configs/chart-transport-config.js';
 import AbstractComponent from './abstract.js';
 import Chart from 'chart.js';
 
-
+//  Отключить автоматический подсчет размера холста графиков
 Chart.defaults.global.maintainAspectRatio = false;
 Chart.defaults.global.responsive = false;
 
@@ -23,19 +23,23 @@ class Stats extends AbstractComponent {
     this._moneyChart = new Chart(this._moneyChartElement, chartMoneyConfig);
     this._transportChart = new Chart(this._transportChartElement, chartTransportConfig);
     this._timeChart = new Chart(this._timeChartElement, chartTimeConfig);
+    //  Для корректной перерисовки и масштабирования графиков все контейнеры canvas должны быть "relative"
     this.getElement().querySelectorAll(`.statistics__item`).forEach((item) => {
       item.style.position = `relative`;
     });
   }
 
   renderCharts() {
+    //  При переключении на страницу статистики перерисовать графики под новый размер контейнеров (без анимации).
     this._moneyChart.resize(0);
     this._transportChart.resize(0);
     this._timeChart.resize(0);
   }
 
   updateChartData(type, {labels, values}) {
+    //  Контроль высоты контейнера canvas. По возможности все bar всех графиков будут фиксированной высоты.
     let optimalChartContainerHeight = chartContainerConfig.rowHeight * labels.length;
+    //  Высота контейнера canvas не может быть меньшие высоты названия графики, чтобы не вызывать размывание надписи.
     if (optimalChartContainerHeight < chartContainerConfig.minContainerHeight) {
       optimalChartContainerHeight = chartContainerConfig.minContainerHeight;
     }
@@ -61,7 +65,9 @@ class Stats extends AbstractComponent {
   _updateData(chart, labels, values) {
     chart.data.labels = labels;
     chart.data.datasets[0].data = values;
+    //  Обновить данные (без анимации)
     chart.update(0);
+    //  Масштабировать график под новый размер контейнера (без анимации)
     chart.resize(0);
   }
 

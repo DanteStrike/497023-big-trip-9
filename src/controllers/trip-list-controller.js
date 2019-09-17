@@ -5,6 +5,7 @@ import PointController from './point-controller.js';
 import TripDay from '../components/trip-day.js';
 import Point from '../data/point.js';
 
+/** Класс представляет управление списком точек*/
 class TripListController {
   constructor(container, onDataChange) {
     this._container = container;
@@ -13,6 +14,8 @@ class TripListController {
     this._onBoardDataChange = onDataChange;
     this._subscriptions = [];
 
+    //  Данные и настройки для контроллеров точек передаются в запакованном объект виде.
+    //  Сформировать опции по умолчанию.
     this._pointDefaultOptions = {
       container: this._container,
       renderPosition: Position.BEFOREEND,
@@ -20,6 +23,7 @@ class TripListController {
       destinations: [],
       offers: [],
       mode: Mode.DEFAULT,
+      //  Закрыть все формы редактирования
       onChangeView: this._onChangeView.bind(this),
       onDataChange: this._onDataChange.bind(this)
     };
@@ -33,36 +37,14 @@ class TripListController {
     this._pointDefaultOptions.offers = offers;
   }
 
-  createPoint(createButton, container, renderPosition) {
-    //  Запретить создавать более одной карточки за раз
-    if (this._creatingPoint) {
-      return;
-    }
-    this._onChangeView();
-
-    const pointOptions = Object.assign({}, this._pointDefaultOptions);
-    pointOptions.container = container;
-    pointOptions.renderPosition = renderPosition;
-    pointOptions.data = new Point(defaultPointData);
-    pointOptions.mode = Mode.ADDING;
-    pointOptions.onTripListAddPointClose = () => {
-      this._creatingPoint = null;
-      createButton.disabled = false;
-    };
-
-    this._creatingPoint = new PointController(pointOptions);
-    this._creatingPoint.init();
-  }
-
   setPoints(points) {
     this._updatePoints(points);
     if (this._points.length === 0) {
       return;
     }
-
+    //  Вывести список точек, не разбивая по дням
     const newTripDay = new TripDay();
     render(this._container, newTripDay.getElement(), Position.BEFOREEND);
-
     for (const point of this._points) {
       this._renderPoint(point, newTripDay.getElement().querySelector(`.trip-events__list`));
     }
@@ -73,14 +55,14 @@ class TripListController {
     if (this._points.length === 0) {
       return;
     }
-
-    const sortedByEvent = this._points.sort((a, b) => a.time.start - b.time.start);
+    //  Отсортировать точки по дате начала события
+    const sortedByEventPoints = this._points.sort((a, b) => a.time.start - b.time.start);
     const firstTripDay = new Date(this._points[0].time.start).setHours(0, 0, 0, 0);
     const lastTripDay = new Date(this._points[this._points.length - 1].time.start).setHours(0, 0, 0, 0);
     let dayIndex = 0;
-
+    //  Разбить точки по дням и отрендерить
     for (let day = firstTripDay; day <= lastTripDay; day += TimeValue.MILLISECONDS_IN_DAY) {
-      const dayPoints = sortedByEvent.filter((point) => new Date(point.time.start).setHours(0, 0, 0, 0) === day);
+      const dayPoints = sortedByEventPoints.filter((point) => new Date(point.time.start).setHours(0, 0, 0, 0) === day);
       dayIndex++;
       //  Не вставлять в разметку пустые дни
       if (dayPoints.length === 0) {
@@ -94,6 +76,28 @@ class TripListController {
     }
   }
 
+  createPoint(createButton, container, renderPosition) {
+    //  Запретить создавать более одной карточки за раз
+    if (this._creatingPoint) {
+      return;
+    }
+    //  ТЗ: При создании закрыть формы редактирования
+    this._onChangeView();
+    //  Собрать опций для контроллера точки
+    const pointOptions = Object.assign({}, this._pointDefaultOptions);
+    pointOptions.container = container;
+    pointOptions.renderPosition = renderPosition;
+    pointOptions.data = new Point(defaultPointData);
+    pointOptions.mode = Mode.ADDING;
+    //  При успешном закрытии точки вернуть исходное состояние контроллера и кнопки создания
+    pointOptions.onTripListAddPointClose = () => {
+      this._creatingPoint = null;
+      createButton.disabled = false;
+    };
+    this._creatingPoint = new PointController(pointOptions);
+    this._creatingPoint.init();
+  }
+
   _updatePoints(points) {
     this._onChangeView();
     this._subscriptions = [];
@@ -101,6 +105,7 @@ class TripListController {
   }
 
   _renderPoint(point, listElement) {
+    //  Собрать опций для контроллера точки
     const pointOptions = Object.assign({}, this._pointDefaultOptions);
     pointOptions.container = listElement;
     pointOptions.data = point;
