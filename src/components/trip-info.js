@@ -10,7 +10,6 @@ class TripInfo extends AbstractComponent {
   }
 
   update({firstCity, secondCity, lastCity, amount}, {firstDay, lastDay}) {
-    //  Вывести информацию согласно ТЗ
     switch (amount) {
       case 0:
         this._titleElement.innerHTML = ``;

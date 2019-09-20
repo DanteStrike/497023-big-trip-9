@@ -39,7 +39,7 @@ export const render = (container, element, place) => {
  *
  * @param {Node} element - элемент.
  */
-export const unrender = (element) => {
+export const unmount = (element) => {
   if (element) {
     element.remove();
   }

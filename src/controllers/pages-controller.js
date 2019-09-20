@@ -11,7 +11,6 @@ class PagesController {
     this._tripController = tripController;
     this._statsController = statsController;
     this._createPointButton = createPointButton;
-    //  Сохранение состояния кнопки, если будет переключение на страницу статистики
     this._createPointButtonDisabled = this._createPointButton.disabled;
 
     this._menu = new Menu();
@@ -27,7 +26,6 @@ class PagesController {
   }
 
   _onMenuClick(evt) {
-    //  Класс активной страницы по markup
     const activeClass = `trip-tabs__btn--active`;
 
     if (evt.target.tagName !== TagName.A || evt.target.classList.contains(activeClass)) {
@@ -53,7 +51,6 @@ class PagesController {
         this._filtersController.hide();
         this._tripController.hide();
         this._statsController.show();
-        //  Сохранение состояния кнопки до переключения на страницу статистики
         this._createPointButtonDisabled = this._createPointButton.disabled;
         this._createPointButton.disabled = true;
     }

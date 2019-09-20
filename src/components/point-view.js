@@ -12,7 +12,6 @@ class PointView extends AbstractComponent {
     this._destination = destination;
     this._time = time;
     this._timeDuration = {
-      //  Точность до минуты (ТЗ)
       milliseconds: new Date(this._time.end).setSeconds(0, 0) - new Date(this._time.start).setSeconds(0, 0),
 
       get days() {

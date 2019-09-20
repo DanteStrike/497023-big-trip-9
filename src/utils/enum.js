@@ -57,9 +57,7 @@ export const Method = {
 
 export const Key = {
   ESCAPE: `Escape`,
-  IE_ESC: `Esc`,
-  BACKSPACE: `Backspace`,
-  DELETE: `Delete`
+  IE_ESC: `Esc`
 };
 
 export const TagName = {

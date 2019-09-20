@@ -3,7 +3,6 @@ import {transferTypes} from '../configs/configs.js';
 
 /** Класс представляет адаптер между сервером и приложением по данным точек*/
 class Point {
-  //  Сформировать удобное/корректное для приложения представление данных
   constructor(data) {
     this.id = data[`id`];
     this.type = {
@@ -21,7 +20,6 @@ class Point {
     this.isFavorite = data[`is_favorite`];
   }
 
-  //  Сформировать корректное для сервера представление данных
   toRAW() {
     return {
       'id': this.id,
@@ -35,14 +33,31 @@ class Point {
     };
   }
 
-  //  Сформировать данные точки
   static parsePoint(pointData) {
     return new Point(pointData);
   }
 
-  //  Сформировать массив данных точек
   static parsePoints(pointsData) {
     return pointsData.map((pointData) => new Point(pointData));
+  }
+
+  static getDefaultPoint() {
+    const defaultPointData = {
+      'id': null,
+      'type': `flight`,
+      'destination': {
+        name: null,
+        description: null,
+        pictures: []
+      },
+      'date_from': Date.now(),
+      'date_to': Date.now(),
+      'base_price': 0,
+      'offers': [],
+      'is_favorite': false
+    };
+
+    return new Point(defaultPointData);
   }
 }
 

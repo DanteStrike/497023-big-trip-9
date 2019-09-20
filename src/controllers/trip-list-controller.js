@@ -1,4 +1,3 @@
-import {defaultPointData} from '../configs/configs.js';
 import {Position, TimeValue, Mode} from '../utils/enum.js';
 import {render} from '../utils/dom.js';
 import PointController from './point-controller.js';
@@ -14,8 +13,6 @@ class TripListController {
     this._onBoardDataChange = onDataChange;
     this._subscriptions = [];
 
-    //  Данные и настройки для контроллеров точек передаются в запакованном объект виде.
-    //  Сформировать опции по умолчанию.
     this._pointDefaultOptions = {
       container: this._container,
       renderPosition: Position.BEFOREEND,
@@ -23,7 +20,7 @@ class TripListController {
       destinations: [],
       offers: [],
       mode: Mode.DEFAULT,
-      //  Закрыть все формы редактирования
+
       onChangeView: this._onChangeView.bind(this),
       onDataChange: this._onDataChange.bind(this)
     };
@@ -42,7 +39,7 @@ class TripListController {
     if (this._points.length === 0) {
       return;
     }
-    //  Вывести список точек, не разбивая по дням
+
     const newTripDay = new TripDay();
     render(this._container, newTripDay.getElement(), Position.BEFOREEND);
     for (const point of this._points) {
@@ -55,19 +52,20 @@ class TripListController {
     if (this._points.length === 0) {
       return;
     }
-    //  Отсортировать точки по дате начала события
+
     const sortedByEventPoints = this._points.sort((a, b) => a.time.start - b.time.start);
     const firstTripDay = new Date(this._points[0].time.start).setHours(0, 0, 0, 0);
     const lastTripDay = new Date(this._points[this._points.length - 1].time.start).setHours(0, 0, 0, 0);
     let dayIndex = 0;
-    //  Разбить точки по дням и отрендерить
+
     for (let day = firstTripDay; day <= lastTripDay; day += TimeValue.MILLISECONDS_IN_DAY) {
       const dayPoints = sortedByEventPoints.filter((point) => new Date(point.time.start).setHours(0, 0, 0, 0) === day);
       dayIndex++;
-      //  Не вставлять в разметку пустые дни
+
       if (dayPoints.length === 0) {
         continue;
       }
+
       const newTripDay = new TripDay(dayIndex, day);
       render(this._container, newTripDay.getElement(), Position.BEFOREEND);
       for (const dayEvent of dayPoints) {
@@ -77,19 +75,13 @@ class TripListController {
   }
 
   createPoint(createButton, container, renderPosition) {
-    //  Запретить создавать более одной карточки за раз
-    if (this._creatingPoint) {
-      return;
-    }
-    //  ТЗ: При создании закрыть формы редактирования
     this._onChangeView();
-    //  Собрать опций для контроллера точки
+
     const pointOptions = Object.assign({}, this._pointDefaultOptions);
     pointOptions.container = container;
     pointOptions.renderPosition = renderPosition;
-    pointOptions.data = new Point(defaultPointData);
+    pointOptions.data = Point.getDefaultPoint();
     pointOptions.mode = Mode.ADDING;
-    //  При успешном закрытии точки вернуть исходное состояние контроллера и кнопки создания
     pointOptions.onTripListAddPointClose = () => {
       this._creatingPoint = null;
       createButton.disabled = false;
@@ -105,7 +97,6 @@ class TripListController {
   }
 
   _renderPoint(point, listElement) {
-    //  Собрать опций для контроллера точки
     const pointOptions = Object.assign({}, this._pointDefaultOptions);
     pointOptions.container = listElement;
     pointOptions.data = point;

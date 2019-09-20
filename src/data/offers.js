@@ -17,21 +17,20 @@ class Offers {
     }));
   }
 
-  //  Найти возможные предложения по типу точки
   getTypeOffers(type) {
     const foundedData = this._data.find((data) => data.type.name === type);
     if (foundedData) {
       return foundedData;
-    } else {
-      return {
-        type: {
-          name: type,
-          icon: type,
-          title: transferTypes.has(type) ? `${capitalizeFirstLetter(type)} to` : `${capitalizeFirstLetter(type)} in`
-        },
-        offers: []
-      };
     }
+
+    return {
+      type: {
+        name: type,
+        icon: type,
+        title: transferTypes.has(type) ? `${capitalizeFirstLetter(type)} to` : `${capitalizeFirstLetter(type)} in`
+      },
+      offers: []
+    };
   }
 }
 

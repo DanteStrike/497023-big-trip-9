@@ -1,4 +1,4 @@
-import {Mode, TagName, Key} from '../utils/enum.js';
+import {Mode, TagName} from '../utils/enum.js';
 import {createElement, hideElement, showElement} from '../utils/dom.js';
 import {formatDateTime} from '../utils/time.js';
 import AbstractComponent from './abstract.js';
@@ -17,10 +17,8 @@ class PointEditView extends AbstractComponent {
     this._isFavorite = isFavorite;
     this._datalistOptions = datalistOptions;
     this._mode = mode;
-    //  Передать контроллеру информацию о соответствующих событиях
     this._onDestinationChange = onDestinationChange;
     this._onTypeChange = onTypeChange;
-
     this._offers = (this._mode === Mode.DEFAULT) ? offers : this._onTypeChange(this._type.name).offers;
 
     this._currentIconImg = this.getElement().querySelector(`.event__type-icon`);
@@ -48,7 +46,6 @@ class PointEditView extends AbstractComponent {
       dateFormat: `Y-m-dTH:i:S`,
       enableTime: true,
       defaultDate: this._time.start ? this._time.start : Date.now(),
-      //  ТЗ: Дата начала не может быть больше даты окончания
       onClose(selectedDates) {
         if (endFlatpickr.selectedDates[0] < selectedDates[0]) {
           endFlatpickr.setDate(selectedDates[0]);
@@ -63,7 +60,6 @@ class PointEditView extends AbstractComponent {
       dateFormat: `Y-m-dTH:i:S`,
       enableTime: true,
       defaultDate: this._time.end ? this._time.end : Date.now(),
-      //  ТЗ: Дата окончания не может быть меньше даты начала
       onClose(selectedDates) {
         if (startFlatpickr.selectedDates[0] > selectedDates[0]) {
           startFlatpickr.setDate(selectedDates[0]);
@@ -75,10 +71,8 @@ class PointEditView extends AbstractComponent {
   _hangHandlers() {
     this._typeListElement.addEventListener(`click`, (evt) => this._onPointTypeListClick(evt));
     this._destinationInputElement.addEventListener(`input`, (evt) => this._onDestinationInput(evt));
-    this._destinationInputElement.addEventListener(`keydown`, (evt) => this._onDestinationKeyDown(evt));
   }
 
-  //  При изменении типа точки, изменить доступные варианты выбора пункта назначения
   _onPointTypeListClick(evt) {
     const target = evt.target;
     if (target.tagName !== TagName.INPUT) {
@@ -101,26 +95,23 @@ class PointEditView extends AbstractComponent {
     this._typeToggle.checked = false;
   }
 
-  //  При изменении пункта назначения изменить отображение согласно новым данным, поступившим с сервера.
   _onDestinationInput(evt) {
     evt.preventDefault();
     const newDestination = evt.currentTarget.value;
     const newDestinationData = this._onDestinationChange(newDestination);
-    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
 
+    if (!newDestinationData) {
+      hideElement(this._destinationSectionElement);
+      this._destinationInputElement.setCustomValidity(`Invalid destination!`);
+      return;
+    }
+    this._destinationInputElement.setCustomValidity(``);
+
+    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
     showElement(this._destinationSectionElement);
     this._destinationDescriptionElement.innerHTML = newDestinationData.description;
     this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
     this._picturesElement = newPhotosElement;
-  }
-
-  //  Согласно ТЗ пользователь не может вводить сам пункт назначения
-  _onDestinationKeyDown(evt) {
-    evt.preventDefault();
-    if (evt.key === Key.BACKSPACE || evt.key === Key.DELETE) {
-      hideElement(this._destinationSectionElement);
-      this._destinationInputElement.value = ``;
-    }
   }
 
   _getPhotosTemplate(pictures) {

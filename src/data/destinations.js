@@ -4,7 +4,6 @@ class Destinations {
     this._data = data;
   }
 
-  //  Получить все точки назначения
   getNames() {
     return this._data.reduce((accum, destination) => {
       accum.push(destination.name);
@@ -12,7 +11,6 @@ class Destinations {
     }, []);
   }
 
-  //  Получить информацию по конкретной точке назначения
   getInfo(name) {
     return this._data.find((destination) => destination.name === name);
   }

@@ -1,5 +1,5 @@
 import {Mode, Action} from '../utils/enum.js';
-import {render, unrender} from '../utils/dom.js';
+import {render, unmount} from '../utils/dom.js';
 import PointView from '../components/point-view.js';
 import PointEditController from './point-edit-controller.js';
 
@@ -13,14 +13,11 @@ class PointController {
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
     this._onTripListAddPointClose = onTripListAddPointClose;
-    //  Данные и настройки для контроллера редактирования точки передаются в запакованном объект виде.
-    //  Сформировать опции по умолчанию.
     this._pointEditOptions = {
       destinations,
       offers,
       data,
       mode,
-      //  Обратная связь с контроллером редактирования (закрытие формы редактирования без изменений и с сохранением).
       onEditClose: this._onEditClose.bind(this),
       onEditSave: this._onEditSave.bind(this),
       onAddPointClose: this._onAddPointClose.bind(this)
@@ -65,7 +62,7 @@ class PointController {
   }
 
   _onAddPointClose() {
-    unrender(this._newPointEditController.getPointEditElement());
+    unmount(this._newPointEditController.getPointEditElement());
     this._newPointEditController = null;
     this._onTripListAddPointClose();
   }

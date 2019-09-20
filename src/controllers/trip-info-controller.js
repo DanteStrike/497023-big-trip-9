@@ -1,6 +1,6 @@
 import TripInfo from '../components/trip-info.js';
 import {Position} from '../utils/enum.js';
-import {render, unrender} from '../utils/dom.js';
+import {render, unmount} from '../utils/dom.js';
 
 /** Класс представляет управление выводом информации об путешествия*/
 class TripInfoController {
@@ -18,10 +18,9 @@ class TripInfoController {
   update(newData) {
     this._points = newData.sort((a, b) => a.time.start - b.time.start);
     this._tripPriceElement.innerHTML = `${this._getTripPrice()}`;
-    //  Контроль отрисовки.
     if (newData.length === 0) {
       if (this._container.contains(this._view.getElement())) {
-        unrender(this._view.getElement());
+        unmount(this._view.getElement());
       }
       return;
     }
@@ -29,7 +28,6 @@ class TripInfoController {
       render(this._container, this._view.getElement(), Position.AFTERBEGIN);
     }
 
-    //  Привести данные в удобные для отрисовки вид.
     const cities = this._getCities(this._points);
     const citiesData = {
       firstCity: cities[0],
@@ -41,7 +39,7 @@ class TripInfoController {
       firstDay: this._points[0].time.start,
       lastDay: this._points[this._points.length - 1].time.end
     };
-    //  Отрисовать изменения
+
     this._view.update(citiesData, datesData);
   }
 
@@ -61,7 +59,6 @@ class TripInfoController {
     }, 0);
   }
 
-  //  ТЗ: Итоговая цена формируется из стоимости всех точек + стоимость всех принятых предложений.
   _getTripPrice() {
     return this._points.reduce((totalCost, point) => {
       totalCost += point.basePrice + this._getOffersCost(point.offers);

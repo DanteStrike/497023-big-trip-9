@@ -12,15 +12,13 @@ class PointEditController {
     this._onEditClose = onEditClose;
     this._onEditSave = onEditSave;
     this._onAddPointClose = onAddPointClose;
-    //  От потери окружения. Сохраняем событие, чтобы потом корректно удалить.
+    //  Сохраняем событие, чтобы потом корректно удалить.
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
-    //  Детектор изменения типа точки.
     this._isTypeChange = false;
 
     this._pointEditViewOptions = {
       mode,
       datalistOptions: this._destinations.getNames(),
-      //  Обратная связь с формой редактирования при изменении пункта назначения и при изменении типа точки
       onDestinationChange: this._onDestinationChange.bind(this),
       onTypeChange: this._onTypeChange.bind(this)
     };
@@ -132,13 +130,11 @@ class PointEditController {
     }
   }
 
-  //  При изменении типа точки менять предложения
   _onTypeChange(newType) {
     this._isTypeChange = true;
     return this._offers.getTypeOffers(newType);
   }
 
-  //  При изменении пункты назначения загружать новые данные
   _onDestinationChange(newDestination) {
     return this._destinations.getInfo(newDestination);
   }
@@ -146,7 +142,6 @@ class PointEditController {
   _onFavoriteButtonClick(evt) {
     evt.preventDefault();
 
-    //  Скопировать текущие данные и попытаться выполнить точечное изменение
     const patch = new Point(this._data.toRAW());
     patch.isFavorite = !patch.isFavorite;
     this._resetShake();

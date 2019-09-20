@@ -24,9 +24,7 @@ class StatsController {
     hideElement(this._page.getElement());
   }
 
-  //  Собрать статистические данные и обновить графики
   update(points) {
-    //  Статистика по типам. Потраченные деньги и количество точек.
     this._statsByTypes = points.reduce((accum, point) => {
       const foundedIndex = accum.findIndex((element) => element.label === point.type.name);
       if (foundedIndex !== NOT_FOUND) {
@@ -42,7 +40,6 @@ class StatsController {
       return accum;
     }, []);
 
-    //  Статистика по точкам назначения. Потраченное время.
     this._statsByDestinations = points.reduce((accum, point) => {
       const foundedIndex = accum.findIndex((element) => element.label === point.destination.name);
       if (foundedIndex !== NOT_FOUND) {

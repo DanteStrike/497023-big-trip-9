@@ -30,7 +30,6 @@ class Stats extends AbstractComponent {
   }
 
   renderCharts() {
-    //  При переключении на страницу статистики перерисовать графики под новый размер контейнеров (без анимации).
     this._moneyChart.resize(0);
     this._transportChart.resize(0);
     this._timeChart.resize(0);
@@ -65,9 +64,7 @@ class Stats extends AbstractComponent {
   _updateData(chart, labels, values) {
     chart.data.labels = labels;
     chart.data.datasets[0].data = values;
-    //  Обновить данные (без анимации)
     chart.update(0);
-    //  Масштабировать график под новый размер контейнера (без анимации)
     chart.resize(0);
   }
 
