@@ -62,3 +62,13 @@ export const hideElement = (node) => {
 export const showElement = (node) => {
   node.classList.remove(`visually-hidden`);
 };
+
+/**
+ * Проверка видимости node.
+ *
+ * @param {Node} node - необходимый node.
+ * @return {boolean} "Скрыта ли node?".
+ */
+export const checkIsElementHidden = (node) => {
+  return node.classList.contains(`visually-hidden`);
+};

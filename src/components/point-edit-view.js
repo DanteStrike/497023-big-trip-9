@@ -1,5 +1,5 @@
 import {Mode, TagName} from '../utils/enum.js';
-import {createElement, hideElement, showElement} from '../utils/dom.js';
+import {createElement, hideElement, showElement, checkIsElementHidden} from '../utils/dom.js';
 import {formatDateTime} from '../utils/time.js';
 import AbstractComponent from './abstract.js';
 import flatpickr from 'flatpickr';
@@ -36,6 +36,12 @@ class PointEditView extends AbstractComponent {
 
     this._initFlatpickr();
     this._hangHandlers();
+
+    if (this._mode === Mode.ADDING) {
+      this._refreshDetailsSectionVisibility();
+    } else {
+      this._favoriteCheckboxElement = this.getElement().querySelector(`.event__favorite-checkbox`);
+    }
   }
 
   _initFlatpickr() {
@@ -68,6 +74,14 @@ class PointEditView extends AbstractComponent {
     });
   }
 
+  _refreshDetailsSectionVisibility() {
+    if (checkIsElementHidden(this._offersSectionElement) && checkIsElementHidden(this._destinationSectionElement)) {
+      hideElement(this._detailsSectionElement);
+    } else {
+      showElement(this._detailsSectionElement);
+    }
+  }
+
   _hangHandlers() {
     this._typeListElement.addEventListener(`click`, (evt) => this._onPointTypeListClick(evt));
     this._destinationInputElement.addEventListener(`input`, (evt) => this._onDestinationInput(evt));
@@ -93,6 +107,11 @@ class PointEditView extends AbstractComponent {
     this._currentIconImg.src = `${this._currentIconImg.baseURI.replace(`#`, ``)}img/icons/${type.icon}.png`;
     this._typeOutput.textContent = `${type.title}`;
     this._typeToggle.checked = false;
+
+    if (this._mode === Mode.DEFAULT) {
+      this._favoriteCheckboxElement.checked = false;
+    }
+    this._refreshDetailsSectionVisibility();
   }
 
   _onDestinationInput(evt) {
@@ -103,15 +122,19 @@ class PointEditView extends AbstractComponent {
     if (!newDestinationData) {
       hideElement(this._destinationSectionElement);
       this._destinationInputElement.setCustomValidity(`Invalid destination!`);
-      return;
+    } else {
+      this._destinationInputElement.setCustomValidity(``);
+      const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
+      showElement(this._destinationSectionElement);
+      this._destinationDescriptionElement.innerHTML = newDestinationData.description;
+      this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
+      this._picturesElement = newPhotosElement;
     }
-    this._destinationInputElement.setCustomValidity(``);
 
-    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
-    showElement(this._destinationSectionElement);
-    this._destinationDescriptionElement.innerHTML = newDestinationData.description;
-    this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
-    this._picturesElement = newPhotosElement;
+    if (this._mode === Mode.DEFAULT) {
+      this._favoriteCheckboxElement.checked = false;
+    }
+    this._refreshDetailsSectionVisibility();
   }
 
   _getPhotosTemplate(pictures) {
@@ -242,8 +265,8 @@ class PointEditView extends AbstractComponent {
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">Delete</button>
-          <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
           ${this._mode === Mode.ADDING ? `` : `
+          <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
           <label class="event__favorite-btn" for="event-favorite-1">
             <span class="visually-hidden">Add to favorite</span>
             <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
