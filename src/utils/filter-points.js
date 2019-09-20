@@ -1,6 +1,14 @@
 import {TimeValue, FilterType} from './enum';
 
-export const filterPoints = (type, points) => {
+
+/**
+ * Отфильтровать точки согласно установленному фильтру
+ *
+ * @param {string} type - тип фильтра.
+ * @param {array} points - точки.
+ * @return {array} - отфильтрованные точки.
+ */
+export const filterPoints = ({filterType: type, downloadedPoints: points}) => {
   switch (type) {
     case FilterType.EVERYTHING:
       return points;
@@ -11,5 +19,5 @@ export const filterPoints = (type, points) => {
     case FilterType.PAST:
       return points.filter((point) => (Date.now() - point.time.end) > TimeValue.MILLISECONDS_IN_MINUTE);
   }
-  return null;
+  return [];
 };

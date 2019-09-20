@@ -1,5 +1,5 @@
 import {serverConfig} from './configs/configs.js';
-import {Action, FilterType} from './utils/enum.js';
+import {Action, FilterType, BoardState} from './utils/enum.js';
 import {filterPoints} from './utils/filter-points.js';
 import API from './utils/api.js';
 import TripController from './controllers/trip-controller.js';
@@ -9,39 +9,51 @@ import StatsController from './controllers/stats-controller.js';
 import FiltersController from './controllers/filters-controller.js';
 
 
-const api = new API(serverConfig);
 const tripInfoElement = document.querySelector(`.trip-info`);
 const controlsElement = document.querySelector(`.trip-controls`);
 const menuHeaderElement = controlsElement.querySelector(`h2:first-child`);
 const filtersHeaderElement = controlsElement.querySelector(`h2:last-child`);
-const createEventButton = document.querySelector(`.trip-main__event-add-btn`);
+const createPointButton = document.querySelector(`.trip-main__event-add-btn`);
 const tripPageMainContainer = document.querySelector(`.page-main .page-body__container`);
 const tripListElement = tripPageMainContainer.querySelector(`.trip-events`);
 
-
-let filterType = FilterType.EVERYTHING;
-let downloadedPoints = null;
-
-const downloadPoints = () => api.getPoints()
-    .then((points) => {
-      downloadedPoints = points;
-      const filteredPoints = filterPoints(filterType, downloadedPoints);
-      tripController.showPoints(filteredPoints);
-      statsController.update(downloadedPoints);
-      tripInfoController.update(downloadedPoints);
-    });
-
-const onFilterTypeChange = (newType) => {
-  filterType = newType;
-  const filteredPoints = filterPoints(filterType, downloadedPoints);
-  tripController.showPoints(filteredPoints);
+const api = new API(serverConfig);
+const appData = {
+  filterType: FilterType.EVERYTHING,
+  downloadedPoints: []
 };
 
-const onDataChange = (action, update) => {
+const updateControllers = () => {
+  if (appData.downloadedPoints.length === 0) {
+    tripController.setBoardState(BoardState.NO_POINTS);
+  } else {
+    tripController.setBoardState(BoardState.DEFAULT);
+    tripController.showPoints(filterPoints(appData));
+  }
+  statsController.update(appData.downloadedPoints);
+  tripInfoController.update(appData.downloadedPoints);
+};
+
+const onFilterTypeChange = (newType) => {
+  appData.filterType = newType;
+  if (appData.downloadedPoints.length !== 0) {
+    tripController.showPoints(filterPoints(appData));
+  }
+};
+
+//  Обработать изменение данных (update), вызванных инициатором (initiator), согласно типу изменения (action)
+const onDataChange = (action, update, initiator) => {
   switch (action) {
     case Action.CREATE:
       api.createPoint(update.toRAW())
-      .then(downloadPoints);
+      .then((point) => {
+        appData.downloadedPoints.push(point);
+        updateControllers();
+        initiator.onAddPointClose();
+      })
+      .catch(() => {
+        initiator.onServerError();
+      });
       break;
 
     case Action.UPDATE:
@@ -49,12 +61,37 @@ const onDataChange = (action, update) => {
         id: update.id,
         data: update.toRAW()
       })
-      .then(downloadPoints);
+      .then((point) => {
+        appData.downloadedPoints[appData.downloadedPoints.findIndex((downloadedPoint) => downloadedPoint.id === point.id)] = point;
+        updateControllers();
+      })
+      .catch(() => {
+        initiator.onServerError();
+      });
+      break;
+
+    case Action.PATCH_FAVORITE:
+      api.updatePoint({
+        id: update.id,
+        data: update.toRAW()
+      })
+      .then(() => {
+        initiator.onFavoriteSuccess();
+      })
+      .catch(() => {
+        initiator.onServerError();
+      });
       break;
 
     case Action.DELETE:
       api.deletePoint(update.id)
-      .then(downloadPoints);
+      .then(() => {
+        appData.downloadedPoints.splice(appData.downloadedPoints.findIndex((downloadedPoint) => downloadedPoint.id === update.id), 1);
+        updateControllers();
+      })
+      .catch(() => {
+        initiator.onServerError();
+      });
       break;
   }
 };
@@ -63,20 +100,19 @@ const tripInfoController = new TripInfoController(tripInfoElement);
 const filtersController = new FiltersController(filtersHeaderElement, onFilterTypeChange);
 const tripController = new TripController(tripListElement, onDataChange);
 const statsController = new StatsController(tripPageMainContainer);
-const pagesController = new PagesController(menuHeaderElement, filtersController, tripController, statsController, createEventButton);
+const pagesController = new PagesController(menuHeaderElement, filtersController, tripController, statsController, createPointButton);
 
-tripInfoController.init();
+// Инициализация приложения, ждем поступления всех данных.
+// Для предупреждения загрузки инициируем tripController раньше.
 tripController.init();
-statsController.init();
-pagesController.init();
-
-api.getDestinations().
-then((destinations) => {
+Promise.all([api.getDestinations(), api.getOffers(), api.getPoints()])
+.then(([destinations, offers, points]) => {
+  appData.downloadedPoints = points;
+  tripInfoController.init();
+  filtersController.init();
+  statsController.init();
+  pagesController.init();
   tripController.setDestinations(destinations);
-  api.getOffers()
-  .then((offers) => {
-    tripController.setOffers(offers);
-    downloadPoints()
-      .then(() => filtersController.init());
-  });
+  tripController.setOffers(offers);
+  updateControllers();
 });

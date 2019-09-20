@@ -1,16 +1,14 @@
+import {Mode, TagName} from '../utils/enum.js';
+import {createElement, hideElement, showElement, checkIsElementHidden} from '../utils/dom.js';
+import {formatDateTime} from '../utils/time.js';
 import AbstractComponent from './abstract.js';
-import {Mode, TagName, Key, Position} from '../utils/enum.js';
-import {createElement, hideElement, showElement, render, unrender} from '../utils/dom.js';
-import {formatDateTimeValue} from '../utils/utils.js';
-
-
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 
 
 class PointEditView extends AbstractComponent {
-  constructor({type, destination, time, basePrice, offers, isFavorite}, datalistOptions, mode, onDestinationChange, onTypeChange) {
+  constructor({type, destination, time, basePrice, offers, isFavorite}, {datalistOptions, mode, onDestinationChange, onTypeChange}) {
     super();
     this._type = type;
     this._destination = destination;
@@ -19,11 +17,8 @@ class PointEditView extends AbstractComponent {
     this._isFavorite = isFavorite;
     this._datalistOptions = datalistOptions;
     this._mode = mode;
-
-    //  Передать контроллеру информацию о соответствующих событиях
     this._onDestinationChange = onDestinationChange;
     this._onTypeChange = onTypeChange;
-
     this._offers = (this._mode === Mode.DEFAULT) ? offers : this._onTypeChange(this._type.name).offers;
 
     this._currentIconImg = this.getElement().querySelector(`.event__type-icon`);
@@ -31,32 +26,30 @@ class PointEditView extends AbstractComponent {
     this._typeToggle = this.getElement().querySelector(`.event__type-toggle`);
     this._typeListElement = this.getElement().querySelector(`.event__type-list`);
     this._destinationInputElement = this.getElement().querySelector(`.event__input--destination`);
-    this._priceInputElement = this.getElement().querySelector(`.event__input--price`);
-    this._pointResetButtonElement = this.getElement().querySelector(`.event__reset-btn`);
     this._detailsSectionElement = this.getElement().querySelector(`.event__details`);
-    this._destinationDescriptionElement = this._detailsSectionElement.querySelector(`.event__destination-description`);
+    this._destinationSectionElement = this._detailsSectionElement.querySelector(`.event__section--destination`);
+    this._destinationDescriptionElement = this._destinationSectionElement.querySelector(`.event__destination-description`);
     this._offersSectionElement = this._detailsSectionElement.querySelector(`.event__section--offers`);
     this._offersElement = this._offersSectionElement.querySelector(`.event__available-offers`);
     this._picturesContainerElement = this._detailsSectionElement.querySelector(`.event__photos-container`);
     this._picturesElement = this._picturesContainerElement.querySelector(`.event__photos-tape`);
 
-    this._favoriteInputElement = this.getElement().querySelector(`#event-favorite-1`);
-    this._favoriteButtonElement = this.getElement().querySelector(`.event__favorite-btn`);
-    if (this._mode === Mode.ADDING) {
-      unrender(this._favoriteInputElement);
-      unrender(this._favoriteButtonElement);
-    }
-
     this._initFlatpickr();
     this._hangHandlers();
+
+    if (this._mode === Mode.ADDING) {
+      this._refreshDetailsSectionVisibility();
+    } else {
+      this._favoriteCheckboxElement = this.getElement().querySelector(`.event__favorite-checkbox`);
+    }
   }
 
   _initFlatpickr() {
     const startFlatpickr = flatpickr(this.getElement().querySelector(`#event-start-time-1`), {
       altInput: true,
       allowInput: true,
-      altFormat: `d/m/Y H:i`,
-      dateFormat: `Y-m-d H:i:S`,
+      altFormat: `d.m.Y H:i`,
+      dateFormat: `Y-m-dTH:i:S`,
       enableTime: true,
       defaultDate: this._time.start ? this._time.start : Date.now(),
       onClose(selectedDates) {
@@ -69,8 +62,8 @@ class PointEditView extends AbstractComponent {
     const endFlatpickr = flatpickr(this.getElement().querySelector(`#event-end-time-1`), {
       altInput: true,
       allowInput: true,
-      altFormat: `d/m/Y H:i`,
-      dateFormat: `Y-m-d H:i:S`,
+      altFormat: `d.m.Y H:i`,
+      dateFormat: `Y-m-dTH:i:S`,
       enableTime: true,
       defaultDate: this._time.end ? this._time.end : Date.now(),
       onClose(selectedDates) {
@@ -79,19 +72,21 @@ class PointEditView extends AbstractComponent {
         }
       }
     });
+  }
 
-    this.getElement().querySelectorAll(`.event__input--time`).forEach((node) => {
-      node.style.width = `150px`;
-    });
+  _refreshDetailsSectionVisibility() {
+    if (checkIsElementHidden(this._offersSectionElement) && checkIsElementHidden(this._destinationSectionElement)) {
+      hideElement(this._detailsSectionElement);
+    } else {
+      showElement(this._detailsSectionElement);
+    }
   }
 
   _hangHandlers() {
     this._typeListElement.addEventListener(`click`, (evt) => this._onPointTypeListClick(evt));
     this._destinationInputElement.addEventListener(`input`, (evt) => this._onDestinationInput(evt));
-    this._destinationInputElement.addEventListener(`keydown`, (evt) => this._onDestinationKeyDown(evt));
   }
 
-  //  При изменении типа точки, изменить доступные варианты выбора пункта назначения
   _onPointTypeListClick(evt) {
     const target = evt.target;
     if (target.tagName !== TagName.INPUT) {
@@ -112,35 +107,34 @@ class PointEditView extends AbstractComponent {
     this._currentIconImg.src = `${this._currentIconImg.baseURI.replace(`#`, ``)}img/icons/${type.icon}.png`;
     this._typeOutput.textContent = `${type.title}`;
     this._typeToggle.checked = false;
+
+    if (this._mode === Mode.DEFAULT) {
+      this._favoriteCheckboxElement.checked = false;
+    }
+    this._refreshDetailsSectionVisibility();
   }
 
-  //  При изменении пункта назначения изменить отображение согласно новым данным, поступившим с сервера.
   _onDestinationInput(evt) {
     evt.preventDefault();
     const newDestination = evt.currentTarget.value;
     const newDestinationData = this._onDestinationChange(newDestination);
-    const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
 
-    render(this._pointResetButtonElement, this._favoriteInputElement, Position.AFTEREND);
-    render(this._favoriteInputElement, this._favoriteButtonElement, Position.AFTEREND);
-
-    showElement(this._detailsSectionElement);
-    this._destinationDescriptionElement.innerHTML = newDestinationData.description;
-    this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
-    this._picturesElement = newPhotosElement;
-  }
-
-  //  Согласно ТЗ пользователь не может вводить сам пункт назначения
-  _onDestinationKeyDown(evt) {
-    evt.preventDefault();
-    if (evt.key === Key.BACKSPACE || evt.key === Key.DELETE) {
-      hideElement(this._detailsSectionElement);
-      if (this._favoriteInputElement) {
-        unrender(this._favoriteInputElement);
-        unrender(this._favoriteButtonElement);
-      }
-      this._destinationInputElement.value = ``;
+    if (!newDestinationData) {
+      hideElement(this._destinationSectionElement);
+      this._destinationInputElement.setCustomValidity(`Invalid destination!`);
+    } else {
+      this._destinationInputElement.setCustomValidity(``);
+      const newPhotosElement = createElement(this._getPhotosTemplate(newDestinationData.pictures));
+      showElement(this._destinationSectionElement);
+      this._destinationDescriptionElement.innerHTML = newDestinationData.description;
+      this._picturesContainerElement.replaceChild(newPhotosElement, this._picturesElement);
+      this._picturesElement = newPhotosElement;
     }
+
+    if (this._mode === Mode.DEFAULT) {
+      this._favoriteCheckboxElement.checked = false;
+    }
+    this._refreshDetailsSectionVisibility();
   }
 
   _getPhotosTemplate(pictures) {
@@ -185,37 +179,37 @@ class PointEditView extends AbstractComponent {
                 <legend class="visually-hidden">Transfer</legend>
 
                 <div class="event__type-item">
-                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${(this._type.name.toLowerCase() === `taxi`) ? `checked` : ``}>
+                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${(this._type.name === `taxi`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${(this._type.name.toLowerCase() === `bus`) ? `checked` : ``}>
+                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${(this._type.name === `bus`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${(this._type.name.toLowerCase() === `train`) ? `checked` : ``}>
+                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${(this._type.name === `train`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${(this._type.name.toLowerCase() === `ship`) ? `checked` : ``}>
+                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${(this._type.name === `ship`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport" ${(this._type.name.toLowerCase() === `transport`) ? `checked` : ``}>
+                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport" ${(this._type.name === `transport`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${(this._type.name.toLowerCase() === `drive`) ? `checked` : ``}>
+                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${(this._type.name === `drive`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${(this._type.name.toLowerCase() === `flight`) ? `checked` : ``}>
+                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${(this._type.name === `flight`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
                 </div>
               </fieldset>
@@ -224,17 +218,17 @@ class PointEditView extends AbstractComponent {
                 <legend class="visually-hidden">Activity</legend>
 
                 <div class="event__type-item">
-                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${(this._type.name.toLowerCase() === `check-in`) ? `checked` : ``}>
+                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${(this._type.name === `check-in`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${(this._type.name.toLowerCase() === `sightseeing`) ? `checked` : ``}>
+                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${(this._type.name === `sightseeing`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
                 </div>
 
                 <div class="event__type-item">
-                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${(this._type.name.toLowerCase() === `restaurant`) ? `checked` : ``}>
+                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${(this._type.name === `restaurant`) ? `checked` : ``}>
                   <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
                 </div>
               </fieldset>
@@ -253,12 +247,12 @@ class PointEditView extends AbstractComponent {
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTimeValue(this._time.start)}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTime(this._time.start)}" required>
             —
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTimeValue(this._time.end)}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTime(this._time.end)}" required>
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -266,11 +260,12 @@ class PointEditView extends AbstractComponent {
               <span class="visually-hidden">Price</span>
               €
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${this._mode === Mode.ADDING ? `` : `${this._basePrice}`}" required>
+            <input class="event__input  event__input--price" id="event-price-1" type="number" min="0" name="event-price" value="${this._mode === Mode.ADDING ? `` : `${this._basePrice}`}" required>
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">Delete</button>
+          ${this._mode === Mode.ADDING ? `` : `
           <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${this._isFavorite ? `checked` : ``}>
           <label class="event__favorite-btn" for="event-favorite-1">
             <span class="visually-hidden">Add to favorite</span>
@@ -278,13 +273,12 @@ class PointEditView extends AbstractComponent {
               <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"></path>
             </svg>
           </label>
-          ${this._mode === Mode.ADDING ? `` : `
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>`}
         </header>
 
-        <section class="event__details ${this._mode === Mode.ADDING ? `visually-hidden` : ``}">
+        <section class="event__details">
 
           <section class="event__section  event__section--offers ${(this._offers.length === 0) ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -292,7 +286,7 @@ class PointEditView extends AbstractComponent {
             ${this._getOffersTemplate(this._offers)}
           </section>
 
-          <section class="event__section  event__section--destination">
+          <section class="event__section  event__section--destination ${this._mode === Mode.ADDING ? `visually-hidden` : ``}">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
             <p class="event__destination-description">${this._destination.description ? `${this._destination.description}` : ``}</p>
 

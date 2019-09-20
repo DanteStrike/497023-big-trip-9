@@ -3,22 +3,7 @@ import {getAuthToken} from '../utils/utils.js';
 
 export const transferTypes = new Set([`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`]);
 
-export const defaultPointData = {
-  'id': null,
-  'type': `flight`,
-  'destination': {
-    name: null,
-    description: null,
-    pictures: []
-  },
-  'date_from': Date.now(),
-  'date_to': Date.now(),
-  'base_price': 0,
-  'offers': [],
-  'is_favorite': false
-};
-
-export const pointConfig = {
+export const pointViewConfig = {
   maxOffers: 3
 };
 

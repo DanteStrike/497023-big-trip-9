@@ -27,7 +27,7 @@ export const chartTimeConfig = {
     layout: {
       padding: {
         left: 28,
-        right: 0,
+        right: 20,
         top: 0,
         bottom: 30
       }
@@ -47,12 +47,21 @@ export const chartTimeConfig = {
       padding: 20
     },
 
+    tooltips: {
+      callbacks: {
+        label(tooltipItem) {
+          return `${tooltipItem.xLabel}H`;
+        }
+      }
+    },
+
     scales: {
       xAxes: [{
         display: false,
         ticks: {
           beginAtZero: true
         },
+        minBarLength: 40,
         gridLines: {
           display: false
         }

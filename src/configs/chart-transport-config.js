@@ -27,7 +27,7 @@ export const chartTransportConfig = {
     layout: {
       padding: {
         left: 28,
-        right: 0,
+        right: 20,
         top: 0,
         bottom: 30
       }
@@ -35,6 +35,14 @@ export const chartTransportConfig = {
 
     legend: {
       display: false
+    },
+
+    tooltips: {
+      callbacks: {
+        label(tooltipItem) {
+          return `${tooltipItem.xLabel}x`;
+        }
+      },
     },
 
     title: {
@@ -53,6 +61,7 @@ export const chartTransportConfig = {
         ticks: {
           beginAtZero: true
         },
+        minBarLength: 40,
         gridLines: {
           display: false
         }

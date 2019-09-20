@@ -8,6 +8,8 @@ export const TimeValue = {
   MILLISECONDS_IN_DAY: 1000 * 60 * 60 * 24,
 };
 
+export const NOT_FOUND = -1;
+
 export const Position = {
   AFTERBEGIN: `afterbegin`,
   BEFOREEND: `beforeend`,
@@ -29,6 +31,7 @@ export const FilterType = {
 export const Action = {
   CREATE: `create`,
   UPDATE: `update`,
+  PATCH_FAVORITE: `patch-favorite`,
   DELETE: `delete`,
   NONE: `none`
 };
@@ -36,6 +39,13 @@ export const Action = {
 export const Mode = {
   ADDING: `adding`,
   DEFAULT: `default`,
+};
+
+export const BoardState = {
+  NO_POINTS: `no-points`,
+  FIRST_POINT: `first-point`,
+  DEFAULT: `default`,
+  LOADING: `loading`
 };
 
 export const Method = {
@@ -47,13 +57,17 @@ export const Method = {
 
 export const Key = {
   ESCAPE: `Escape`,
-  IE_ESC: `Esc`,
-  BACKSPACE: `Backspace`,
-  DELETE: `Delete`
+  IE_ESC: `Esc`
 };
 
 export const TagName = {
-  INPUT: `INPUT`
+  INPUT: `INPUT`,
+  A: `A`
+};
+
+export const Page = {
+  TABLE: `table`,
+  STATS: `stats`
 };
 
 export const ChartType = {

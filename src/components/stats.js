@@ -6,7 +6,7 @@ import {chartTransportConfig} from '../configs/chart-transport-config.js';
 import AbstractComponent from './abstract.js';
 import Chart from 'chart.js';
 
-
+//  Отключить автоматический подсчет размера холста графиков
 Chart.defaults.global.maintainAspectRatio = false;
 Chart.defaults.global.responsive = false;
 
@@ -23,6 +23,7 @@ class Stats extends AbstractComponent {
     this._moneyChart = new Chart(this._moneyChartElement, chartMoneyConfig);
     this._transportChart = new Chart(this._transportChartElement, chartTransportConfig);
     this._timeChart = new Chart(this._timeChartElement, chartTimeConfig);
+    //  Для корректной перерисовки и масштабирования графиков все контейнеры canvas должны быть "relative"
     this.getElement().querySelectorAll(`.statistics__item`).forEach((item) => {
       item.style.position = `relative`;
     });
@@ -34,8 +35,10 @@ class Stats extends AbstractComponent {
     this._timeChart.resize(0);
   }
 
-  updateChartData(type, labels, data) {
+  updateChartData(type, {labels, values}) {
+    //  Контроль высоты контейнера canvas. По возможности все bar всех графиков будут фиксированной высоты.
     let optimalChartContainerHeight = chartContainerConfig.rowHeight * labels.length;
+    //  Высота контейнера canvas не может быть меньшие высоты названия графики, чтобы не вызывать размывание надписи.
     if (optimalChartContainerHeight < chartContainerConfig.minContainerHeight) {
       optimalChartContainerHeight = chartContainerConfig.minContainerHeight;
     }
@@ -43,24 +46,24 @@ class Stats extends AbstractComponent {
     switch (type) {
       case ChartType.MONEY:
         this._moneyChartElement.parentNode.style.height = `${optimalChartContainerHeight}px`;
-        this._updateData(this._moneyChart, labels, data);
+        this._updateData(this._moneyChart, labels, values);
         break;
 
       case ChartType.TRANSPORT:
         this._transportChartElement.parentNode.style.height = `${optimalChartContainerHeight}px`;
-        this._updateData(this._transportChart, labels, data);
+        this._updateData(this._transportChart, labels, values);
         break;
 
       case ChartType.TIME:
         this._timeChartElement.parentNode.style.height = `${optimalChartContainerHeight}px`;
-        this._updateData(this._timeChart, labels, data);
+        this._updateData(this._timeChart, labels, values);
         break;
     }
   }
 
-  _updateData(chart, labels, data) {
+  _updateData(chart, labels, values) {
     chart.data.labels = labels;
-    chart.data.datasets[0].data = data;
+    chart.data.datasets[0].data = values;
     chart.update(0);
     chart.resize(0);
   }

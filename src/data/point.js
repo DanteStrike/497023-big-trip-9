@@ -1,7 +1,7 @@
 import {capitalizeFirstLetter} from '../utils/utils.js';
 import {transferTypes} from '../configs/configs.js';
 
-
+/** Класс представляет адаптер между сервером и приложением по данным точек*/
 class Point {
   constructor(data) {
     this.id = data[`id`];
@@ -39,6 +39,25 @@ class Point {
 
   static parsePoints(pointsData) {
     return pointsData.map((pointData) => new Point(pointData));
+  }
+
+  static getDefaultPoint() {
+    const defaultPointData = {
+      'id': null,
+      'type': `flight`,
+      'destination': {
+        name: null,
+        description: null,
+        pictures: []
+      },
+      'date_from': Date.now(),
+      'date_to': Date.now(),
+      'base_price': 0,
+      'offers': [],
+      'is_favorite': false
+    };
+
+    return new Point(defaultPointData);
   }
 }
 

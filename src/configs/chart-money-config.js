@@ -27,7 +27,7 @@ export const chartMoneyConfig = {
     layout: {
       padding: {
         left: 28,
-        right: 0,
+        right: 20,
         top: 0,
         bottom: 30
       }
@@ -45,6 +45,14 @@ export const chartMoneyConfig = {
       fontSize: `30`,
       fullWidth: true,
       padding: 20
+    },
+
+    tooltips: {
+      callbacks: {
+        label(tooltipItem) {
+          return `€ ${tooltipItem.xLabel}`;
+        }
+      }
     },
 
     scales: {

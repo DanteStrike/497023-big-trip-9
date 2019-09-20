@@ -2,39 +2,39 @@
  * Сделать заглавной первую букву слова.
  *
  * @param {string} word - слово.
- * @return {string} - слово с заглавной первой буквой
+ * @return {string} - слово с заглавной первой буквой.
  */
 export const capitalizeFirstLetter = (word) => {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 };
 
-export const formatDateTimeValue = (time) => {
-  return `${new Date(time).getDate()}/${new Date(time).getMonth()}/${new Date(time).getFullYear()} ${new Date(time).getHours()}:${new Date(time).getMinutes()}`;
+/**
+ * Привести число в двузначный вид.
+ *
+ * @param {number} value - число.
+ * @return {string} - строковое представление числа в двузначном виде.
+ */
+export const leadIntoTwoDigitView = (value) => {
+  return value < 10 ? `0${value}` : `${value}`;
 };
 
-export const formatDateTime = (time) => {
-  return `${new Date(time).getFullYear()}-${new Date(time).getMonth()}-${new Date(time).getDate()}T${new Date(time).getHours()}:${new Date(time).getMinutes()}`;
-};
-
-export const formatDateTimeView = (time) => {
-  return `${new Date(time).getHours() < 10 ? `0${new Date(time).getHours()}` : `${new Date(time).getHours()}`}:${new Date(time).getMinutes() < 10 ? `0${new Date(time).getMinutes()}` : `${new Date(time).getMinutes()}`}`;
-};
-
-export const formatDateToMonthDay = (date) => {
-  return new Date(date).toDateString()
-    .split(` `)
-    .slice(1, 3)
-    .join(` `);
-};
-
+/**
+ * Конвертировать тело запроса в формат json.
+ *
+ * @param {Response} response - запрос с сервера.
+ * @return {json} - данные в формате json.
+ */
 export const toJSON = (response) => {
   return response.json();
 };
 
-
+/**
+ * Сформировать случайный токен авторизации.
+ *
+ * @return {string} - токен авторизации.
+ */
 export const getAuthToken = () => {
   const numberSystem = 36;
-
   return Math.random()
     .toString(numberSystem);
 };
