@@ -1,7 +1,7 @@
 import {Mode, TagName} from '../utils/enum.js';
 import {createElement, hideElement, showElement, checkIsElementHidden} from '../utils/dom.js';
 import {formatDateTime} from '../utils/time.js';
-import AbstractComponent from './abstract.js';
+import AbstractComponent from './abstract-component.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';

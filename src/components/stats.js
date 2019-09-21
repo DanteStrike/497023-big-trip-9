@@ -3,7 +3,7 @@ import {chartContainerConfig} from '../configs/configs.js';
 import {chartMoneyConfig} from '../configs/chart-money-config.js';
 import {chartTimeConfig} from '../configs/chart-time-config.js';
 import {chartTransportConfig} from '../configs/chart-transport-config.js';
-import AbstractComponent from './abstract.js';
+import AbstractComponent from './abstract-component.js';
 import Chart from 'chart.js';
 
 //  Отключить автоматический подсчет размера холста графиков

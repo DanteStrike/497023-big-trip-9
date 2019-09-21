@@ -1,6 +1,6 @@
 import {Position, FilterType, TagName} from '../utils/enum.js';
 import {render, unmount} from '../utils/dom.js';
-import Filters from '../components/trip-filters';
+import Filters from '../components/filters.js';
 
 /** Класс представляет управление панелью фильтров*/
 class FiltersController {

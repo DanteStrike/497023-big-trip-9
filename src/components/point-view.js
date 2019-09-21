@@ -2,7 +2,7 @@ import {TimeValue} from '../utils/enum.js';
 import {leadIntoTwoDigitView} from '../utils/utils.js';
 import {formatDateTime, formatDateTimeView} from '../utils/time.js';
 import {pointViewConfig} from '../configs/configs.js';
-import AbstractComponent from './abstract.js';
+import AbstractComponent from './abstract-component.js';
 
 
 class PointView extends AbstractComponent {

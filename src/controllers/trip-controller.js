@@ -1,7 +1,7 @@
 import {Position, SortType, TagName, BoardState, Action} from '../utils/enum.js';
 import {render, showElement, hideElement, unmount} from '../utils/dom.js';
 import NoPointsWarning from '../components/no-points-warning.js';
-import Sort from '../components/sorting.js';
+import Sort from '../components/sort.js';
 import TripBoard from '../components/trip-board.js';
 import TripListController from './trip-list-controller.js';
 import LoadingPointsWarning from '../components/loading-points-warning.js';
