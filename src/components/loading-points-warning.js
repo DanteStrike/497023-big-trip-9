@@ -1,4 +1,4 @@
-import AbstractComponent from './abstract.js';
+import AbstractComponent from './abstract-component.js';
 
 
 class LoadingPointsWarning extends AbstractComponent {
